@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { BrowserRouter as Router, Route } from 'react-router-dom'
+import axios from 'axios'
 
 import 'normalize.css'
 import './App.styl'
@@ -19,8 +20,6 @@ const Container = (props) => {
     children,
     sidebar = true
   } = props;
-
-  console.log(match, location, history);
 
   return [
       <header className="application__header" key="header">
@@ -47,8 +46,12 @@ const Container = (props) => {
 const Home = (props) => (
   <Container {...props}>
     <h2>Home</h2>
-    <p>Help</p>
+  </Container>
+)
 
+const Blog = (props) => (
+  <Container {...props}>
+    list posts here
   </Container>
 )
 
@@ -59,11 +62,60 @@ const About = (props) => (
 )
 
 export default class App extends Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      homepage: null,
+      blogpage: null,
+      ready: false
+    }
+  }
+
+  componentDidMount() {
+    axios.get('https://wcjkl.local/wp-json/wp/v2/pages')
+      .then(response => {
+        const newState = response.data.reduce((acc, page) => {
+          if (page.isHomepage) {
+            acc.homepage = page
+          } else if (page.isBlogpage) {
+            acc.blogpage = page
+          }
+
+          return acc
+        }, {
+          ready: true,
+        })
+
+        this.setState(newState, () => {
+          // This will fire after the state has updated
+        })
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
   render() {
+    const { ready, blogpage, homepage } = this.state
+
+    if (!ready) {
+      console.log('not ready')
+      return (
+        <Router>
+          <div className="application">
+            <Container>
+              <p>Loading...</p>
+            </Container>
+          </div>
+        </Router>
+      )
+    }
+
     return (
       <Router>
         <div className="application">
-          <Route exact path="/" component={Home}/>
+          <Route exact path="/" component={!homepage ? Blog : Home}/>
           <Route path="/about" component={About}/>
         </div>
       </Router>

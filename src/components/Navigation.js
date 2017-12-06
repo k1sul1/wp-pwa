@@ -15,15 +15,17 @@ export default class Navigation extends Component {
   render() {
     const { open } = this.state
     const toggleMenu = (e) => {
-      console.log(e);
       this.setState(prevState => ({
         open: !prevState.open // Invert the current value
       }))
     }
 
     return (
-      <nav className="navigation" onClick={toggleMenu}>
-        <ul style={{ display: open ? 'flex' : 'none'}}>
+      <nav className={`navigation ${open ? 'open' : 'closed'}`}>
+        <button onClick={toggleMenu} className="navigation__toggle">
+          {!open ? 'Open menu' : 'Close menu'}
+        </button>
+        <ul style={{ display: open ? 'flex' : 'none'}} className="navigation__menu">
           <li><Link to="/">Home</Link></li>
           <li><Link to="/about">About</Link></li>
         </ul>
