@@ -4,62 +4,12 @@ import axios from 'axios'
 
 import 'normalize.css'
 import './App.styl'
-import Navigation from './components/Navigation'
-import Sidebar from './components/Sidebar'
 
-/*
- * Container is used to wrap our views so we can keep the code DRY.
- */
-const Container = (props) => {
-  // Here I've used destructuring to pick certain values from props.
-  const {
-    match,    //
-    location, // <-- react-router-dom provides these
-    history,  //
+import About from './routes/About'
+import Blog from './routes/Blog'
+import Home from './routes/Home'
+import Loading from './routes/Loading'
 
-    children,
-    sidebar = true
-  } = props;
-
-  return [
-      <header className="application__header" key="header">
-        <Navigation match={match} />
-      </header>,
-
-      <div
-        className={`application__wrapper ${sidebar ? 'has-sidebar' : 'no-sidebar'}`}
-        key="wrapper"
-      >
-        <main
-          id="content"
-        >
-          {children}
-        </main>
-
-
-        {/* sidebar is a boolean value, if it's truthy, show sidebar */}
-        {sidebar ? <Sidebar /> : false }
-      </div>
-  ]
-}
-
-const Home = (props) => (
-  <Container {...props}>
-    <h2>Home</h2>
-  </Container>
-)
-
-const Blog = (props) => (
-  <Container {...props}>
-    list posts here
-  </Container>
-)
-
-const About = (props) => (
-  <Container {...props} sidebar={false}>
-    <h2>About</h2>
-  </Container>
-)
 
 export default class App extends Component {
   constructor(props) {
@@ -104,18 +54,21 @@ export default class App extends Component {
       return (
         <Router>
           <div className="application">
-            <Container>
-              <p>Loading...</p>
-            </Container>
+            <Loading />
           </div>
         </Router>
       )
     }
 
+    const Component = !homepage ? Blog : Home
+    const data = !homepage ? blogpage : homepage
+
     return (
       <Router>
         <div className="application">
-          <Route exact path="/" component={!homepage ? Blog : Home}/>
+          <Route exact path="/" render={props => (
+            <Component {...props} data={data}/>
+          )} />
           <Route path="/about" component={About}/>
         </div>
       </Router>
