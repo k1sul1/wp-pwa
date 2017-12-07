@@ -9,6 +9,7 @@ import About from './routes/About'
 import Blog from './routes/Blog'
 import Home from './routes/Home'
 import Loading from './routes/Loading'
+import Resolver from './routes/Resolver'
 
 
 export default class App extends Component {
@@ -70,6 +71,7 @@ export default class App extends Component {
             <Component {...props} data={data}/>
           )} />
           <Route path="/about" component={About}/>
+          <Route component={Resolver} />
         </div>
       </Router>
     )
