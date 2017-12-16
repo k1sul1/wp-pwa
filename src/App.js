@@ -19,11 +19,12 @@ export default class App extends Component {
     this.state = {
       homepage: null,
       blogpage: null,
+      posts: null,
       ready: false
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     axios.get('https://wcjkl.local/wp-json/wp/v2/pages')
       .then(response => {
         const newState = response.data.reduce((acc, page) => {
@@ -45,10 +46,21 @@ export default class App extends Component {
       .catch(error => {
         console.log(error)
       })
+
+    try {
+      const response = await axios.get('https://wcjkl.local/wp-json/wp/v2/posts')
+      const posts = response.data
+
+      this.setState({
+        posts,
+      })
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   render() {
-    const { ready, blogpage, homepage } = this.state
+    const { ready, blogpage, homepage, posts } = this.state
 
     if (!ready) {
       console.log('not ready')
@@ -67,11 +79,17 @@ export default class App extends Component {
     return (
       <Router>
         <div className="application">
+          {/*
           <Route exact path="/" render={props => (
-            <Component {...props} data={data}/>
+            <Component {...props} data={data}  posts={posts}/>
           )} />
-          <Route path="/about" component={About}/>
-          <Route component={Resolver} />
+          <Route path="/about" component={About}/>*/}
+
+          <Route render={props => (
+            <Resolver {...props} data={data} posts={posts} />
+          )} />
+          {/* <Route component={Resolver} /> */}
+
         </div>
       </Router>
     )

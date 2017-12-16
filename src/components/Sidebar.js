@@ -6,38 +6,26 @@ export default class Sidebar extends Component {
   constructor(props) {
     super(props)
 
-    this.state = {
-      posts: []
-    }
+    this.state = {}
   }
 
-  componentDidMount() {
-    axios.get('https://wcjkl.local/wp-json/wp/v2/posts')
-      .then(response => {
-        const posts = response.data.map(post => {
-          return (
-            <p key={post.id}>
-              <Link to={post.link.replace('https://wcjkl.local', '')}>{post.title.rendered}</Link>
-            </p>
-          )
-        })
-
-        this.setState({
-          posts,
-        })
-      })
-      .catch(error => {
-        console.log(error)
-      })
+  async componentDidMount() {
   }
 
   render() {
-    const { posts } = this.state
+    const { posts } = this.props
 
     return (
       <aside>
         <h3>Sidebar</h3>
-        {posts}
+        {posts && posts.map(post => {
+          return (
+            <p key={post.id}>
+              <Link to={''}>{post.title.rendered}</Link>
+            </p>
+          )
+        })
+}
       </aside>
     )
   }

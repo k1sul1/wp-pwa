@@ -1,8 +1,8 @@
 import React from 'react'
 import Layout from '../components/Layout'
 
-const BlogPost = (props) => {
-  const { post_title, post_content } = props.data
+const Singular = (props) => {
+  const { post_title, post_content } = props.post
 
   return (
     <Layout {...props}>
@@ -12,4 +12,4 @@ const BlogPost = (props) => {
   )
 }
 
-export default BlogPost
+export default Singular
