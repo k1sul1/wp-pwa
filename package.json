@@ -2,9 +2,11 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "WPURL": "https://wcjkl.local",
   "dependencies": {
     "axios": "^0.17.1",
     "custom-react-scripts": "0.2.1",
+    "localforage": "^1.5.5",
     "node-watch": "^0.5.5",
     "normalize.css": "^7.0.0",
     "react": "^16.2.0",

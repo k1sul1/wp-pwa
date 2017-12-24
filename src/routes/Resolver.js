@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import axios from 'axios'
+import WP from '../lib/WP'
+import p from '../../package.json'
 
 import Index from './Index'
 import About from './About'
@@ -18,103 +19,108 @@ export default class Resolver extends Component {
 
     this.state = {
       ready: false,
-      component: null,
-      props: {}, // Will be passed into the resolved component
+      ViewComponent: null,
+      ViewComponentProps: {},
     }
   }
 
-  async getComponent(path, fallback) {
-    console.log(path, fallback)
-    try {
-      const component = await import(path)
-      console.log(component)
-      return component.default
-    } catch(e) {
-      console.error(e)
-      return fallback
-    }
+  showComponent(component, componentProps) {
+    this.setState((prev) => ({
+      ViewComponent: component.default || component, // Support dynamic imports
+      ViewComponentProps: {
+        ...prev.ViewComponentProps,
+        ...componentProps,
+      },
+      ready: true,
+    }))
   }
 
-  async componentDidMount() {
-    console.log(this.props);
-    const url = 'https://wcjkl.local/' + this.props.location.pathname
+  show404() {
+    return this.showComponent(FourOhFour, {})
+  }
+
+  async doRouting({ location }) {
+    console.log(location)
+
 
     try {
-      const response = await axios.get('https://wcjkl.local/wp-json/wp/v2/lookup', {
-        params: {
-          url,
-        }
+      const url = p.WPURL + location.pathname
+      const response = await WP.getByURL(url, {}, {
+        preferCache: true,
+        cacheStaleTime: 3600000, // 1 hour
       })
-      const { post, error } = response.data
+      console.log(response)
+      const { post, error } = response
 
       console.log(response)
 
       if (error) {
         if (error === 'No post found.') { // "404"
-          this.setState({
-            component: FourOhFour,
-            ready: true,
-          })
-
-          return
+          return this.show404()
         }
 
         console.error(error)
       } else {
         const { post_type } = post
 
-        console.log(post_type)
-        let component
+        // Page templates are pretty much based on the slug.
+        // This ought to be enough for many.
+        switch (location.pathname) {
+          case '/about/': {
+            return this.showComponent(About, { post })
+          }
+
+          default: {
+
+          }
+        }
 
         switch (post_type) {
           case "post": {
-            component = Singular
+            this.showComponent(Singular, { post })
             break
           }
 
           case "page": {
-            component = Page
             // component = await import('./Page')
             // component = Singular
+            this.showComponent(Page, { post })
 
             break
           }
 
           default: {
-            component = Index
+            this.showComponent(Index, {})
             break
           }
         }
-
-        console.log(component)
-
-        this.setState((prev) => ({
-          component: component.default || component, // Support dynamic imports
-          props: {
-            ...prev.props,
-            post,
-          },
-          ready: true,
-        }))
       }
     } catch (e) {
-      console.log(e)
+      // console.log(e)
+      throw e
     }
   }
+
+  async componentDidMount() {
+    this.doRouting(this.props)
+  }
+
+  async componentWillReceiveProps(props) {
+    // console.log(props)
+    this.doRouting(props)
+  }
+
 
   render() {
     const {
       ready,
-      component,
-      props, // Not to be confused with this.props!
+      ViewComponent,
+      ViewComponentProps,
     } = this.state
-    const Component = component // React wants custom tags in uppercase format
-
-    // console.log(this.props)
 
     return ready
-      ? <Component {...props} />
-      : <Layout><p>Loading...</p></Layout>
+      ? <ViewComponent {...ViewComponentProps} />
+      : <Loading />
 
   }
 }

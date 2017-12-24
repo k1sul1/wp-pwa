@@ -13,12 +13,13 @@ const Layout = (props) => {
     history,  //
 
     children,
-    sidebar = true
+    sidebar = true,
+    navigation = true,
   } = props;
 
   return [
       <header className="application__header" key="header">
-        <Navigation match={match} />
+        {navigation ? <Navigation match={match} /> : false}
       </header>,
 
       <div

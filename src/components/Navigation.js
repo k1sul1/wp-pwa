@@ -1,7 +1,16 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 import './Navigation.styl'
+import WP from '../lib/WP'
+
+// Item receives a props object, and we'll extract these keys from it
+// Note: Assuming object is the object type could be wrong
+const Item = ({ object_id, object, url, title, onClick }) => (
+  <li data-oid={object_id} data-otype={object}>
+    <NavLink to={url} activeClassName="active" onClick={onClick}>{title}</NavLink>
+  </li>
+)
 
 export default class Navigation extends Component {
   constructor(props) {
@@ -9,11 +18,23 @@ export default class Navigation extends Component {
 
     this.state = {
       open: false,
+      items: [],
+      ready: false,
     }
   }
 
+  async componentDidMount() {
+    const menu = await WP.getMenu(3)
+    const { items } = menu
+
+    this.setState({
+      items,
+      ready: true,
+    })
+  }
+
   render() {
-    const { open } = this.state
+    const { open, items, ready } = this.state
     const toggleMenu = (e) => {
       this.setState(prevState => ({
         open: !prevState.open // Invert the current value
@@ -26,8 +47,13 @@ export default class Navigation extends Component {
           {!open ? 'Open menu' : 'Close menu'}
         </button>
         <ul style={{ display: open ? 'flex' : 'none'}} className="navigation__menu">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/about">About</Link></li>
+          {!ready ? (
+            <li>Loading...</li>
+          ) : (
+            items.map(item => (
+              <Item {...item} key={item.id} onClick={toggleMenu} />
+            ))
+          )}
         </ul>
       </nav>
     )
