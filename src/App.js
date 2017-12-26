@@ -52,17 +52,9 @@ export default class App extends Component {
     return (
       <Router>
         <div className="application">
-          {/*
-          <Route exact path="/" render={props => (
-            <Component {...props} data={data}  posts={posts}/>
-          )} />
-          <Route path="/about" component={About}/>*/}
-
           <Route render={props => (
             <Resolver {...props} />
           )} />
-          {/* <Route component={Resolver} /> */}
-
         </div>
       </Router>
     )
