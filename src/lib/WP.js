@@ -36,6 +36,13 @@ class WP_Client {
     console.log('WP_Client: Switched to online mode.')
   }
 
+  turnURLRelative(key, obj) {
+    obj[key] = obj[key].replace(p.WPURL, '')
+
+    return obj
+  }
+
+
   getCacheKey(endpoint, payload, options) {
     return [
       this.cacheKeyPrefix,
@@ -68,7 +75,6 @@ class WP_Client {
     }
 
     if (this.offline || opts.preferCache) {
-      console.log(endpoint, 'cache pls');
       const cached = await localforage.getItem(cacheKey).catch(e => {
         return this.onError(e, 'cache')
       })
@@ -115,7 +121,9 @@ class WP_Client {
   }
 
   async getPostsFrom(type = 'posts', payload = {}, options = {}) {
-    return await this.req(`/wp-json/wp/v2/${type}`, payload, options)
+    const posts = await this.req(`/wp-json/wp/v2/${type}`, payload, options)
+
+    return posts.map(post => this.turnURLRelative('link', post))
   }
 
   async getPages(payload = {}, options = {}) {
@@ -138,13 +146,16 @@ class WP_Client {
 
     return {
       ...menu,
-      items: menu.items.map(item => {
-        // Transform some values so they're a bit friendlier
-
-        item.url = item.url.replace(p.WPURL, '') // Relative URLs please
-        return item
-      }),
+      items: menu.items.map(item => this.turnURLRelative('url', item)),
     }
+  }
+
+  async getArchives() {
+    return await this.req('/wp-json/emp/v1/archives')
+  }
+
+  async query(params = {}, options = {}) {
+    return await this.req('/wp-json/wp_query/args/', params, options)
   }
 }
 

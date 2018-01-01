@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { NavLink } from 'react-router-dom'
 
-import './Navigation.styl'
 import WP from '../lib/WP'
 
 // Item receives a props object, and we'll extract these keys from it

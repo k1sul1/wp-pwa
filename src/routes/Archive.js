@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import Layout from '../components/Layout'
 import PostList from '../components/PostList'
 
-export default class Blog extends Component {
+import { dumpObject } from '../lib/helpers'
+
+export default class Archive extends Component {
   constructor() {
     super()
 
@@ -13,12 +15,13 @@ export default class Blog extends Component {
 
   render() {
     console.log(this.props);
-    const { post } = this.props
     return (
       <Layout {...this.props}>
-        <h1>{post.title.rendered}</h1>
+        <p>Archive</p>
 
-        <PostList />
+        <PostList getPosts={this.props.archive}/>
+
+        {dumpObject(this.props.archive)}
       </Layout>
     )
   }

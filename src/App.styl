@@ -20,47 +20,7 @@ body {
 
 #root {
   height: 100%
-  // margin-top: -16px; // I don't know why.
 }
 
-.application {
-  min-height: 100%
+@import 'styles/components/*'
 
-  &__header {
-  }
-
-  &__wrapper {
-    display: flex
-    flex-flow: row nowrap
-    align-items: flex-start
-    background: #222
-    color: #f1f1f1
-
-    &.has-sidebar {
-      > main {
-        flex-basis: 65%
-      }
-
-      > aside {
-        flex-basis: 35%
-      }
-    }
-
-    &.no-sidebar {
-      > main {
-        flex-basis: 90%
-      }
-    }
-
-    > main {
-      background: #f1f1f1
-      color: #222
-      min-height: 100vh
-      padding: 20px
-    }
-
-    > aside {
-      padding: 20px
-    }
-  }
-}

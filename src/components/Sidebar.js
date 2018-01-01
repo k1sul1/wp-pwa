@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
+import React, { Component, Fragment } from 'react'
+import PropTypes from 'prop-types'
 
 export default class Sidebar extends Component {
   constructor(props) {
@@ -8,23 +8,22 @@ export default class Sidebar extends Component {
     this.state = {}
   }
 
-  async componentDidMount() {
+  static propTypes = {
+    children: PropTypes.node,
+  }
+
+  static defaultProps = {
+    children: (
+      <Fragment>
+        <h3>Sidebar</h3>
+      </Fragment>
+    ),
   }
 
   render() {
-    const { posts } = this.props
-
-    return (
+    return this.props.disabled ? false : (
       <aside>
-        <h3>Sidebar</h3>
-        {posts && posts.map(post => {
-          return (
-            <p key={post.id}>
-              <Link to={''}>{post.title.rendered}</Link>
-            </p>
-          )
-        })
-}
+        { this.props.children }
       </aside>
     )
   }
