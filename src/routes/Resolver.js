@@ -2,15 +2,18 @@ import React, { Component } from 'react'
 import WP from '../lib/WP'
 import p from '../../package.json'
 
-import Index from './Index'
-import About from './About'
-import FourOhFour from './404'
-import Page from './Page'
-import Blog from './Blog'
-import Archive from './Archive'
-import Home from './Home'
+// import Index from './Index'
+// import About from './About'
+// import Page from './Page'
+// import Blog from './Blog'
+// import Archive from './Archive'
+// import Home from './Home'
+// import Singular from './Singular'
+
 import Loading from './Loading'
-import Singular from './Singular'
+import FourOhFour from './404'
+import NothingToSeeHereMoveAlong from './Crashed'
+
 
 
 export default class Resolver extends Component {
@@ -21,6 +24,8 @@ export default class Resolver extends Component {
       ready: false,
       ViewComponent: null,
       ViewComponentProps: {},
+      crashed: false,
+
     }
   }
 
@@ -43,6 +48,10 @@ export default class Resolver extends Component {
       preferCache: true,
       cacheStaleTime: 3600000, // 1 hour
     })
+
+    if (!post) {
+      return false
+    }
 
     if (post.error) {
       const { error } = post
@@ -71,15 +80,12 @@ export default class Resolver extends Component {
       ]);
 
       const findObjectByProp = (key, compare, arr) => {
-        const result = arr.filter(item => {
-          if (item[key]) {
-            if (item[key] === compare) {
-              return true
-            }
-          }
-
+        if (!Array.isArray(arr)) {
+          console.log(arr)
           return false
-        })
+        }
+
+        const result = arr.filter(item => item[key] && item[key] === compare ? true : false)
 
         if (result.length) {
           return result.pop()
@@ -97,12 +103,14 @@ export default class Resolver extends Component {
         if (post) {
           if (post.isBlogpage) {
             console.log('returning blog early');
-            return this.showComponent(Blog, { post })
+            return this.showComponent(await import ('./Blog'), { post })
           }
         }
 
         console.log('isArchive', post);
-        return this.showComponent(Archive, { archive: allArchives.find(Boolean) })
+        return this.showComponent(await import('./Archive'), {
+          archive: allArchives.find(Boolean)
+        })
       } else if (post) {
         // Page templates are pretty much based on the slug.
         // This ought to be enough for many. It's possible to use black magic
@@ -116,21 +124,21 @@ export default class Resolver extends Component {
 
         switch (location.pathname) {
           case '/about/': {
-            return this.showComponent(About, { post })
+            return this.showComponent(await import('./About'), { post })
           }
 
           case '/': {
             if (post.isBlogpage) {
-              return this.showComponent(Blog, { post })
+              return this.showComponent(await import('./Blog'), { post })
             } else if (post.isHomepage) {
-              return this.showComponent(Home, { post })
+              return this.showComponent(await import('./Home'), { post })
             } else {
               console.log(
                 `Root post wasn't blog or homepage.
   Is k1sul1/expose-more-pagedata-in-rest installed and activated in WordPress?`,
                 post
               )
-              return this.showComponent(Home, { post })
+              return this.showComponent(await import('./Home'), { post })
             }
           }
 
@@ -141,24 +149,25 @@ export default class Resolver extends Component {
 
         switch (type) {
           case "post": {
-            return this.showComponent(Singular, { post })
+            return this.showComponent(await import('./Singular'), { post })
           }
 
           case "page": {
-            // component = await import('./Page')
-            // component = Singular
-
             if (post.isBlogpage) {
-              return this.showComponent(Blog, { post })
+              return this.showComponent(await import('./Blog'), { post })
             } else if (post.isHomepage) {
-              return this.showComponent(Home, { post })
+              return this.showComponent(await import('./Home'), { post })
             }
 
-            return this.showComponent(Page, { post })
+            return this.showComponent(await import('./Page'), { post })
+          }
+
+          case "slides": {
+            return this.showComponent(await import('./Slide'), { post })
           }
 
           default: {
-            return this.showComponent(Index, {})
+            return this.showComponent(await import('./Index'), {})
           }
         }
       }
@@ -177,13 +186,26 @@ export default class Resolver extends Component {
     this.doRouting(props)
   }
 
+  componentDidCatch(error, info) {
+    this.setState({
+      crashed: true,
+    })
+
+    console.log(error, info)
+  }
+
 
   render() {
     const {
       ready,
+      crashed,
       ViewComponent,
       ViewComponentProps,
     } = this.state
+
+    if (crashed) {
+      return <NothingToSeeHereMoveAlong />
+    }
 
     return ready
       ? <ViewComponent {...ViewComponentProps} />
