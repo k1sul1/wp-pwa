@@ -9,9 +9,13 @@
   height: 100vh
   width: 100vw
   color: #fff
+  animation-duration: 0.3s
 
   .wrapper {
     max-width: r(1200px)
+    width: 100%
+    background: rgba(#000, 0.8)
+    padding: r(30px)
   }
 
   h1 {
@@ -30,7 +34,7 @@
 
   }
 
-  p {
+  p, ul, ol {
     font-size: r(24px)
   }
 }
@@ -74,6 +78,12 @@
       height:r(80px)
       margin: 0
       border-right: r(1px) solid #000
+      transition: 0.2s ease-in
+
+      &:hover, &:focus-within {
+        background-color: lighten(#000, 10%)
+        transition: 0.2s ease-out
+      }
 
       &:last-child {
         border-right: 0
@@ -88,15 +98,36 @@
 
 .all-slides {
   overflow: hidden
+  background: darken(#222, 10%)
+  height: 100vh
+  overflow-y: scroll
+  display: flex
+  flex-flow: row wrap
+  justify-content: center
+  align-items: center
 
-  .slide-preview {
-    float: left
-    margin-right: 5vw
-    margin-bottom: 5vw
+  > .slide-preview {
+    // float: left
+    // margin-right: 4.5vw
+    margin-right: r(20px)
+    // margin-bottom: 5vw
+    box-shadow: r(4px) r(4px) r(5px) r(0px) rgba(0,0,0,0.75)
+    transition: 0.2s ease-in
 
-    &:nth-child(4n),
+    &:hover, &:focus-within {
+      transform: translateY(r(5px))
+      transition: 0.2s ease-out
+    }
+
+    &:nth-child(3n),
     &:last-child {
       margin-right: 0
+    }
+
+    &:nth-last-child(1),
+    &:nth-last-child(2),
+    &:nth-last-child(3) {
+      margin-bottom: 0
     }
   }
 }

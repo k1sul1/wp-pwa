@@ -14,16 +14,70 @@ export default class Slides extends Component {
       slide: post,
       slides: [],
       parent: null,
+      animationDir: null,
     }
   }
 
-  afterSwitch() {
-    const { slide } = this.state
+  resetAnimationClasses(element) {
+    const classes = [
+      'slideOutUp',
+      'slideOutDown',
+      'slideOutLeft',
+      'slideOutRight',
+      'slideInUp',
+      'slideInDown',
+      'slideInLeft',
+      'slideInRight',
+    ]
+
+    if (element) {
+      element.classList.remove(...classes)
+    }
+  }
+
+  async animate(className) {
+    if (!this.slide) {
+      console.log('unable to animate as slide is not set', this.slide)
+      return false
+    }
+
+    this.resetAnimationClasses(this.slide)
+    this.slide.classList.add(className)
+    await new Promise(resolve => setTimeout(resolve, 300))
+    this.resetAnimationClasses(this.slide)
+  }
+
+  async afterSwitch() {
+    const { slide, animationDir } = this.state
+
+    switch (animationDir) {
+      case 'left': {
+        await this.animate('slideInRight')
+        break
+      }
+
+      case 'right': {
+        await this.animate('slideInLeft')
+        break
+      }
+
+      case 'up': {
+        await this.animate('slideInDown')
+        break
+      }
+
+      case 'down': {
+        await this.animate('slideInUp')
+        break
+      }
+
+      // no default
+    }
 
     return history.pushState({}, slide.title.rendered, slide.link) // eslint-disable-line no-restricted-globals
   }
 
-  switchSlide(direction) {
+  async switchSlide(direction) {
     const { slide, slides, parent } = this.state
     const compare = parent ? parent.id : slide.id
     const rootSlides = slides.filter(s => s.parent === 0)
@@ -43,8 +97,11 @@ export default class Slides extends Component {
     switch (direction) {
       case 'forwards': {
         if (currentIndex < slideCount) {
+          await this.animate('slideOutLeft')
+
           this.setState({
-            slide: rootSlides[currentIndex + 1]
+            slide: rootSlides[currentIndex + 1],
+            animationDir: 'left',
           }, this.afterSwitch)
         }
 
@@ -53,8 +110,11 @@ export default class Slides extends Component {
 
       case 'backwards': {
         if (currentIndex > 0) {
+          await this.animate('slideOutRight')
+
           this.setState({
-            slide: rootSlides[currentIndex - 1]
+            slide: rootSlides[currentIndex - 1],
+            animationDir: 'right'
           }, this.afterSwitch)
         }
         break
@@ -64,7 +124,7 @@ export default class Slides extends Component {
     }
   }
 
-  switchSubSlide(direction) {
+  async switchSubSlide(direction) {
     const { slide, slides, parent } = this.state
     const compare = parent ? parent.id : slide.id
     const childSlides = slides.filter(s => s.parent === compare)
@@ -78,9 +138,13 @@ export default class Slides extends Component {
 
     switch (direction) {
       case 'downwards': {
+        console.log(currentIndex, slideCount, childSlides, compare)
         if (currentIndex < slideCount) {
+          await this.animate('slideOutUp')
+
           this.setState({
-            slide: childSlides[currentIndex + 1]
+            slide: childSlides[currentIndex + 1],
+            animationDir: 'down',
           }, this.afterSwitch)
 
           if (!parent) {
@@ -95,13 +159,19 @@ export default class Slides extends Component {
 
       case 'upwards': {
         if (currentIndex > 0) {
+          await this.animate('slideOutDown')
+
           this.setState({
-            slide: childSlides[currentIndex - 1]
+            slide: childSlides[currentIndex - 1],
+            animationDir: 'up',
           }, this.afterSwitch)
         } else if (parent && currentIndex === -1) {
+          await this.animate('slideOutDown')
+
           this.setState({
             slide: parent,
             parent: null,
+            animationDir: 'up',
           }, this.afterSwitch)
         }
         break
@@ -111,7 +181,7 @@ export default class Slides extends Component {
     }
   }
 
-  handleEvent(e) {
+  async handleEvent(e) {
     switch(e.type) {
       case 'keydown': {
         switch(e.key) {
@@ -121,7 +191,7 @@ export default class Slides extends Component {
           }
 
           case 'ArrowRight': {
-            this.switchSlide('forwards')
+            await this.switchSlide('forwards')
             break
           }
 
@@ -185,9 +255,13 @@ export default class Slides extends Component {
   }
 
   renderSlide(slide) {
+    if (!slide) {
+      return false
+    }
+
     const { title, content } = slide
     return (
-      <article className="single-slide" style={this.getSlideBackground(slide)}>
+      <article className="single-slide animated" ref={(n) => this.slide = n} style={this.getSlideBackground(slide)}>
         <div className="wrapper">
           <h1>
             {title.rendered}
