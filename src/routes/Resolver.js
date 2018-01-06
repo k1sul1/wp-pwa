@@ -14,8 +14,6 @@ import Loading from './Loading'
 import FourOhFour from './404'
 import NothingToSeeHereMoveAlong from './Crashed'
 
-
-
 export default class Resolver extends Component {
   constructor() {
     super()

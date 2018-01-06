@@ -46,7 +46,6 @@ class WP_Client {
   }
 
   renderContent(post) {
-    console.log(post)
     post.content.rendered = ReactHtmlParser(post.content.rendered, {
       transform: transformWPContent
     })
@@ -130,10 +129,6 @@ class WP_Client {
       }
     }, options)
 
-    // if (post && post.content) {
-      // post.content.rendered = this.renderContent(post.content.rendered)
-    // }
-    // console.log(post)
     return this.renderContent(post)
   }
 

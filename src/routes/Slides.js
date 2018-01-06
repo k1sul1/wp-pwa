@@ -20,15 +20,6 @@ export default class Slides extends Component {
   afterSwitch() {
     const { slide } = this.state
 
-    // this.setState({
-      // slide: {
-        // ...slide,
-        // content: ReactHtmlParser(slide.content.rendered, {
-          // transform: transformWPContent
-        // })
-      // }
-    // })
-
     return history.pushState({}, slide.title.rendered, slide.link) // eslint-disable-line no-restricted-globals
   }
 
@@ -68,6 +59,8 @@ export default class Slides extends Component {
         }
         break
       }
+
+      // no default
     }
   }
 
@@ -113,6 +106,8 @@ export default class Slides extends Component {
         }
         break
       }
+
+      // no-default
     }
   }
 

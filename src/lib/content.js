@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactHtmlParser from 'react-html-parser'
+// import ReactHtmlParser from 'react-html-parser'
 
 const isDownloadComponent = (node) => {
   const nodeText = node.data || (node.children[0] && node.children[0].data);
@@ -9,7 +9,7 @@ const isDownloadComponent = (node) => {
 export const transformWPContent = (...args) => {
   if (isDownloadComponent(...args)) {
     return (
-      <a href="https://github.com/k1sul1/headless-wp-starter" target="_blank">
+      <a href="https://github.com/k1sul1/headless-wp-starter" target="_blank" rel="noopener noreferrer">
         Download
       </a>
     )
