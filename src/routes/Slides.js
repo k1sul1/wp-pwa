@@ -14,7 +14,9 @@ export default class Slides extends Component {
       slide: post,
       slides: [],
       parent: null,
+      relations: {},
       animationDir: null,
+      ready: false,
     }
   }
 
@@ -74,11 +76,13 @@ export default class Slides extends Component {
       // no default
     }
 
-    return history.pushState({}, slide.title.rendered, slide.link) // eslint-disable-line no-restricted-globals
+    if (slide) {
+      return history.pushState({}, slide.title.rendered, slide.link) // eslint-disable-line no-restricted-globals
+    }
   }
 
   async switchSlide(direction) {
-    const { slide, slides, parent } = this.state
+    const { slide, slides, parent, relations } = this.state
     const compare = parent ? parent.id : slide.id
     const rootSlides = slides.filter(s => s.parent === 0)
     const currentIndex = rootSlides.findIndex(s => s.id === compare)
@@ -88,19 +92,15 @@ export default class Slides extends Component {
       return
     }
 
-    if (parent) {
-      this.setState({
-        parent: null,
-      })
-    }
-
     switch (direction) {
       case 'forwards': {
         if (currentIndex < slideCount) {
           await this.animate('slideOutLeft')
+          const nextSlide = rootSlides[currentIndex + 1]
 
           this.setState({
-            slide: rootSlides[currentIndex + 1],
+            slide: nextSlide,
+            parent: relations[nextSlide.id] ? nextSlide : null,
             animationDir: 'left',
           }, this.afterSwitch)
         }
@@ -111,9 +111,11 @@ export default class Slides extends Component {
       case 'backwards': {
         if (currentIndex > 0) {
           await this.animate('slideOutRight')
+          const prevSlide = rootSlides[currentIndex - 1]
 
           this.setState({
-            slide: rootSlides[currentIndex - 1],
+            slide: prevSlide,
+            parent: relations[prevSlide.id] ? prevSlide : null,
             animationDir: 'right'
           }, this.afterSwitch)
         }
@@ -125,59 +127,81 @@ export default class Slides extends Component {
   }
 
   async switchSubSlide(direction) {
-    const { slide, slides, parent } = this.state
-    const compare = parent ? parent.id : slide.id
-    const childSlides = slides.filter(s => s.parent === compare)
-    const currentIndex = childSlides.findIndex(s => s.id === compare)
-    const slideCount = childSlides.length === 1 ? 1 : childSlides.length - 1
-
-    if (!direction || slideCount === 0) {
-      return
+    if (!direction) {
+      return false
     }
 
+    const { slide, relations, parent } = this.state
+    const isParent = relations[slide.id] ? true : false
+    let currentIndex
 
-    switch (direction) {
-      case 'downwards': {
-        console.log(currentIndex, slideCount, childSlides, compare)
-        if (currentIndex < slideCount) {
-          await this.animate('slideOutUp')
+    if (slide.parent === 0 && !isParent) {
+      return false // No children.
+    }
 
-          this.setState({
-            slide: childSlides[currentIndex + 1],
-            animationDir: 'down',
-          }, this.afterSwitch)
+    if (isParent) {
+      console.log('isParent')
+      // can only go down
+      if (direction === 'downwards') {
+        this.setState({
+          slide: relations[slide.id][0],
+          animationDir: 'down',
+          // parent,
+        }, this.afterSwitch)
 
-          if (!parent) {
+        return
+      }
+    } else {
+      console.log('isSubslide')
+      Object.entries(relations).forEach(([key, children]) => {
+        const slideIndex = children.findIndex(c => c.id === slide.id)
+        currentIndex = slideIndex !== -1 ? slideIndex : false
+      })
+
+      if (!parent) {
+        console.error('STOP WRITING BUGGY CODE!')
+      }
+
+      const relationsLength = relations[parent.id].length
+      const slideCount = relationsLength > 1 ? relationsLength - 1 : relationsLength
+
+      switch (direction) {
+        case 'downwards': {
+          if (currentIndex < slideCount) {
+            await this.animate('slideOutUp')
+
             this.setState({
-              parent: slide,
-            })
+              slide: relations[parent.id][currentIndex + 1],
+              parent,
+              animationDir: 'down',
+            }, this.afterSwitch)
           }
+
+          break
         }
 
-        break
-      }
+        case 'upwards': {
+          if (currentIndex - 1 >= 0) {
+            await this.animate('slideOutDown')
 
-      case 'upwards': {
-        if (currentIndex > 0) {
-          await this.animate('slideOutDown')
+            this.setState({
+              slide: relations[parent.id][currentIndex - 1],
+              parent,
+              animationDir: 'up',
+            }, this.afterSwitch)
+          } else if (currentIndex - 1 < 0) {
+            await this.animate('slideOutDown')
 
-          this.setState({
-            slide: childSlides[currentIndex - 1],
-            animationDir: 'up',
-          }, this.afterSwitch)
-        } else if (parent && currentIndex === -1) {
-          await this.animate('slideOutDown')
-
-          this.setState({
-            slide: parent,
-            parent: null,
-            animationDir: 'up',
-          }, this.afterSwitch)
+            this.setState({
+              slide: parent,
+              animationDir: 'up',
+            }, this.afterSwitch)
+          }
+          break
         }
-        break
-      }
 
-      // no default
+        // no default
+      }
     }
   }
 
@@ -217,10 +241,39 @@ export default class Slides extends Component {
     document.body.classList.add('fullscreen')
     window.addEventListener('keydown', this)
 
+    const { slide } = this.state
+
     const slides = await WP.getPostsFrom('slides')
+    const relations = slides.reduce((acc, slide) => {
+      if (slide.parent !== 0) {
+        const parentID = slide.parent
+
+        if (acc[parentID]) {
+          acc[parentID] = [
+            ...acc[parentID],
+            slide,
+          ].sort((a, b) => {
+            return a.menu_order - b.menu_order
+          })
+        } else {
+          acc[parentID] = [slide]
+        }
+      }
+
+      return acc
+    }, {})
+
+    let parent
+
+    if (slide && slide.parent !== 0) {
+      parent = slides.find(s => s.id === slide.parent)
+    }
 
     this.setState({
       slides,
+      relations,
+      parent,
+      ready: true,
     })
   }
 
@@ -294,7 +347,11 @@ export default class Slides extends Component {
   }
 
   render() {
-    const { slide } = this.state
+    const { slide, ready } = this.state
+
+    if (!ready) {
+      return <p>Any moment now...</p>
+    }
 
     if (slide === 404) {
       return (
