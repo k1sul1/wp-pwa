@@ -129,6 +129,18 @@ class WP_Client {
       }
     }, options)
 
+    // This portion of the code only exists because WP refuses to work with the _embed parameter
+    // with internal requests. No one seems to know why.
+    const featuredImage = post.featured_media === 0 ? false : [await this.req(
+      `/wp-json/wp/v2/media/${post.featured_media}`
+    )]
+
+    if (featuredImage) {
+      post['_embedded'] = {
+        'wp:featuredmedia': featuredImage || [],
+      }
+    }
+
     return this.renderContent(post)
   }
 
