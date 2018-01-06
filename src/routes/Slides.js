@@ -43,10 +43,12 @@ export default class Slides extends Component {
       return false
     }
 
+    this.animationInProgress = true
     this.resetAnimationClasses(this.slide)
     this.slide.classList.add(className)
     await new Promise(resolve => setTimeout(resolve, 300))
     this.resetAnimationClasses(this.slide)
+    this.animationInProgress = false
   }
 
   async afterSwitch() {
@@ -82,15 +84,16 @@ export default class Slides extends Component {
   }
 
   async switchSlide(direction) {
+    if (!direction || this.animationInProgress) {
+      return
+    }
+
     const { slide, slides, parent, relations } = this.state
     const compare = parent ? parent.id : slide.id
     const rootSlides = slides.filter(s => s.parent === 0)
     const currentIndex = rootSlides.findIndex(s => s.id === compare)
     const slideCount = rootSlides.length === 0 ? 0 : rootSlides.length - 1
 
-    if (!direction) {
-      return
-    }
 
     switch (direction) {
       case 'forwards': {
@@ -127,7 +130,7 @@ export default class Slides extends Component {
   }
 
   async switchSubSlide(direction) {
-    if (!direction) {
+    if (!direction || this.animationInProgress) {
       return false
     }
 
