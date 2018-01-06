@@ -8,6 +8,7 @@ html, body {
 
 html {
   box-sizing: border-box
+  font-size: 16px // Changing this will scale *everything* that uses rem
 }
 
 *, *:before, *:after {
@@ -16,11 +17,16 @@ html {
 
 body {
   overflow-y: scroll
+
+  &.fullscreen {
+    overflow: hidden
+  }
 }
 
 #root {
   height: 100%
 }
 
+@import 'styles/Mixins'
 @import 'styles/components/*'
 

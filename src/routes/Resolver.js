@@ -127,6 +127,10 @@ export default class Resolver extends Component {
             return this.showComponent(await import('./About'), { post })
           }
 
+          case '/slides/': {
+            return this.showComponent(await import('./Slides'), { post })
+          }
+
           case '/': {
             if (post.isBlogpage) {
               return this.showComponent(await import('./Blog'), { post })
@@ -163,7 +167,7 @@ export default class Resolver extends Component {
           }
 
           case "slides": {
-            return this.showComponent(await import('./Slide'), { post })
+            return this.showComponent(await import('./Slides'), { post })
           }
 
           default: {

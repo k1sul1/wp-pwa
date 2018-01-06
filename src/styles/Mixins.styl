@@ -1,0 +1,9 @@
+r(value) { /* https://davidwalsh.name/stylus-rem */
+  u = unit(value);
+
+  if (u is 'px') {
+    return unit(value/16, 'rem')
+  } else {
+    return unit(value, u)
+  }
+}

@@ -1,5 +1,8 @@
 import axios from 'axios'
 import localforage from 'localforage'
+import ReactHtmlParser from 'react-html-parser'
+
+import transformWPContent from '../lib/content'
 import p from  '../../package.json'
 
 class WP_Client {
@@ -40,6 +43,14 @@ class WP_Client {
     obj[key] = obj[key].replace(p.WPURL, '')
 
     return obj
+  }
+
+  renderContent(post) {
+    console.log(post)
+    post.content.rendered = ReactHtmlParser(post.content.rendered, {
+      transform: transformWPContent
+    })
+    return post
   }
 
 
@@ -112,18 +123,28 @@ class WP_Client {
   }
 
   async getByURL(url, params, options) {
-    return await this.req(`/wp-json/rpl/v1/lookup`, {
+    const post = await this.req(`/wp-json/rpl/v1/lookup`, {
       params: {
         url,
         ...params,
       }
     }, options)
+
+    // if (post && post.content) {
+      // post.content.rendered = this.renderContent(post.content.rendered)
+    // }
+    // console.log(post)
+    return this.renderContent(post)
   }
 
   async getPostsFrom(type = 'posts', payload = {}, options = {}) {
-    const posts = await this.req(`/wp-json/wp/v2/${type}`, payload, options)
+    const page = payload.page ? payload.page : false
+    const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}_embed=1`
+    const posts = await this.req(endpoint, payload, options)
 
-    return posts.map(post => this.turnURLRelative('link', post))
+    return posts
+      .map(post => this.turnURLRelative('link', post))
+      .map(this.renderContent)
   }
 
   async getPages(payload = {}, options = {}) {
@@ -131,7 +152,16 @@ class WP_Client {
   }
 
   async getPosts(payload = {}, options = {}) {
-    return await this.getPostsFrom('posts', payload, options)
+    return await this.getPostsFrom('posts', {
+
+      ...payload,
+    }, options)
+  }
+
+  async getForContext(object, params = {}, options = {}) {
+      // heitä tänne term objekti tai post type objekti, näytä sisältöä siitä kontekstista
+    // sivutuksella kiitos
+
   }
 
   async getMenus(params = {}, options = {}) {
@@ -160,4 +190,5 @@ class WP_Client {
 }
 
 const WP = new WP_Client(p.WPURL)
+window.WP = WP
 export default WP
