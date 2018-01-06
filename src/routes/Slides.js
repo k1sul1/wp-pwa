@@ -212,7 +212,7 @@ export default class Slides extends Component {
     )
   }
 
-  renderAllSlides() {
+  renderAllSlidePreviews() {
     const parentSlides = this.state.slides.filter(slide => slide.parent === 0)
     const childSlides = this.state.slides.filter(slide => slide.parent !== 0)
 
@@ -225,8 +225,7 @@ export default class Slides extends Component {
     if (slide === 404) {
       return (
         <div className="all-slides">
-          <h1>Slide archive</h1>
-          {this.renderAllSlides()}
+          {this.renderAllSlidePreviews()}
         </div>
       )
     }
