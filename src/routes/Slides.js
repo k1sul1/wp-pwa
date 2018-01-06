@@ -107,15 +107,13 @@ export default class Slides extends Component {
         break
       }
 
-      // no-default
+      // no default
     }
   }
 
   handleEvent(e) {
     switch(e.type) {
       case 'keydown': {
-        const { slide, slides } = this.state
-
         switch(e.key) {
           case 'ArrowLeft': {
             this.switchSlide('backwards')
@@ -222,7 +220,7 @@ export default class Slides extends Component {
   }
 
   render() {
-    const { slide, slides } = this.state
+    const { slide } = this.state
 
     if (slide === 404) {
       return (
