@@ -317,10 +317,18 @@ export default class Slides extends Component {
 
     const embedded = slide._embedded
     const featuredImages = embedded ? embedded['wp:featuredmedia'] : null
+
+    console.log(embedded, slide)
     let style
 
     if (featuredImages) {
       const first = featuredImages[0]
+
+      if (first.code === 'rest_forbidden') {
+        // https://core.trac.wordpress.org/ticket/41445
+        return style
+      }
+
       style = {
         backgroundImage: `url('${getImageData(first, 'medium').source_url}')`
       }
