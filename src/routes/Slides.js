@@ -144,7 +144,6 @@ export default class Slides extends Component {
     }
 
     if (isParent) {
-      console.log('isParent')
       // can only go down
       if (direction === 'downwards') {
         this.setState({
@@ -156,7 +155,6 @@ export default class Slides extends Component {
         return
       }
     } else {
-      console.log('isSubslide')
       Object.entries(relations).forEach(([key, children]) => {
         const slideIndex = children.findIndex(c => c.id === slide.id)
         currentIndex = slideIndex !== -1 ? slideIndex : false
@@ -168,6 +166,7 @@ export default class Slides extends Component {
 
       const relationsLength = relations[parent.id].length
       const slideCount = relationsLength > 1 ? relationsLength - 1 : relationsLength
+
 
       switch (direction) {
         case 'downwards': {
@@ -247,9 +246,11 @@ export default class Slides extends Component {
 
     const { slide } = this.state
 
-    const slides = await WP.getPostsFrom('slides', {}, {
-      preferCache: true,
-      cacheStaleTime: 3600000 / 12,
+    const slides = await WP.getPostsFrom('slides', {
+      perPage: 100, // if you have more than a hundred slides you have a problem
+    }, {
+      // preferCache: true,
+      // cacheStaleTime: 3600000 / 12,
     })
     const relations = slides.reduce((acc, slide) => {
       if (slide.parent !== 0) {

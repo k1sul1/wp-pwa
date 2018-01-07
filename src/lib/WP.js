@@ -108,7 +108,7 @@ class WP_Client {
       })
 
       if (cached) {
-        console.log('hit cache')
+        console.log('hit cache', endpoint)
         const { cacheTime } = cached.meta
 
         if (Date.now() - cacheTime < opts.cacheStaleTime) {
@@ -121,6 +121,8 @@ class WP_Client {
           }
         }
       }
+
+      console.log('cache miss', endpoint)
     }
 
     try {
@@ -187,7 +189,8 @@ class WP_Client {
 
   async getPostsFrom(type = 'posts', payload = {}, options = {}) {
     const page = payload.page ? payload.page : false
-    const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}_embed=1`
+    const perPage = payload.perPage ? payload.perPage : 10
+    const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
     const posts = await this.req(endpoint, payload, options)
 
     return posts
