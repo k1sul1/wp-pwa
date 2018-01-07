@@ -22,14 +22,14 @@ export default class Slides extends Component {
 
   resetAnimationClasses(element) {
     const classes = [
-      'slideOutUp',
-      'slideOutDown',
-      'slideOutLeft',
-      'slideOutRight',
-      'slideInUp',
-      'slideInDown',
-      'slideInLeft',
-      'slideInRight',
+      'bounceOutUp',
+      'bounceOutDown',
+      'bounceOutLeft',
+      'bounceOutRight',
+      'bounceInUp',
+      'bounceInDown',
+      'bounceInLeft',
+      'bounceInRight',
     ]
 
     if (element) {
@@ -56,22 +56,22 @@ export default class Slides extends Component {
 
     switch (animationDir) {
       case 'left': {
-        await this.animate('slideInRight')
+        await this.animate('bounceInRight')
         break
       }
 
       case 'right': {
-        await this.animate('slideInLeft')
+        await this.animate('bounceInLeft')
         break
       }
 
       case 'up': {
-        await this.animate('slideInDown')
+        await this.animate('bounceInDown')
         break
       }
 
       case 'down': {
-        await this.animate('slideInUp')
+        await this.animate('bounceInUp')
         break
       }
 
@@ -98,7 +98,7 @@ export default class Slides extends Component {
     switch (direction) {
       case 'forwards': {
         if (currentIndex < slideCount) {
-          await this.animate('slideOutLeft')
+          await this.animate('bounceOutLeft')
           const nextSlide = rootSlides[currentIndex + 1]
 
           this.setState({
@@ -113,7 +113,7 @@ export default class Slides extends Component {
 
       case 'backwards': {
         if (currentIndex > 0) {
-          await this.animate('slideOutRight')
+          await this.animate('bounceOutRight')
           const prevSlide = rootSlides[currentIndex - 1]
 
           this.setState({
@@ -171,7 +171,7 @@ export default class Slides extends Component {
       switch (direction) {
         case 'downwards': {
           if (currentIndex < slideCount) {
-            await this.animate('slideOutUp')
+            await this.animate('bounceOutUp')
 
             this.setState({
               slide: relations[parent.id][currentIndex + 1],
@@ -185,7 +185,7 @@ export default class Slides extends Component {
 
         case 'upwards': {
           if (currentIndex - 1 >= 0) {
-            await this.animate('slideOutDown')
+            await this.animate('bounceOutDown')
 
             this.setState({
               slide: relations[parent.id][currentIndex - 1],
@@ -193,7 +193,7 @@ export default class Slides extends Component {
               animationDir: 'up',
             }, this.afterSwitch)
           } else if (currentIndex - 1 < 0) {
-            await this.animate('slideOutDown')
+            await this.animate('bounceOutDown')
 
             this.setState({
               slide: parent,
