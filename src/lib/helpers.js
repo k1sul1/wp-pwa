@@ -26,5 +26,5 @@ export const transformWPContent = (...args) => {
 }
 
 // Used to avoid caching in development and so on
-export const isDevelopment = module.hot ? true : false
+export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false
 console.log(isDevelopment ? 'Running development build' : 'Running production build')
