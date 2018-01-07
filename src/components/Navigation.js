@@ -19,17 +19,21 @@ export default class Navigation extends Component {
       open: false,
       items: [],
       ready: false,
+      error: false,
     }
   }
 
   async componentDidMount() {
     const menu = await WP.getMenu(3)
-    const { items } = menu
 
-    this.setState({
-      items,
-      ready: true,
-    })
+    if (menu) {
+      const { items } = menu
+
+      this.setState({
+        items,
+        ready: true,
+      })
+    }
   }
 
   render() {
@@ -46,7 +50,9 @@ export default class Navigation extends Component {
           {!open ? 'Open menu' : 'Close menu'}
         </button>
         <ul style={{ display: open ? 'flex' : 'none'}} className="navigation__menu">
-          {!ready ? (
+          {this.props.error ? (
+            <li>{this.props.error}</li>
+          ) : !ready ? (
             <li>Loading...</li>
           ) : (
             items.map(item => (

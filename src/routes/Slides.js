@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 
+import p from '../../package.json'
 import WP from '../lib/WP'
 import { getImageData } from '../lib/image'
 
@@ -327,6 +328,9 @@ export default class Slides extends Component {
           </h1>
           {content.rendered}
         </div>
+        <a className="edit" href={`${p.WPURL}/wp-admin/post.php?post=${slide.id}&action=edit`}>
+          Edit slide
+        </a>
       </article>
     )
   }

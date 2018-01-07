@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import WP from '../lib/WP'
+import WP, { connect } from '../lib/WP'
 import p from '../../package.json'
 
 // import Index from './Index'
@@ -14,7 +14,12 @@ import Loading from './Loading'
 import FourOhFour from './404'
 import NothingToSeeHereMoveAlong from './Crashed'
 
-export default class Resolver extends Component {
+class ResolverError extends Error {
+  name = 'ResolverError'
+  static FAILED_TO_LOAD_ARCHIVE = 'Unable to load archive page data, which is required for the routing to work'
+}
+
+class Resolver extends Component {
   constructor() {
     super()
 
@@ -41,28 +46,25 @@ export default class Resolver extends Component {
     return this.showComponent(FourOhFour, props)
   }
 
-  async getSingularByURL(url) {
-    const post = await WP.getByURL(url, {}, {
-      preferCache: true,
-      cacheStaleTime: 3600000, // 1 hour
-    })
+  async wpErrorHandler(error) {
+    console.log(error)
 
-    if (!post) {
-      return false
-    }
-
-    if (post.error) {
-      const { error } = post
-      console.error(error)
-
-      if (error === 'No post found.') {
-        return 404
-        // return this.show404({ error })
+    switch (error.name) {
+      case 'MenuLoadError': {
+        this.setState({
+          ViewComponentProps: {
+            ...this.state.ViewComponentProps,
+            navigation: {
+              error: error.message,
+            }
+          }
+        })
+        break
       }
 
-      throw error
-    } else {
-      return post;
+      default: {
+        this.showComponent(await import('./Error'), { error })
+      }
     }
   }
 
@@ -73,12 +75,13 @@ export default class Resolver extends Component {
       const url = p.WPURL + location.pathname
 
       const cacheSettings = {
-        preferCache: true,
+        // preferCache: true,
         cacheStaleTime: 60 * 1000 * 10,
       }
       const [archives, post] = await Promise.all([
         WP.getArchives({}, cacheSettings),
-        this.getSingularByURL(url, {}, cacheSettings),
+        WP.getByURL(url, {}, cacheSettings),
+        // this.getSingularByURL(url, {}, cacheSettings),
       ]);
 
       const findObjectByProp = (key, compare, arr) => {
@@ -94,6 +97,13 @@ export default class Resolver extends Component {
         }
 
         return false
+      }
+
+      if (!archives) {
+        // console.log('no', archives)
+        return this.wpErrorHandler(
+          new ResolverError(ResolverError.FAILED_TO_LOAD_ARCHIVE)
+        )
       }
 
       const postTypeArchive = findObjectByProp('archive_link', url, archives.post_types);
@@ -184,12 +194,17 @@ export default class Resolver extends Component {
   }
 
   async componentDidMount() {
+    this.props.WP.connectErrorHandler(this.wpErrorHandler.bind(this))
     this.doRouting(this.props)
   }
 
   async componentWillReceiveProps(props) {
     // console.log(props)
     this.doRouting(props)
+  }
+
+  componentWillUnmount() {
+    this.props.WP.disconnectErrorHandler()
   }
 
   componentDidCatch(error, info) {
@@ -219,3 +234,6 @@ export default class Resolver extends Component {
 
   }
 }
+
+// export ResolverError
+export default connect(Resolver)

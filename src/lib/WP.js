@@ -1,8 +1,9 @@
+import React from 'react'
 import axios from 'axios'
 import localforage from 'localforage'
 import ReactHtmlParser from 'react-html-parser'
 
-import transformWPContent from '../lib/content'
+import { transformWPContent, isDevelopment } from '../lib/helpers'
 import p from  '../../package.json'
 
 class WP_Client {
@@ -10,6 +11,7 @@ class WP_Client {
     this.url = url || '' // Use relative urls, assume current domain
     this.offline = !navigator.onLine
     this.cacheKeyPrefix = 'WP_Client'
+    this.errorHandler = null
 
     window.addEventListener('online', this)
     window.addEventListener('offline', this)
@@ -19,15 +21,26 @@ class WP_Client {
     this[`on${e.type}`](e)
   }
 
-  onError(error, type = 'general', severe = false) {
-    console.log(`${severe ? 'Severe error' : 'Error'}: ${type}`, error)
+  /* connect(component) {
+    console.log('connect')
+    console.log(component, component.showError)
+  } */
 
-    if (severe) {
-      // Crash application
-      throw error
-    }
+  connectErrorHandler(handler) {
+    this.errorHandler = handler
   }
 
+  disconnectErrorHandler() {
+    this.errorHandler = null
+  }
+
+  onError(error) {
+    if (this.errorHandler) {
+      return this.errorHandler(error)
+    }
+
+    throw error
+  }
 
   onoffline(e) {
     this.offline = true
@@ -69,7 +82,9 @@ class WP_Client {
     const opts = {
       raw: false,
       method: 'get',
-      preferCache: false,
+      crashAppOnError: false,
+      ignoreAxiosError: true,
+      preferCache: isDevelopment ? false : true,
       cacheStaleTime: 3600000 * 3, // 3 hours
 
       ...options, // Overwrite the defaults
@@ -121,7 +136,12 @@ class WP_Client {
       await localforage.setItem(cacheKey, addCacheMeta(response)).catch((e) => this.onError(e, 'cache'))
       return response
     } catch(e) {
-      return this.onError(e, 'axios')
+      if (opts.ignoreAxiosError) {
+        return false
+      }
+
+      // think about the parameter again
+      return this.onError(e, 'axios', opts.crashAppOnError)
     }
   }
 
@@ -133,6 +153,23 @@ class WP_Client {
       }
     }, options)
 
+    if (!post) {
+      console.log('no post')
+      return 404
+    }
+
+    console.log(post)
+    if (post.error) {
+      const { error } = post
+      console.error(error)
+
+      if (error === 'No post found.') {
+        return 404
+        // return this.show404({ error })
+      }
+
+      throw error
+    }
     // This portion of the code only exists because WP refuses to work with the _embed parameter
     // with internal requests. No one seems to know why.
     const featuredImage = post.featured_media === 0 ? false : [await this.req(
@@ -170,7 +207,7 @@ class WP_Client {
   }
 
   async getForContext(object, params = {}, options = {}) {
-      // heitä tänne term objekti tai post type objekti, näytä sisältöä siitä kontekstista
+    // heitä tänne term objekti tai post type objekti, näytä sisältöä siitä kontekstista
     // sivutuksella kiitos
 
   }
@@ -185,6 +222,14 @@ class WP_Client {
       ...options
     })
 
+    if (!menu) {
+      class MenuLoadError extends Error {
+        name = 'MenuLoadError'
+      }
+
+      return this.onError(new MenuLoadError('Unable to load menu'))
+    }
+
     return {
       ...menu,
       items: menu.items.map(item => this.turnURLRelative('url', item)),
@@ -192,7 +237,10 @@ class WP_Client {
   }
 
   async getArchives(params = {}, options = {}) {
-    return await this.req('/wp-json/emp/v1/archives', params, options)
+    return await this.req('/wp-json/emp/v1/archives', params, {
+      // crashAppOnError: true,
+      ...options
+    })
   }
 
   async query(params = {}, options = {}) {
@@ -202,4 +250,12 @@ class WP_Client {
 
 const WP = new WP_Client(p.WPURL)
 window.WP = WP
+
+export const connect = ComponentToConnect => props => {
+  const connected = <ComponentToConnect {...props} WP={WP} />
+  // WP.connect(connected)
+
+  return connected
+}
+
 export default WP
