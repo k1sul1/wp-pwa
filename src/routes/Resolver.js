@@ -72,9 +72,13 @@ export default class Resolver extends Component {
     try {
       const url = p.WPURL + location.pathname
 
+      const cacheSettings = {
+        preferCache: true,
+        cacheStaleTime: 60 * 1000 * 10,
+      }
       const [archives, post] = await Promise.all([
-        WP.getArchives(),
-        this.getSingularByURL(url),
+        WP.getArchives({}, cacheSettings),
+        this.getSingularByURL(url, {}, cacheSettings),
       ]);
 
       const findObjectByProp = (key, compare, arr) => {
