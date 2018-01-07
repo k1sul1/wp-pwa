@@ -81,6 +81,8 @@
       border-right: r(1px) solid #000
       transition: 0.2s ease-in
       float: left
+      background-image: none !important
+      padding: 3%
 
       &:hover, &:focus-within {
         background-color: lighten(#000, 10%)
@@ -91,7 +93,11 @@
         border-right: 0
       }
 
-      > *:not(a) {
+      h2 {
+        font-size: r(8px)
+      }
+
+      > *:not(a, h2) {
         display: none
       }
     }

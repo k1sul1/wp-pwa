@@ -99,8 +99,10 @@ export default class Slides extends Component {
     switch (direction) {
       case 'forwards': {
         if (currentIndex < slideCount) {
-          await this.animate('bounceOutLeft')
+          console.log(slide)
           const nextSlide = rootSlides[currentIndex + 1]
+          document.body.style.backgroundImage = this.getSlideBackground(slide.featured_media === 0 ? parent : slide).backgroundImage
+          await this.animate('bounceOutLeft')
 
           this.setState({
             slide: nextSlide,
@@ -114,8 +116,9 @@ export default class Slides extends Component {
 
       case 'backwards': {
         if (currentIndex > 0) {
-          await this.animate('bounceOutRight')
           const prevSlide = rootSlides[currentIndex - 1]
+          document.body.style.backgroundImage = this.getSlideBackground(slide.featured_media === 0 ? parent : slide).backgroundImage
+          await this.animate('bounceOutRight')
 
           this.setState({
             slide: prevSlide,
@@ -146,6 +149,7 @@ export default class Slides extends Component {
     if (isParent) {
       // can only go down
       if (direction === 'downwards') {
+        document.body.style.backgroundImage = this.getSlideBackground(slide).backgroundImage
         this.setState({
           slide: relations[slide.id][0],
           animationDir: 'down',
@@ -171,6 +175,7 @@ export default class Slides extends Component {
       switch (direction) {
         case 'downwards': {
           if (currentIndex < slideCount) {
+            // document.body.style.backgroundImage = this.getSlideBackground(relations[parent.id][currentIndex + 1]).backgroundImage
             await this.animate('bounceOutUp')
 
             this.setState({
@@ -185,6 +190,7 @@ export default class Slides extends Component {
 
         case 'upwards': {
           if (currentIndex - 1 >= 0) {
+            // document.body.style.backgroundImage = this.getSlideBackground(relations[parent.id][currentIndex - 1]).backgroundImage
             await this.animate('bounceOutDown')
 
             this.setState({
@@ -194,6 +200,8 @@ export default class Slides extends Component {
             }, this.afterSwitch)
           } else if (currentIndex - 1 < 0) {
             await this.animate('bounceOutDown')
+            // document.body.style.backgroundImage = this.getSlideBackground(parent).backgroundImage
+
 
             this.setState({
               slide: parent,
@@ -301,6 +309,12 @@ export default class Slides extends Component {
   }
 
   getSlideBackground(slide) {
+    if (!slide) {
+      return {
+        backgroundImage: false,
+      }
+    }
+
     const embedded = slide._embedded
     const featuredImages = embedded ? embedded['wp:featuredmedia'] : null
     let style
