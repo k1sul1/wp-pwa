@@ -246,7 +246,10 @@ export default class Slides extends Component {
 
     const { slide } = this.state
 
-    const slides = await WP.getPostsFrom('slides')
+    const slides = await WP.getPostsFrom('slides', {}, {
+      preferCache: true,
+      cacheStaleTime: 3600000 / 12,
+    })
     const relations = slides.reduce((acc, slide) => {
       if (slide.parent !== 0) {
         const parentID = slide.parent
