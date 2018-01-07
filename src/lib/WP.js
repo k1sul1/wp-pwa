@@ -93,6 +93,7 @@ class WP_Client {
       })
 
       if (cached) {
+        console.log('hit cache')
         const { cacheTime } = cached.meta
 
         if (Date.now() - cacheTime < opts.cacheStaleTime) {
@@ -190,8 +191,8 @@ class WP_Client {
     }
   }
 
-  async getArchives() {
-    return await this.req('/wp-json/emp/v1/archives')
+  async getArchives(params = {}, options = {}) {
+    return await this.req('/wp-json/emp/v1/archives', params, options)
   }
 
   async query(params = {}, options = {}) {
