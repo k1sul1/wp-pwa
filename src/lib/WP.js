@@ -61,7 +61,13 @@ class WP_Client {
   renderContent(post) {
     if (post && post.content) {
       post.content.rendered = ReactHtmlParser(post.content.rendered, {
-        transform: transformWPContent
+        transform: transformWPContent,
+      })
+    }
+
+    if (post && post.title) {
+      post.title.rendered = ReactHtmlParser(post.title.rendered, {
+        transform: transformWPContent,
       })
     }
 
@@ -138,6 +144,7 @@ class WP_Client {
       await localforage.setItem(cacheKey, addCacheMeta(response)).catch((e) => this.onError(e, 'cache'))
       return response
     } catch(e) {
+      console.log(e.name, e.message)
       if (opts.ignoreAxiosError) {
         return false
       }
@@ -160,14 +167,12 @@ class WP_Client {
       return 404
     }
 
-    console.log(post)
     if (post.error) {
       const { error } = post
       console.error(error)
 
       if (error === 'No post found.') {
         return 404
-        // return this.show404({ error })
       }
 
       throw error
