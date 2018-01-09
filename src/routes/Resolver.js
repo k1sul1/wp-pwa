@@ -182,9 +182,10 @@ class Resolver extends Component {
             return this.showComponent(await import('./Slides'), { post })
           }
 
-          default: {
-            return this.showComponent(await import('./Index'), {})
-          }
+          // default: {
+            // return this.showComponent(await import('./Index'), {})
+          // }
+          // no default
         }
       }
     } catch (e) {
