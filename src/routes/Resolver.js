@@ -10,6 +10,7 @@ import p from '../../package.json'
 // import Home from './Home'
 // import Singular from './Singular'
 
+import Error from './Error'
 import Loading from './Loading'
 import FourOhFour from './404'
 import NothingToSeeHereMoveAlong from './Crashed'
@@ -62,8 +63,16 @@ class Resolver extends Component {
         break
       }
 
+      case 'Forbidden': {
+        // Uh oh.
+        this.setState({
+          crashed: { error },
+        })
+        break
+      }
+
       default: {
-        this.showComponent(await import('./Error'), { error })
+        this.showComponent(Error, { error })
       }
     }
   }
@@ -210,7 +219,7 @@ class Resolver extends Component {
 
   componentDidCatch(error, info) {
     this.setState({
-      crashed: true,
+      crashed: error,
     })
 
     console.log(error, info)
@@ -226,7 +235,7 @@ class Resolver extends Component {
     } = this.state
 
     if (crashed) {
-      return <NothingToSeeHereMoveAlong />
+      return <Error {...crashed } />
     }
 
     return ready
