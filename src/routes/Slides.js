@@ -101,6 +101,7 @@ export default class Slides extends Component {
         if (currentIndex < slideCount) {
           console.log(slide)
           const nextSlide = rootSlides[currentIndex + 1]
+console.log(this.getSlideBackground)
           document.body.style.backgroundImage = this.getSlideBackground(slide.featured_media === 0 ? parent : slide).backgroundImage
           await this.animate('bounceOutLeft')
 
@@ -138,9 +139,12 @@ export default class Slides extends Component {
       return false
     }
 
+    // known bug: doesn't work if first slide contains subslides
+
     const { slide, relations, parent } = this.state
     const isParent = relations[slide.id] ? true : false
     let currentIndex
+
 
     if (slide.parent === 0 && !isParent) {
       return false // No children.
@@ -149,7 +153,7 @@ export default class Slides extends Component {
     if (isParent) {
       // can only go down
       if (direction === 'downwards') {
-        document.body.style.backgroundImage = this.getSlideBackground(slide).backgroundImage
+        // document.body.style.backgroundImage = this.getSlideBackground(slide).backgroundImage
         this.setState({
           slide: relations[slide.id][0],
           animationDir: 'down',
@@ -160,15 +164,44 @@ export default class Slides extends Component {
       }
     } else {
       Object.entries(relations).forEach(([key, children]) => {
-        const slideIndex = children.findIndex(c => c.id === slide.id)
+        console.log(key, parent.id, children)
+        const slideIndex = children.findIndex(c => c.id === parent.id)
         currentIndex = slideIndex !== -1 ? slideIndex : false
       })
 
-      if (!parent) {
-        console.error('STOP WRITING BUGGY CODE!')
+      // console.log(currentIndex, slide)
+      console.log(slide)
+      console.log(parent)
+      console.log(relations)
+      console.log(relations[parent.id])
+
+      // find next or previous slide by checking direction and comparing current slide position in the relations
+      const currentSlideIndex = relations[parent.id].findIndex(s => s.id === slide.id)
+      const nextSlide = relations[parent.id][currentSlideIndex + 1]
+      const prevSlide = relations[parent.id][currentSlideIndex - 1]
+      // const newSlide = relations[parent.id][newSlideIndex]
+      const newSlide = direction === 'upwards' ? currentSlideIndex === 0 ? parent : prevSlide : nextSlide
+
+      console.log(currentSlideIndex)
+      console.log(nextSlide)
+      console.log(prevSlide)
+
+      if (newSlide) {
+        document.body.style.backgroundImage = this.getSlideBackground(newSlide).backgroundImage
+        await this.animate(direction !== 'upwards' ? 'bounceOutUp' : 'bounceOutDown')
+        this.setState({
+          slide: newSlide,
+          animationDir: direction === 'upwards' ? 'up' : 'down',
+        }, this.afterSwitch)
       }
 
-      const relationsLength = relations[parent.id].length
+      if (!parent) {
+        console.error('STOP WRITING BUGGY CODE!')
+        console.log('Or wait a bit.');
+        return
+      }
+
+      /* const relationsLength = relations[parent.id].length
       const slideCount = relationsLength > 1 ? relationsLength - 1 : relationsLength
 
 
@@ -212,7 +245,7 @@ export default class Slides extends Component {
         }
 
         // no default
-      }
+      } */
     }
   }
 
@@ -309,32 +342,34 @@ export default class Slides extends Component {
   }
 
   getSlideBackground(slide) {
+    const defaultReturn = {
+      backgroundImage: false,
+    }
+
     if (!slide) {
-      return {
-        backgroundImage: false,
-      }
+      return defaultReturn
     }
 
     const embedded = slide._embedded
     const featuredImages = embedded ? embedded['wp:featuredmedia'] : null
-
-    console.log(embedded, slide)
-    let style
 
     if (featuredImages) {
       const first = featuredImages[0]
 
       if (first.code === 'rest_forbidden') {
         // https://core.trac.wordpress.org/ticket/41445
-        return style
+        return defaultReturn
       }
+      const image = getImageData(first, 'medium')
 
-      style = {
-        backgroundImage: `url('${getImageData(first, 'medium').source_url}')`
+      console.log(image)
+
+      return {
+        backgroundImage: `url('${image.source_url}')`
       }
     }
 
-    return style
+    return defaultReturn
   }
 
   renderSlide(slide) {

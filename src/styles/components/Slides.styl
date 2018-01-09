@@ -37,6 +37,11 @@
   p, ul, ol {
     font-size: r(24px)
   }
+
+  .column {
+    float: left
+    width: 50%
+  }
 }
 
 .slide-preview {
@@ -51,6 +56,16 @@
   justify-content: center
   align-items: center
   position: relative
+
+  @media (max-width: 1280px) {
+    width: 45vw
+    height: 45vw
+  }
+
+  @media (max-width: 768px) {
+    width: 90vw
+    height: 90vw
+  }0
 
   a {
     position: absolute
@@ -72,6 +87,8 @@
     position: absolute
     bottom: r(30px)
     overflow: hidden
+    display: flex
+    max-width: 100%
 
 
     .slide-preview {
@@ -111,13 +128,21 @@
   overflow-y: scroll
   display: flex
   flex-flow: row wrap
-  justify-content: center
+  justify-content: space-around
   align-items: center
+
+
+  @media (max-width: 1280px) {
+    > .slide-preview {
+      margin-right: 0 !important
+    }
+  }
 
   > .slide-preview {
     // float: left
     // margin-right: 4.5vw
-    margin-right: r(20px)
+    margin-top: r(20px)
+    margin-bottom: r(20px)
     // margin-bottom: 5vw
     box-shadow: r(4px) r(4px) r(5px) r(0px) rgba(0,0,0,0.75)
     transition: 0.2s ease-in
@@ -132,10 +157,5 @@
       margin-right: 0
     }
 
-    &:nth-last-child(1),
-    &:nth-last-child(2),
-    &:nth-last-child(3) {
-      margin-bottom: 0
-    }
   }
 }
