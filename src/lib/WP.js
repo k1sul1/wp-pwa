@@ -145,12 +145,18 @@ class WP_Client {
       return response
     } catch(e) {
       console.log(e.name, e.message)
+      // Handle 403 anyway
+      if (e.message === 'Request failed with status code 403') {
+        console.log('HEY OVER HERE')
+        class Forbidden extends Error { name = 'Forbidden' }
+        return this.onError(new Forbidden('It appears this requires authentication'))
+      }
+
       if (opts.ignoreAxiosError) {
         return false
       }
 
-      // think about the parameter again
-      return this.onError(e, 'axios', opts.crashAppOnError)
+      return this.onError(e)
     }
   }
 
@@ -162,12 +168,15 @@ class WP_Client {
       }
     }, options)
 
+
     if (!post) {
-      console.log('no post')
-      return 404
+      class LookupError extends Error { name = 'LookupError' }
+      this.onError(new LookupError('Lookup request failed'))
+      return false
     }
 
-    if (post.error) {
+
+    if (post && post.error) {
       const { error } = post
       console.error(error)
 
