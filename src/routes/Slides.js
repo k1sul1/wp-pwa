@@ -179,8 +179,9 @@ console.log(this.getSlideBackground)
       const currentSlideIndex = relations[parent.id].findIndex(s => s.id === slide.id)
       const nextSlide = relations[parent.id][currentSlideIndex + 1]
       const prevSlide = relations[parent.id][currentSlideIndex - 1]
-      // const newSlide = relations[parent.id][newSlideIndex]
-      const newSlide = direction === 'upwards' ? currentSlideIndex === 0 ? parent : prevSlide : nextSlide
+      const newSlide = direction === 'upwards' ? currentSlideIndex === 0 // If going up and it's the first slide, switch to parent.
+        ? parent : prevSlide
+        : nextSlide
 
       console.log(currentSlideIndex)
       console.log(nextSlide)
