@@ -143,7 +143,6 @@ console.log(this.getSlideBackground)
 
     const { slide, relations, parent } = this.state
     const isParent = relations[slide.id] ? true : false
-    let currentIndex
 
 
     if (slide.parent === 0 && !isParent) {
@@ -165,11 +164,8 @@ console.log(this.getSlideBackground)
     } else {
       Object.entries(relations).forEach(([key, children]) => {
         console.log(key, parent.id, children)
-        const slideIndex = children.findIndex(c => c.id === parent.id)
-        currentIndex = slideIndex !== -1 ? slideIndex : false
       })
 
-      // console.log(currentIndex, slide)
       console.log(slide)
       console.log(parent)
       console.log(relations)
@@ -361,9 +357,8 @@ console.log(this.getSlideBackground)
         // https://core.trac.wordpress.org/ticket/41445
         return defaultReturn
       }
-      const image = getImageData(first, 'medium')
 
-      console.log(image)
+      const image = getImageData(first, 'medium')
 
       return {
         backgroundImage: `url('${image.source_url}')`
