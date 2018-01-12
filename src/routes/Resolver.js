@@ -13,11 +13,10 @@ import p from '../../package.json'
 import Error from './Error'
 import Loading from './Loading'
 import FourOhFour from './404'
-import NothingToSeeHereMoveAlong from './Crashed'
 
 class ResolverError extends Error {
   name = 'ResolverError'
-  static FAILED_TO_LOAD_ARCHIVE = 'Unable to load archive page data, which is required for the routing to work'
+  // FAILED_TO_LOAD_ARCHIVE = 'Unable to load archive page data, which is required for the routing to work'
 }
 
 class Resolver extends Component {
@@ -48,7 +47,7 @@ class Resolver extends Component {
   }
 
   async wpErrorHandler(error) {
-    console.log(error)
+    console.log(error, error.name, error.message)
 
     switch (error.name) {
       case 'MenuLoadError': {
@@ -71,6 +70,22 @@ class Resolver extends Component {
         break
       }
 
+      case 'QuotaExceededError': {
+        console.log('Using too much storage? Is your disk full?')
+        this.setState({
+          crashed: {
+            error: {
+              ...error,
+              name: 'ApplicationIsGreedy',
+              message: 'Is your disk full? This error shouldn\'t be shown.',
+            }
+          },
+        })
+        // throw error
+
+        break
+      }
+
       default: {
         this.showComponent(Error, { error })
       }
@@ -78,8 +93,6 @@ class Resolver extends Component {
   }
 
   async doRouting({ location }) {
-    console.log(location)
-
     try {
       const url = p.WPURL + location.pathname
 
@@ -111,7 +124,7 @@ class Resolver extends Component {
       if (!archives) {
         // console.log('no', archives)
         return this.wpErrorHandler(
-          new ResolverError(ResolverError.FAILED_TO_LOAD_ARCHIVE)
+          new ResolverError('Unable to load archive page data, which is required for the routing to work')
         )
       }
 
@@ -137,8 +150,14 @@ class Resolver extends Component {
         // This ought to be enough for many. It's possible to use black magic
         // and Webpack to reproduce the page-[slug].php behaviour, but
         // create-react-app doesn't support it and nags if you try to.
-        if (post === 404) {
-          this.show404({ error: 'Post not found.' })
+        // if (post === 404) {
+          // this.show404({ error: 'Post not found.' })
+        // }
+        // if (post instanceof 'Error404') {
+          // throw post
+        // }
+        if (post.name === 'Error404') {
+          throw post
         }
 
         const { type } = post
@@ -219,7 +238,7 @@ class Resolver extends Component {
 
   componentDidCatch(error, info) {
     this.setState({
-      crashed: error,
+      crashed: { error },
     })
 
     console.log(error, info)
@@ -227,12 +246,7 @@ class Resolver extends Component {
 
 
   render() {
-    const {
-      ready,
-      crashed,
-      ViewComponent,
-      ViewComponentProps,
-    } = this.state
+    const { ready, crashed, ViewComponent, ViewComponentProps } = this.state
 
     if (crashed) {
       return <Error {...crashed } />
@@ -241,7 +255,6 @@ class Resolver extends Component {
     return ready
       ? <ViewComponent {...ViewComponentProps} />
       : <Loading />
-
   }
 }
 
