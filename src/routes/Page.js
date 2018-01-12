@@ -2,13 +2,14 @@ import React from 'react'
 import Layout from '../components/Layout'
 
 const Page = (props) => {
-  const { post_title, post_content } = props.post
+  console.log(props)
+  const { title, content } = props.post
 
   return (
     <Layout {...props} sidebar={false}>
       <h2>Page</h2>
-      <h3>{post_title}</h3>
-      {post_content}
+      <h3>{title.rendered}</h3>
+      {content.rendered}
     </Layout>
   )
 }
