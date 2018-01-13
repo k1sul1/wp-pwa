@@ -3,6 +3,7 @@ import axios from 'axios'
 import localforage from 'localforage'
 import ReactHtmlParser from 'react-html-parser'
 
+import { MenuLoadError, ArchiveLoadError, LookupError, Error404, Forbidden } from '../errors'
 import { transformWPContent, isDevelopment } from '../lib/helpers'
 import p from  '../../package.json'
 
@@ -168,10 +169,6 @@ class WP_Client {
     })
 
     if (!menu) {
-      class MenuLoadError extends Error {
-        name = 'MenuLoadError'
-      }
-
       return this.onError(new MenuLoadError('Unable to load menu'))
     }
 
@@ -188,9 +185,6 @@ class WP_Client {
     })
 
     if (!archives) {
-      class ArchiveLoadError extends Error {
-        name = 'ArchiveLoadError'
-      }
 
       return this.onError(new ArchiveLoadError('Unable to load archives'))
     }
@@ -228,9 +222,7 @@ class WP_Client {
 
 
     if (!post) {
-      class LookupError extends Error { name = 'LookupError' }
-      this.onError(new LookupError('Lookup request failed'))
-      return false
+      return this.onError(new LookupError('Lookup request failed'))
     }
 
 
@@ -238,8 +230,7 @@ class WP_Client {
       const { error } = post
 
       if (error === 'No post found.') {
-        class Error404 extends Error { name = 'Error404' }
-        this.onError(new Error404('Nothing found with that URL.'))
+        return this.onError(new Error404('Nothing found with that URL.'))
         // return 404
       } else {
         console.log('UNHANDLED ERROR!')
@@ -383,7 +374,6 @@ class WP_Client {
     } catch(e) {
       // Handle 403s anyway.
       if (e.message === 'Request failed with status code 403') {
-        class Forbidden extends Error { name = 'Forbidden' }
         return this.onError(new Forbidden('It appears this requires authentication'))
       }
 

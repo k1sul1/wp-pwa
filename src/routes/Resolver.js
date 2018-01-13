@@ -1,5 +1,6 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import WP, { connect } from '../lib/WP'
+import { ResolverError, Error404, Forbidden, MenuLoadError } from '../errors'
 import p from '../../package.json'
 
 // import Index from './Index'
@@ -12,12 +13,8 @@ import p from '../../package.json'
 
 import Error from './Error'
 import Loading from './Loading'
-import FourOhFour from './404'
+import SearchForm from '../components/SearchForm'
 
-class ResolverError extends Error {
-  name = 'ResolverError'
-  // FAILED_TO_LOAD_ARCHIVE = 'Unable to load archive page data, which is required for the routing to work'
-}
 
 class Resolver extends Component {
   constructor() {
@@ -42,15 +39,11 @@ class Resolver extends Component {
     })
   }
 
-  show404(props = {}) {
-    return this.showComponent(FourOhFour, props)
-  }
-
   async wpErrorHandler(error) {
-    console.log(error, error.name, error.message)
+    console.log(error, error.constructor, error.name, error.message)
 
-    switch (error.name) {
-      case 'MenuLoadError': {
+    switch (error.constructor) {
+      case MenuLoadError: {
         this.setState({
           ViewComponentProps: {
             ...this.state.ViewComponentProps,
@@ -59,17 +52,42 @@ class Resolver extends Component {
             }
           }
         })
-        break
+        return
       }
 
-      case 'Forbidden': {
+      case Forbidden: {
         // Uh oh.
         this.setState({
           crashed: { error },
         })
-        break
+        return
       }
 
+      case Error404: {
+        this.setState({
+          ViewComponentProps: {
+            ...this.state.ViewComponentProps,
+            sidebar: {
+              children: (
+                <Fragment>
+                  <h2>Try the search</h2>
+
+                  <SearchForm />
+                </Fragment>
+              )
+            }
+          }
+        })
+        // return
+        break // Stop the switch but fall down!
+      }
+
+
+      // no default
+    }
+
+    // For errors that are not custom.
+    switch (error.name) {
       case 'QuotaExceededError': {
         console.log('Using too much storage? Is your disk full?')
         this.setState({
@@ -81,15 +99,17 @@ class Resolver extends Component {
             }
           },
         })
-        // throw error
 
-        break
+        return
       }
 
-      default: {
-        this.showComponent(Error, { error })
-      }
+      // no default
     }
+
+    return this.showComponent(Error, {
+      ...this.state.ViewComponentProps,
+      error
+    })
   }
 
   async doRouting({ location }) {

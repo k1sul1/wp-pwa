@@ -25,7 +25,7 @@ const Error = (props) => {
   const { name, message } = props.error
 
   return (
-    <Layout {...props} sidebar={false}>
+    <Layout {...props}>
       <h1>{name}</h1>
       <p>{message}</p>
       {dumpObject(props)}
