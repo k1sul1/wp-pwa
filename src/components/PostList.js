@@ -24,16 +24,36 @@ export default class PostList extends Component {
 
   static propTypes = {
     posts: PropTypes.array,
+    page: PropTypes.number,
+    context: PropTypes.object,
+    query: PropTypes.object,
   }
 
   static defaultProps = {
     posts: [],
+    page: 1,
   }
 
   async componentDidMount() {
-    const posts = this.props.query
-      ? await WP.query(this.props.query)
-      : await WP.getPosts(this.props.getPosts) // this does not do anything right
+    const { context, page } = this.props
+
+    if (this.props.posts) {
+      return this.setState({
+        posts: this.props.posts,
+        loading: false,
+      })
+    } else if (context) {
+      const posts = await WP.getPostsForContext({ context, page })
+      return this.setState({
+        posts,
+        loading: false,
+      })
+    }
+
+    const posts = await WP.query({
+      ...this.props.query,
+      page
+    })
 
     this.setState({
       posts,

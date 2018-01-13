@@ -1,12 +1,17 @@
 import React, { Component } from 'react'
+import { connect } from '../lib/WP'
+import { SearchError } from '../errors'
+import PostList from '../components/PostList'
 // import PropTypes from 'prop-types'
 
-export default class SearchForm extends Component {
+export default connect(class SearchForm extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
       searchQuery: '',
+      loading: false,
+      results: [],
     }
   }
 
@@ -20,23 +25,42 @@ export default class SearchForm extends Component {
     })
   }
 
-  onSubmit(e) {
+  async onSubmit(e) {
+    const { WP } = this.props
+    const { searchQuery } = this.state
+
     e.preventDefault()
+    this.setState({
+      loading: true,
+    })
+
+    const results = await WP.query({
+      s: searchQuery
+    })
+
+    if (results) {
+      console.log(results)
+      this.setState({ results })
+    } else {
+      throw new SearchError(`Search query didn't return an acceptable response`)
+    }
   }
 
   render() {
-    const { searchQuery } = this.state
+    const { searchQuery, results } = this.state
 
     return (
-      <form onSubmit={() => this.onSubmit()}>
+      <form onSubmit={(e) => this.onSubmit(e)}>
         <input
           type="search"
           placeholder="kittens"
           value={searchQuery}
-          onChange={() => this.onChange()}
+          onChange={(e) => this.onChange(e)}
         />
         <input type="submit" value="&#x1F50E;" title="Do the search" />
+
+        {results.length ? <PostList posts={results} /> : false}
       </form>
     )
   }
-}
+})
