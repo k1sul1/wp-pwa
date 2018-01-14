@@ -1,18 +1,6 @@
 import React from 'react'
-import Layout from '../components/Layout'
+import Page from './Page'
+import { defaultSidebar } from '../components/Sidebar'
 
-const Home = (props) => {
-  console.log(props);
-  const { post } = props
-  const { title, content } = post
-
-  return (
-    <Layout {...props} sidebar={{ children: <h1>Hello!</h1> }}>
-      <h2>Home</h2>
-      <h3>{title.rendered}</h3>
-      {content.rendered}
-    </Layout>
-  )
-}
-
+const Home = (props) => <Page {...props} sidebar={defaultSidebar} />
 export default Home

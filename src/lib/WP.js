@@ -22,9 +22,16 @@ class WP_Client {
     this.saveIntoReqCache = true
     this.cacheKeyPrefix = ''
     this.errorHandler = null
+    this.user = null
 
-    window.addEventListener('online', this)
-    window.addEventListener('offline', this)
+    this.getCurrentUser().then(user => {
+      console.log(user)
+      this.user = user
+      window.dispatchEvent(new CustomEvent('authenticated', { detail: { response: user } }))
+    }) // swallow any errors
+
+    this.addNetworkStatusListeners(this)
+    this.addAuthenticationListeners(this)
   }
 
   async onError(error) {
@@ -37,6 +44,8 @@ class WP_Client {
 
       // clear the cache maybe
       // but whatever you do, don't propagate further
+    } else if (error.message === 'Request failed with status code 403') {
+      return this.onError(new Forbidden('It appears this requires authentication'))
     }
 
     if (this.errorHandler) {
@@ -44,6 +53,16 @@ class WP_Client {
     }
 
     throw error
+  }
+
+  async onauthenticated(e) {
+    await dataStore.setItem('user', e.detail.response)
+    this.user = await this.getCurrentUser()
+  }
+
+  async onlogout() {
+    await dataStore.removeItem('user')
+    this.user = null
   }
 
   onoffline(e) {
@@ -152,10 +171,61 @@ class WP_Client {
     }, options)
   }
 
-  async getForContext(object, params = {}, options = {}) {
+  async getForContext(type, params = {}, options = {}) {
     // heitä tänne term objekti tai post type objekti, näytä sisältöä siitä kontekstista
     // sivutuksella kiitos
+    switch (type) {
+      case 'blog': {
+        break
+      }
 
+      case 'taxonomy': {
+        const { term_id, taxonomy } = params
+        const taxonomies = { post_tag: 'tags', category: 'categories' } // add rest base to the object pls
+        const posts = await this.getPostsFrom('posts', {
+          params: {
+            [taxonomies[taxonomy]]: term_id
+          }
+        }, options)
+        /* const a = {
+          'post_type': 'post',
+          'tax_query': [
+            {
+              'taxonomy': 'post_tag',
+              'field': 'slug',
+              'terms': [ 'who' ]
+            },
+            {
+              'taxonomy': 'post_tag',
+              'field': 'slug',
+              'terms': [ 'needs' ]
+            }
+          ]
+        }
+
+        const args = Object.keys(a).map(function(k) {
+            return encodeURIComponent(k) + '=' + encodeURIComponent(a[k])
+        }).join('&')
+        console.log(args)
+
+        const posts = await this.req('/wp-json/wp_query/args/?' + args)
+
+        console.log(posts) */
+
+        if (posts) {
+          return posts
+        }
+
+        break
+      }
+
+      case 'post_type': {
+
+        break
+      }
+
+      // no default
+    }
   }
 
   async getMenus(params = {}, options = {}) {
@@ -196,6 +266,26 @@ class WP_Client {
     return await this.req('/wp-json/wp_query/args/', params, options)
   }
 
+  async getCurrentUser() {
+    const user = await dataStore.getItem('user')
+
+    if (user) {
+      return user
+    }
+
+    return false
+  }
+
+  async logout() {
+    try {
+      window.dispatchEvent(new Event('logout', {}))
+      return true
+    } catch(e) {
+      console.log(e)
+      return false
+    }
+  }
+
   async authenticate(username, password) {
     const response = await this.req('/wp-json/jwt-auth/v1/token', {
       username,
@@ -203,13 +293,38 @@ class WP_Client {
     }, {
       method: 'post',
       allowCache: false,
+      ignoreAxiosError: true,
     })
 
-    if (response.token) {
-      await dataStore.setItem('user', response)
+    if (response && response.token) {
+      window.dispatchEvent(new CustomEvent('authenticated', { detail: { response } }))
+      return true
     }
 
-    return response
+    return this.onError(response)
+    // console.log(response)
+
+    // return false
+  }
+
+  addNetworkStatusListeners(component) {
+    window.addEventListener('online', component)
+    window.addEventListener('offline', component)
+  }
+
+  removeNetworkStatusListeners(component) {
+    window.removeEventListener('online', component)
+    window.removeEventListener('offline', component)
+  }
+
+  addAuthenticationListeners(component) {
+    window.addEventListener('authenticated', component)
+    window.addEventListener('logout', component)
+  }
+
+  removeAuthenticationListeners(component) {
+    window.removeEventListener('authenticated', component)
+    window.removeEventListener('logout', component)
   }
 
   async getByURL(url, params, options) {
@@ -231,13 +346,12 @@ class WP_Client {
 
       if (error === 'No post found.') {
         return this.onError(new Error404('Nothing found with that URL.'))
-        // return 404
       } else {
         console.log('UNHANDLED ERROR!')
         throw error
       }
-
     }
+
     // This portion of the code only exists because WP refuses to work with the _embed parameter
     // with internal requests. No one seems to know why.
     const featuredImage = !post.featured_media ? false : [await this.req(
@@ -282,7 +396,7 @@ class WP_Client {
       raw: false,
 
       crashAppOnError: false,
-      ignoreAxiosError: true,
+      ignoreAxiosError: false,
       allowCache: true,
       preferCache: isDevelopment ? false : true,
       cacheStaleTime: 3600000 * 3, // 3 hours
@@ -295,7 +409,7 @@ class WP_Client {
     }
 
     const headers = {}
-    const user = await dataStore.getItem('user')
+    const user = this.user
     const jwt = user ? user.token : false
 
     if (jwt) {
@@ -372,13 +486,9 @@ class WP_Client {
       opts.allowCache && await requestCache.setItem(cacheKey, addCacheMeta(response)).catch(this.onError)
       return response
     } catch(e) {
-      // Handle 403s anyway.
-      if (e.message === 'Request failed with status code 403') {
-        return this.onError(new Forbidden('It appears this requires authentication'))
-      }
 
       if (opts.ignoreAxiosError) {
-        return false
+        return e
       }
 
       return this.onError(e)

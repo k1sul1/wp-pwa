@@ -3,9 +3,9 @@ import PropTypes from 'prop-types'
 
 import Navigation from './Navigation'
 
-const Header = ({ match, navigation }) => (
+const Header = ({ navigation }) => (
   <header className="application__header">
-    {navigation ? <Navigation match={match} {...navigation}/> : false}
+    {navigation ? <Navigation {...navigation}/> : false}
   </header>
 )
 

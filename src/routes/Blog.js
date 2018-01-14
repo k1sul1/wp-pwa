@@ -18,7 +18,7 @@ export default class Blog extends Component {
       <Layout {...this.props}>
         <h1>{post.title.rendered}</h1>
 
-        <PostList />
+        <PostList context={post} />
       </Layout>
     )
   }

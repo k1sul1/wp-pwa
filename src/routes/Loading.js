@@ -2,7 +2,7 @@ import React from 'react'
 import Layout from '../components/Layout'
 
 const Loading = (props) => (
-  <Layout sidebar={false} navigation={false}>
+  <Layout disableTransition={true} >
     <p>Loading...</p>
   </Layout>
 )

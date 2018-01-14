@@ -37,17 +37,31 @@ export default class PostList extends Component {
   async componentDidMount() {
     const { context, page } = this.props
 
-    if (this.props.posts) {
+    if (this.props.posts.length) {
       return this.setState({
         posts: this.props.posts,
         loading: false,
       })
     } else if (context) {
-      const posts = await WP.getPostsForContext({ context, page })
-      return this.setState({
-        posts,
-        loading: false,
-      })
+      console.log(context)
+      let posts = []
+
+      if (context.isBlogpage) {
+        const result = await WP.getForContext('blog', { page })
+
+        if (result) {
+          posts = result
+        }
+      } else if (context.term_id || context.taxonomy) {
+        const { term_id, taxonomy } = context
+        const result = await WP.getForContext('taxonomy', { term_id, taxonomy })
+
+        if (result) {
+          posts = result
+        }
+      }
+
+      return this.setState({ posts, loading: false })
     }
 
     const posts = await WP.query({

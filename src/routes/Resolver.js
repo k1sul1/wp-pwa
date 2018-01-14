@@ -1,20 +1,11 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component } from 'react'
+import { searchSidebar } from '../components/Sidebar'
 import WP, { connect } from '../lib/WP'
 import { ResolverError, Error404, Forbidden, MenuLoadError } from '../errors'
 import p from '../../package.json'
 
-// import Index from './Index'
-// import About from './About'
-// import Page from './Page'
-// import Blog from './Blog'
-// import Archive from './Archive'
-// import Home from './Home'
-// import Singular from './Singular'
-
 import Error from './Error'
 import Loading from './Loading'
-import SearchForm from '../components/SearchForm'
-
 
 class Resolver extends Component {
   constructor() {
@@ -22,25 +13,46 @@ class Resolver extends Component {
 
     this.state = {
       ready: false,
-      ViewComponent: null,
-      ViewComponentProps: {},
       crashed: false,
 
+      // These will determine what will be rendered:
+      // The component and it's props!
+      ViewComponent: null,
+      ViewComponentProps: {
+        disableTransition: true,
+      },
     }
   }
 
-  showComponent(component, componentProps) {
+  async showComponent(component, componentProps, merge = false) {
+    // Transition the element out. React will re-render after setState,
+    // reseting this and transitioning again.
+    const wrapper = document.querySelector('.application__wrapper')
+    if (!componentProps.disableTransition) {
+      wrapper.classList.add('lightSpeedOut')
+      await new Promise((resolve) => setTimeout(resolve, 300))
+    } else {
+      wrapper.classList.remove('animated')
+      wrapper.classList.remove('lightSpeedIn')
+    }
+
+
     this.setState({
       ViewComponent: component.default || component, // Support dynamic imports
       ViewComponentProps: {
+        // In some cases you might want to merge the old and new props
+        // But that's an insane default behaviour, so nah.
+        ...(merge ? this.state.ViewComponentProps : {}),
         ...componentProps,
       },
       ready: true,
+    }, () => {
+      // wrapper.classList.add('animated', 'lightSpeedIn')
     })
   }
 
   async wpErrorHandler(error) {
-    console.log(error, error.constructor, error.name, error.message)
+    console.log('Resolver::wpErrorHandler', error)
 
     switch (error.constructor) {
       case MenuLoadError: {
@@ -67,21 +79,11 @@ class Resolver extends Component {
         this.setState({
           ViewComponentProps: {
             ...this.state.ViewComponentProps,
-            sidebar: {
-              children: (
-                <Fragment>
-                  <h2>Try the search</h2>
-
-                  <SearchForm />
-                </Fragment>
-              )
-            }
+            sidebar: searchSidebar
           }
         })
-        // return
         break // Stop the switch but fall down!
       }
-
 
       // no default
     }
@@ -89,13 +91,12 @@ class Resolver extends Component {
     // For errors that are not custom.
     switch (error.name) {
       case 'QuotaExceededError': {
-        console.log('Using too much storage? Is your disk full?')
         this.setState({
           crashed: {
             error: {
               ...error,
               name: 'ApplicationIsGreedy',
-              message: 'Is your disk full? This error shouldn\'t be shown.',
+              message: `Is your disk full? This error shouldn't be shown, as it's a cache error and should die silently.`,
             }
           },
         })
@@ -106,10 +107,17 @@ class Resolver extends Component {
       // no default
     }
 
-    return this.showComponent(Error, {
-      ...this.state.ViewComponentProps,
-      error
-    })
+    // Keep the props from previous view in case of error
+    // It'll help track down the cause of the bug if there's one.
+    // In production you might want to disable this and/or use something like Sentry.
+    return this.showComponent(
+      Error,
+      {
+        ...this.state.ViewComponentProps,
+        error
+      },
+      false // process.env.NODE_ENV === 'production' instead of true to disable in prod
+    )
   }
 
   async doRouting({ location }) {
@@ -148,9 +156,12 @@ class Resolver extends Component {
         )
       }
 
+      // Just add custom post types and taxonomies here as they appear.
+
       const postTypeArchive = findObjectByProp('archive_link', url, archives.post_types);
       const categoryArchive = findObjectByProp('archive_link', url, archives.taxonomies.category);
-      const allArchives = [postTypeArchive, categoryArchive]
+      const postTagArchive = findObjectByProp('archive_link', url, archives.taxonomies.post_tag);
+      const allArchives = [postTypeArchive, categoryArchive, postTagArchive]
       const isArchive = allArchives.some(Boolean)
 
       if (isArchive) {
