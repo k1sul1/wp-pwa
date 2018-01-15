@@ -91,9 +91,12 @@ class WP_Client {
   }
 
   getWPURL() {
+    console.log(process.env)
     if (process.env.NODE_ENV === 'production') {
+      console.log('using p.homepage')
       return p.homepage
     } else {
+      console.log('using p.WPURL')
       return p.WPURL
     }
   }
