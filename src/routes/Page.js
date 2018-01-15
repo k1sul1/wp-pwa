@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import Layout from '../components/Layout'
 import { defaultSidebar } from '../components/Sidebar'
 import { connect } from '../lib/WP'
-import p from '../../package.json'
 
+const noop = n => n
 class Page extends Component {
   constructor() {
     super()
@@ -12,6 +12,19 @@ class Page extends Component {
     this.state = {
       authenticated: false
     }
+  }
+
+  static propTypes = {
+    hooks: PropTypes.object,
+    post: PropTypes.object.isRequired,
+  }
+
+
+  static defaultProps = {
+    hooks: {
+      title: noop,
+      content: noop,
+    },
   }
 
   onlogout() {
@@ -34,6 +47,7 @@ class Page extends Component {
   async componentDidMount() {
     this.props.WP.addAuthenticationListeners(this)
     const user = await this.props.WP.getCurrentUser()
+    console.log(this.props.hooks)
 
     if (user) {
       this.setState({
@@ -48,9 +62,11 @@ class Page extends Component {
 
   render() {
     const props = this.props
-    const { hooks, post } = props
+    const { hooks, post, WP } = props
     const { title, content } = post
     const { authenticated } = this.state
+
+    console.log(hooks)
 
     return (
       <Layout sidebar={defaultSidebar} {...props}>
@@ -66,25 +82,13 @@ class Page extends Component {
 
           {authenticated ? (
             <div className="admin-bar">
-              <a href={`${p.WPURL}/wp-admin/post.php?post=${post.id}&action=edit`}>Edit</a>
+              <a href={`${WP.getWPURL()}/wp-admin/post.php?post=${post.id}&action=edit`}>Edit</a>
             </div>
           ) : false }
         </article>
       </Layout>
     )
   }
-}
-
-Page.propTypes = {
-  hooks: PropTypes.object,
-  post: PropTypes.object.isRequired,
-}
-
-Page.defaultProps = {
-  hooks: {
-    title: (n) => n,
-    content: (n) => n,
-  },
 }
 
 export default connect(Page)

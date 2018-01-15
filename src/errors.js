@@ -8,7 +8,6 @@ export class MenuLoadError extends ExtendableError {
   name = 'MenuLoadError'
 }
 
-
 export class ArchiveLoadError extends ExtendableError {
   name = 'ArchiveLoadError'
 }
@@ -19,6 +18,9 @@ export class LookupError extends ExtendableError {
 
 export class Error404 extends ExtendableError {
   name = 'Error404'
+}
+export class FatalError404 extends Error404 {
+  name = 'FatalError404'
 }
 
 export class Forbidden extends ExtendableError {

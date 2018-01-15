@@ -3,7 +3,7 @@ import axios from 'axios'
 import localforage from 'localforage'
 import ReactHtmlParser from 'react-html-parser'
 
-import { MenuLoadError, ArchiveLoadError, LookupError, Error404, Forbidden } from '../errors'
+import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden } from '../errors'
 import { transformWPContent, isDevelopment } from '../lib/helpers'
 import p from  '../../package.json'
 
@@ -46,6 +46,9 @@ class WP_Client {
       // but whatever you do, don't propagate further
     } else if (error.message === 'Request failed with status code 403') {
       return this.onError(new Forbidden('It appears this requires authentication'))
+    } else if (error.message === 'Request failed with status code 404') {
+      // return this.onError(new Error404('Request failed with status code 404'))
+      return this.onError(new FatalError404('No endpoint found.'))
     }
 
     if (this.errorHandler) {
@@ -87,8 +90,16 @@ class WP_Client {
     this.errorHandler = null
   }
 
+  getWPURL() {
+    if (process.env.NODE_ENV === 'production') {
+      return p.homepage
+    } else {
+      return p.WPURL
+    }
+  }
+
   turnURLRelative(key, obj) {
-    obj[key] = obj[key].replace(p.WPURL, '')
+    obj[key] = obj[key].replace(this.getWPURL(), '')
 
     return obj
   }
@@ -233,19 +244,21 @@ class WP_Client {
   }
 
   async getMenu(menu_id, params = {}, options = {}) {
-    const menu = await this.req(`/wp-json/wp-api-menus/v2/menus/${menu_id}`, params, {
+    const menu = await this.req(`/wp-json/wp-api-menus/v2/menus/${menu_id}2`, params, {
       preferCache: true,
       ...options
     })
 
-    if (!menu) {
-      return this.onError(new MenuLoadError('Unable to load menu'))
+    console.log(menu)
+
+    if (menu && menu.items) {
+      return {
+        ...menu,
+        items: menu.items.map(item => this.turnURLRelative('url', item)),
+      }
     }
 
-    return {
-      ...menu,
-      items: menu.items.map(item => this.turnURLRelative('url', item)),
-    }
+    return this.onError(new MenuLoadError('Unable to load menu'))
   }
 
   async getArchives(params = {}, options = {}) {
@@ -337,7 +350,7 @@ class WP_Client {
 
 
     if (!post) {
-      return this.onError(new LookupError('Lookup request failed'))
+      // return this.onError(new LookupError('Lookup request failed'))
     }
 
 
@@ -345,7 +358,8 @@ class WP_Client {
       const { error } = post
 
       if (error === 'No post found.') {
-        return this.onError(new Error404('Nothing found with that URL.'))
+        return this.onError(new LookupError('Lookup request failed'))
+        // return this.onError(new Error404('Nothing found with that URL.'))
       } else {
         console.log('UNHANDLED ERROR!')
         throw error

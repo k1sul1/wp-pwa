@@ -10,7 +10,7 @@ const fancyHeader = (node, props) => {
 }
 
 const About = (props) => (
-  <Page {...props} hooks={{ title: fancyHeader }} />
+  <Page {...props} hooks={{ title: fancyHeader, content: (n) => n }} />
 )
 
 export default About

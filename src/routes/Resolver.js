@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
 import { searchSidebar } from '../components/Sidebar'
 import WP, { connect } from '../lib/WP'
-import { ResolverError, Error404, Forbidden, MenuLoadError } from '../errors'
-import p from '../../package.json'
+import { ResolverError, Error404, FatalError404, Forbidden, MenuLoadError, LookupError } from '../errors'
 
 import Error from './Error'
 import Loading from './Loading'
@@ -52,7 +51,7 @@ class Resolver extends Component {
   }
 
   async wpErrorHandler(error) {
-    console.log('Resolver::wpErrorHandler', error)
+    console.log('Resolver::wpErrorHandler', error, error.constructor)
 
     switch (error.constructor) {
       case MenuLoadError: {
@@ -72,17 +71,30 @@ class Resolver extends Component {
         this.setState({
           crashed: { error },
         })
-        return
+        break
+      }
+
+      case LookupError: {
+        // sshhh, it'll all be over soon
+        return new Error404(`Query didn't find any results.`)
       }
 
       case Error404: {
         this.setState({
           ViewComponentProps: {
             ...this.state.ViewComponentProps,
+            disableTransition: true,
             sidebar: searchSidebar
           }
         })
         break // Stop the switch but fall down!
+      }
+
+      case FatalError404: {
+        this.setState({
+          crashed: { error }
+        })
+        break
       }
 
       // no default
@@ -122,7 +134,7 @@ class Resolver extends Component {
 
   async doRouting({ location }) {
     try {
-      const url = p.WPURL + location.pathname
+      const url = WP.getWPURL() + location.pathname
 
       const cacheSettings = {
         // preferCache: true,
@@ -184,11 +196,8 @@ class Resolver extends Component {
         // if (post === 404) {
           // this.show404({ error: 'Post not found.' })
         // }
-        // if (post instanceof 'Error404') {
-          // throw post
-        // }
-        if (post.name === 'Error404') {
-          throw post
+        if (post instanceof Error404) {
+          return this.wpErrorHandler(post)
         }
 
         const { type } = post
