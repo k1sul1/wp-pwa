@@ -40,7 +40,6 @@ export default class Sidebar extends Component {
   // static defaultProps = defaultSidebar
 
   render() {
-    console.log(this.props)
     if (!this.props) {
       return <aside></aside>
     }

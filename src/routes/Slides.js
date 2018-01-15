@@ -413,11 +413,13 @@ console.log(this.getSlideBackground)
   render() {
     const { slide, ready } = this.state
 
+    console.log(slide)
+
     if (!ready) {
       return <p>Any moment now...</p>
     }
 
-    if (slide === 404) {
+    if (!slide) {
       return (
         <div className="all-slides">
           {this.renderAllSlidePreviews()}

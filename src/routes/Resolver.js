@@ -51,7 +51,7 @@ class Resolver extends Component {
   }
 
   async wpErrorHandler(error) {
-    console.log('Resolver::wpErrorHandler', error, error.constructor)
+    console.log('Resolver::wpErrorHandler', error)
 
     switch (error.constructor) {
       case MenuLoadError: {
@@ -76,6 +76,7 @@ class Resolver extends Component {
 
       case LookupError: {
         // sshhh, it'll all be over soon
+
         return new Error404(`Query didn't find any results.`)
       }
 
@@ -196,33 +197,39 @@ class Resolver extends Component {
         // if (post === 404) {
           // this.show404({ error: 'Post not found.' })
         // }
-        if (post instanceof Error404) {
-          return this.wpErrorHandler(post)
-        }
-
         const { type } = post
+        const componentProps = {}
+
+        // post can contain a value or it can be undefined, but if it's an error
+        // don't put it into the component
+        if (post instanceof LookupError) {
+          // This only means that no post was found with the URL, can't return yet
+        } else {
+          componentProps.post = post
+        }
 
         switch (location.pathname) {
           case '/about/': {
-            return this.showComponent(await import('./About'), { post })
+            return this.showComponent(await import('./About'), componentProps)
           }
 
           case '/slides/': {
-            return this.showComponent(await import('./Slides'), { post })
+            console.log('no nonono')
+            return this.showComponent(await import('./Slides'), componentProps)
           }
 
           case '/': {
             if (post.isBlogpage) {
-              return this.showComponent(await import('./Blog'), { post })
+              return this.showComponent(await import('./Blog'), componentProps)
             } else if (post.isHomepage) {
-              return this.showComponent(await import('./Home'), { post })
+              return this.showComponent(await import('./Home'), componentProps)
             } else {
               console.log(
                 `Root post wasn't blog or homepage.
   Is k1sul1/expose-more-pagedata-in-rest installed and activated in WordPress?`,
                 post
               )
-              return this.showComponent(await import('./Home'), { post })
+              return this.showComponent(await import('./Home'), componentProps)
             }
           }
 
@@ -233,27 +240,32 @@ class Resolver extends Component {
 
         switch (type) {
           case "post": {
-            return this.showComponent(await import('./Singular'), { post })
+            return this.showComponent(await import('./Singular'), componentProps)
           }
 
           case "page": {
             if (post.isBlogpage) {
-              return this.showComponent(await import('./Blog'), { post })
+              return this.showComponent(await import('./Blog'), componentProps)
             } else if (post.isHomepage) {
-              return this.showComponent(await import('./Home'), { post })
+              return this.showComponent(await import('./Home'), componentProps)
             }
 
-            return this.showComponent(await import('./Page'), { post })
+            return this.showComponent(await import('./Page'), componentProps)
           }
 
           case "slides": {
-            return this.showComponent(await import('./Slides'), { post })
+            console.log('yesyesyes', componentProps)
+            return this.showComponent(await import('./Slides'), componentProps)
           }
 
           // default: {
             // return this.showComponent(await import('./Index'), {})
           // }
           // no default
+        }
+
+        if (post instanceof LookupError) {
+          return this.wpErrorHandler(new Error404(post.message))
         }
       }
     } catch (e) {

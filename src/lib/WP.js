@@ -16,12 +16,9 @@ const dataStore = localforage.createInstance({
 })
 
 export const getWPURL = () => {
-  console.log(process.env)
   if (process.env.NODE_ENV === 'production') {
-    console.log('using p.homepage')
     return p.homepage
   } else {
-    console.log('using p.WPURL')
     return p.WPURL
   }
 }
@@ -251,11 +248,9 @@ class WP_Client {
 
   async getMenu(menu_id, params = {}, options = {}) {
     const menu = await this.req(`/wp-json/wp-api-menus/v2/menus/${menu_id}`, params, {
-      preferCache: true,
+      // preferCache: true,
       ...options
     })
-
-    console.log(menu)
 
     if (menu && menu.items) {
       return {
@@ -354,6 +349,8 @@ class WP_Client {
       }
     }, options)
 
+    console.log(post)
+
 
     if (!post) {
       // return this.onError(new LookupError('Lookup request failed'))
@@ -364,7 +361,8 @@ class WP_Client {
       const { error } = post
 
       if (error === 'No post found.') {
-        return this.onError(new LookupError('Lookup request failed'))
+        return new LookupError(error)
+        // return this.onError(new LookupError('Lookup request failed'))
         // return this.onError(new Error404('Nothing found with that URL.'))
       } else {
         console.log('UNHANDLED ERROR!')
@@ -476,6 +474,10 @@ class WP_Client {
       const reqOpts = {
         withCredentials: true,
         headers,
+        auth: process.env.NODE_ENV === 'production' ? {
+          username: 'k1sul1',
+          password: 'M4mw43ZufvDeRwQdES3zMAWM', // OMG PASSWORD IN PLAINTEXT
+        } : null
       }
       let response
 
