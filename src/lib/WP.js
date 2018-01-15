@@ -36,7 +36,6 @@ class WP_Client {
     this.user = null
 
     this.getCurrentUser().then(user => {
-      console.log(user)
       this.user = user
       window.dispatchEvent(new CustomEvent('authenticated', { detail: { response: user } }))
     }) // swallow any errors
@@ -251,7 +250,7 @@ class WP_Client {
   }
 
   async getMenu(menu_id, params = {}, options = {}) {
-    const menu = await this.req(`/wp-json/wp-api-menus/v2/menus/${menu_id}2`, params, {
+    const menu = await this.req(`/wp-json/wp-api-menus/v2/menus/${menu_id}`, params, {
       preferCache: true,
       ...options
     })
@@ -373,15 +372,17 @@ class WP_Client {
       }
     }
 
-    // This portion of the code only exists because WP refuses to work with the _embed parameter
-    // with internal requests. No one seems to know why.
-    const featuredImage = !post.featured_media ? false : [await this.req(
-      `/wp-json/wp/v2/media/${post.featured_media}`
-    )]
+    if (post) {
+      // This portion of the code only exists because WP refuses to work with the _embed parameter
+      // with internal requests. No one seems to know why.
+      const featuredImage = !post.featured_media ? false : [await this.req(
+        `/wp-json/wp/v2/media/${post.featured_media}`
+      )]
 
-    if (featuredImage) {
-      post['_embedded'] = {
-        'wp:featuredmedia': featuredImage || [],
+      if (featuredImage) {
+        post['_embedded'] = {
+          'wp:featuredmedia': featuredImage || [],
+        }
       }
     }
 
