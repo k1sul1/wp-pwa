@@ -15,6 +15,17 @@ const dataStore = localforage.createInstance({
   name: 'dataStore',
 })
 
+export const getWPURL = () => {
+  console.log(process.env)
+  if (process.env.NODE_ENV === 'production') {
+    console.log('using p.homepage')
+    return p.homepage
+  } else {
+    console.log('using p.WPURL')
+    return p.WPURL
+  }
+}
+
 class WP_Client {
   constructor(url = undefined) {
     this.url = url || '' // Use relative urls, assume current domain
@@ -91,14 +102,7 @@ class WP_Client {
   }
 
   getWPURL() {
-    console.log(process.env)
-    if (process.env.NODE_ENV === 'production') {
-      console.log('using p.homepage')
-      return p.homepage
-    } else {
-      console.log('using p.WPURL')
-      return p.WPURL
-    }
+    return getWPURL()
   }
 
   turnURLRelative(key, obj) {
@@ -513,7 +517,7 @@ class WP_Client {
   }
 }
 
-const WP = new WP_Client(p.WPURL)
+const WP = new WP_Client(getWPURL())
 window.WP = WP
 export default WP
 
