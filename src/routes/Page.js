@@ -66,7 +66,7 @@ class Page extends Component {
     const { authenticated } = this.state
 
     return (
-      <Layout sidebar={defaultSidebar} {...props}>
+      <Layout sidebar={defaultSidebar} className="single-page" {...props}>
         <article className="single-page">
           {filterTitle(<h2>{title.rendered}</h2>, props)}
 

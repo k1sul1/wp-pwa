@@ -15,7 +15,7 @@ export default class Blog extends Component {
     console.log(this.props);
     const { post } = this.props
     return (
-      <Layout {...this.props}>
+      <Layout {...this.props} className="blog">
         <h1>{post.title.rendered}</h1>
 
         <PostList context={post} />
