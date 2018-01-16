@@ -214,7 +214,6 @@ class Resolver extends Component {
           }
 
           case '/slides/': {
-            console.log('no nonono')
             return this.showComponent(await import('./Slides'), componentProps)
           }
 
@@ -254,7 +253,6 @@ class Resolver extends Component {
           }
 
           case "slides": {
-            console.log('yesyesyes', componentProps)
             return this.showComponent(await import('./Slides'), componentProps)
           }
 

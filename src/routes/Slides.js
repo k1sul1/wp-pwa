@@ -375,7 +375,11 @@ console.log(this.getSlideBackground)
 
     const { title, content } = slide
     return (
-      <article className="single-slide animated" ref={(n) => this.slide = n} style={this.getSlideBackground(slide)}>
+      <article
+        className={`single-slide animated ${slide.parent ? 'child' : 'parent'}`}
+        onClick={({ target }) => target.classList.toggle('stop')}
+        ref={(n) => this.slide = n}
+        style={this.getSlideBackground(slide)}>
         <div className="wrapper">
           <h1>
             {title.rendered}
@@ -412,8 +416,6 @@ console.log(this.getSlideBackground)
 
   render() {
     const { slide, ready } = this.state
-
-    console.log(slide)
 
     if (!ready) {
       return <p>Any moment now...</p>

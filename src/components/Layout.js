@@ -66,9 +66,6 @@ class Layout extends Component {
     const { children, sidebar, navigation, disableTransition } = this.props;
     const { online } = this.state
 
-    // Down below, Sidebar & Navigation are going to receive props
-    // from sidebar & navigation. Pay attention the capitalization.
-
     const wrapperClass = `
     application__wrapper
     ${!disableTransition ? 'animated lightSpeedIn' : ''}
