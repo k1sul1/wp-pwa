@@ -15,16 +15,14 @@ class Page extends Component {
   }
 
   static propTypes = {
-    hooks: PropTypes.object,
-    post: PropTypes.object.isRequired,
+    filterTitle: PropTypes.func.isRequired,
+    filterContent: PropTypes.func.isRequired,
   }
 
 
   static defaultProps = {
-    hooks: {
-      title: noop,
-      content: noop,
-    },
+    filterTitle: noop,
+    filterContent: noop,
   }
 
   onlogout() {
@@ -62,18 +60,16 @@ class Page extends Component {
 
   render() {
     const props = this.props
-    const { hooks, post, WP } = props
+    const { filterTitle, filterContent, post, WP } = props
     const { title, content } = post
     const { authenticated } = this.state
-
-    console.log(hooks)
 
     return (
       <Layout sidebar={defaultSidebar} {...props}>
         <article className="single-page">
-          {hooks.title(<h2>{title.rendered}</h2>, props)}
+          {filterTitle(<h2>{title.rendered}</h2>, props)}
 
-          {hooks.content(
+          {filterContent(
             <section>
               {content.rendered}
             </section>,
