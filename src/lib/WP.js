@@ -43,18 +43,14 @@ class WP_Client {
 
   async onError(error) {
     if (error.name === 'QuotaExceededError') {
-      console.log('it seems that the cache is full, and flush is not implemented yet')
-
+      console.log(error) // Private browsing or disk full? Fail silently.
       this.saveIntoReqCache = false
 
       return await this.retry()
-
-      // clear the cache maybe
-      // but whatever you do, don't propagate further
     } else if (error.message === 'Request failed with status code 403') {
       return this.onError(new Forbidden('It appears this requires authentication'))
     } else if (error.message === 'Request failed with status code 404') {
-      // return this.onError(new Error404('Request failed with status code 404'))
+      // Endpoint wasn't found at all.
       return this.onError(new FatalError404('No endpoint found.'))
     }
 
@@ -349,19 +345,11 @@ class WP_Client {
       }
     }, options)
 
-    console.log(post)
-
-
-    if (!post) {
-      // return this.onError(new LookupError('Lookup request failed'))
-    }
-
-
     if (post && post.error) {
       const { error } = post
 
       if (error === 'No post found.') {
-        return new LookupError(error)
+        return new LookupError(error) // Send this through as is, handle it there.
         // return this.onError(new LookupError('Lookup request failed'))
         // return this.onError(new Error404('Nothing found with that URL.'))
       } else {
@@ -389,15 +377,18 @@ class WP_Client {
 
   async retry(maxTimes = 3) {
     console.log('retrying is untested, does it work?')
+    console.log('it does to some extent')
     if (this.lastRequest) {
       const { endpoint, payload, options, retries } = this.lastRequest
 
-      if (retries && retries > maxTimes) {
-        console.log('Retried too many times.')
-        return false
+      if (retries && retries >= maxTimes) {
+        // console.log('Retried too many times.')
+        return this.wpErrorHandler(new Error('Retried too many times.'))
       }
 
-      this.lastRequest.retries = retries ? retries + 1 : 1
+      console.log(this.lastRequest, retries)
+
+      this.lastRequest.retries = retries + 1
       return this.req(endpoint, payload, options)
     }
 
@@ -405,12 +396,6 @@ class WP_Client {
   }
 
   async req(endpoint, payload = {}, options = {}) {
-    this.lastRequest = {
-      endpoint,
-      payload,
-      options
-    }
-
     const opts = {
       method: 'get',
       raw: false,
@@ -443,6 +428,18 @@ class WP_Client {
         cacheTime: Date.now(),
       }
     })
+
+    this.lastRequest = {
+      endpoint,
+      payload,
+      options,
+      retries: 0,
+      ...(this.lastRequest ? cacheKey === this.getCacheKey(
+        this.lastRequest.endpoint,
+        this.lastRequest.payload,
+        this.lastRequest.options,
+      ) ? this.lastRequest : {} : {}),
+    }
 
     if (!endpoint) {
       throw new Error('Endpoint URL mustn\'t be empty.')
