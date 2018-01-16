@@ -30,6 +30,9 @@ class Resolver extends Component {
     if (!componentProps.disableTransition) {
       wrapper.classList.add('lightSpeedOut')
       await new Promise((resolve) => setTimeout(resolve, 300))
+
+      // re-render handles most cases, but not everything causes a re-render
+      wrapper.classList.remove('lightSpeedOut')
     } else {
       wrapper.classList.remove('animated')
       wrapper.classList.remove('lightSpeedIn')
@@ -84,7 +87,6 @@ class Resolver extends Component {
         this.setState({
           ViewComponentProps: {
             ...this.state.ViewComponentProps,
-            disableTransition: true,
             sidebar: searchSidebar
           }
         })
