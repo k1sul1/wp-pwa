@@ -63,12 +63,13 @@ class Layout extends Component {
   }
 
   render() {
-    const { children, sidebar, navigation, disableTransition } = this.props;
+    const { children, sidebar, navigation, disableTransition, className } = this.props;
     const { online } = this.state
 
     const wrapperClass = `
     application__wrapper
     ${!disableTransition ? 'animated lightSpeedIn' : ''}
+    ${className || ''}
     ${sidebar ? 'has-sidebar' : 'no-sidebar'}`
 
     return (

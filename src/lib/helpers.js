@@ -15,12 +15,6 @@ const isDownloadComponent = (node) => {
   return nodeText === '[download]';
 }
 
-// const isColumnComponent = (node) => {
-  // const nodeText = node.data || (node.children[0] && node.children[0].data);
-  // return nodeText === '[column]';
-// }
-
-
 export const transformWPContent = (...args) => {
   if (isDownloadComponent(...args)) {
     const [, index] = args // Skip the first param, we don't need the node
@@ -46,3 +40,10 @@ export const renderHTML = string => ReactHtmlParser(string, {
 // Used to avoid caching in development and so on
 export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false
 console.log(isDevelopment ? 'Running development build' : 'Running production build')
+
+export const taxonomies = {
+  post_tag: 'Tag',
+  category: 'Category',
+}
+
+export const taxonomyName = name => taxonomies[name]
