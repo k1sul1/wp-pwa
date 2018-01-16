@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 
@@ -18,6 +18,7 @@ export default class PostList extends Component {
 
     this.state = {
       posts: this.props.posts,
+      page: props.page,
       loading: true,
     }
   }
@@ -34,8 +35,9 @@ export default class PostList extends Component {
     page: 1,
   }
 
-  async componentDidMount() {
-    const { context, page } = this.props
+  async getContents() {
+    const { context } = this.props
+    const { page } = this.state
 
     if (this.props.posts.length) {
       return this.setState({
@@ -43,25 +45,38 @@ export default class PostList extends Component {
         loading: false,
       })
     } else if (context) {
-      console.log(context)
       let posts = []
+      let headers = {}
 
       if (context.isBlogpage) {
         const result = await WP.getForContext('blog', { page })
 
         if (result) {
-          posts = result
+          console.log(result)
+          headers = result.headers
+          posts = result.posts
         }
       } else if (context.term_id || context.taxonomy) {
         const { term_id, taxonomy } = context
-        const result = await WP.getForContext('taxonomy', { term_id, taxonomy })
+        const result = await WP.getForContext('taxonomy', { term_id, taxonomy, page })
+
+        console.log(result)
 
         if (result) {
-          posts = result
+          headers = result.headers
+          posts = result.posts
         }
       }
 
-      return this.setState({ posts, loading: false })
+      const maxPages = headers && headers['x-wp-totalpages']
+        ? parseInt(headers['x-wp-totalpages'], 10)
+        : 0
+
+      return this.setState({
+        posts,
+        maxPages,
+        loading: false,
+      })
     }
 
     const posts = await WP.query({
@@ -75,16 +90,71 @@ export default class PostList extends Component {
     })
   }
 
+  async componentDidUpdate(prevProps, prevState) {
+    if (prevState.page !== this.state.page) {
+      console.log('update postlist')
+      await this.getContents()
+    }
+  }
+
+  async componentDidMount() {
+    await this.getContents()
+  }
+
+  async componentWillReceiveProps() {
+    await this.getContents()
+  }
+
+  pagination() {
+    const { page, maxPages } = this.state
+    const previousPage = (e) => {
+      e.preventDefault();
+      this.setState({
+        page: this.state.page - 1,
+        loading: true,
+      })
+    }
+    const nextPage = (e) => {
+      e.preventDefault();
+      this.setState({
+        page: this.state.page + 1,
+        loading: true,
+      })
+    }
+
+    const Previous = page > 1 ? (
+      <button onClick={previousPage}>
+        Previous
+      </button>
+    ) : false
+
+    const Next = page < maxPages ? (
+      <button onClick={nextPage}>
+        Next
+      </button>
+    ) : false
+
+    return (
+      <div className="pagination">
+        {Previous || false}
+        {Next || false}
+      </div>
+    )
+  }
+
   render() {
     const { posts, loading } = this.state
     return (
       <div className="post-list">
-        {posts.length === 0 && loading ? (
+        {loading ? (
           <p>Please wait while we load the posts...</p>
-        ) : posts.length === 0 ? (
+        ) : posts && !posts.length ? (
           <p>It appears that there is no posts.</p>
         ) : (
-          posts.map(post => <SinglePost key={post.id} post={post} />)
+          <Fragment>
+            {posts.map(post => <SinglePost key={post.id} post={post} />)}
+            {this.pagination()}
+          </Fragment>
         )}
       </div>
     )

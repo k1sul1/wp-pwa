@@ -182,12 +182,10 @@ class Resolver extends Component {
       if (isArchive) {
         if (post) {
           if (post.isBlogpage) {
-            console.log('returning blog early');
             return this.showComponent(await import ('./Blog'), { post })
           }
         }
 
-        console.log('isArchive', post);
         return this.showComponent(await import('./Archive'), {
           archive: allArchives.find(Boolean)
         })

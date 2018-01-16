@@ -1,10 +1,11 @@
 import React from 'react'
 import axios from 'axios'
 import localforage from 'localforage'
+import omit from 'lodash.omit'
 // import ReactHtmlParser from 'react-html-parser'
 
 import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden } from '../errors'
-import { isDevelopment, renderHTML } from '../lib/helpers'
+import { isDevelopment, renderHTML, taxonomyRESTBase } from '../lib/helpers'
 import p from  '../../package.json'
 
 const requestCache = localforage.createInstance({
@@ -159,11 +160,23 @@ class WP_Client {
     const page = payload.page ? payload.page : false
     const perPage = payload.perPage ? payload.perPage : 10
     const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
-    const posts = await this.req(endpoint, payload, options)
+    const response = await this.req(endpoint, payload, options)
 
-    return posts
-      .map(post => this.turnURLRelative('link', post))
-      .map(this.renderContent)
+    if (response) {
+      const { __headers } = response
+      const posts = Object.values(omit(response, '__headers'))
+        .map(post => this.turnURLRelative('link', post))
+        .map(this.renderContent)
+
+      return {
+        posts,
+        headers: __headers,
+      }
+
+    } else {
+      console.log('Throw something here? Like plates?')
+    }
+
   }
 
   async getPages(payload = {}, options = {}) {
@@ -178,60 +191,45 @@ class WP_Client {
   }
 
   async getForContext(type, params = {}, options = {}) {
-    // heitä tänne term objekti tai post type objekti, näytä sisältöä siitä kontekstista
-    // sivutuksella kiitos
+    const formatResponse = ({ headers, posts }) => ({ posts, headers })
+
     switch (type) {
       case 'blog': {
+        const response = await this.getPostsFrom('posts', params, options)
+
+        if (response) {
+          return formatResponse(response)
+        }
+
         break
       }
 
       case 'taxonomy': {
         const { term_id, taxonomy } = params
-        const taxonomies = { post_tag: 'tags', category: 'categories' } // add rest base to the object pls
-        const posts = await this.getPostsFrom('posts', {
+        const response = await this.getPostsFrom('posts', {
           params: {
-            [taxonomies[taxonomy]]: term_id
+            [taxonomyRESTBase(taxonomy)]: term_id,
+            ...params,
           }
         }, options)
-        /* const a = {
-          'post_type': 'post',
-          'tax_query': [
-            {
-              'taxonomy': 'post_tag',
-              'field': 'slug',
-              'terms': [ 'who' ]
-            },
-            {
-              'taxonomy': 'post_tag',
-              'field': 'slug',
-              'terms': [ 'needs' ]
-            }
-          ]
-        }
 
-        const args = Object.keys(a).map(function(k) {
-            return encodeURIComponent(k) + '=' + encodeURIComponent(a[k])
-        }).join('&')
-        console.log(args)
-
-        const posts = await this.req('/wp-json/wp_query/args/?' + args)
-
-        console.log(posts) */
-
-        if (posts) {
-          return posts
+        if (response) {
+          return formatResponse(response)
         }
 
         break
       }
 
       case 'post_type': {
+        // tl;dr use this.getPostsFrom and pick the type from params
+        // might have to create a helper, because rest base..
 
         break
       }
-
       // no default
     }
+
+    return false
   }
 
   async getMenus(params = {}, options = {}) {
@@ -492,6 +490,8 @@ class WP_Client {
 
         // no default
       }
+
+      response.data.__headers = response.headers
 
       // If a raw response wasn't requested, return the data only
       // Could also implement a method that returns the last request (by storing the last req)

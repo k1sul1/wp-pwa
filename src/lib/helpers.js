@@ -41,9 +41,18 @@ export const renderHTML = string => ReactHtmlParser(string, {
 export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false
 console.log(isDevelopment ? 'Running development build' : 'Running production build')
 
+// TODO: Maybe add this data to the REST API via expose-more-pagedata?
 export const taxonomies = {
-  post_tag: 'Tag',
-  category: 'Category',
+  post_tag: {
+    name: 'Tag',
+    RESTBase: 'tags',
+  },
+
+  category: {
+    name: 'Category',
+    RESTBase: 'categories',
+  }
 }
 
-export const taxonomyName = name => taxonomies[name]
+export const taxonomyName = slug => taxonomies[slug].name
+export const taxonomyRESTBase = slug => taxonomies[slug].RESTBase

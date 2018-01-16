@@ -10,6 +10,7 @@
     "custom-react-scripts": "0.2.1",
     "es6-error": "^4.1.1",
     "localforage": "^1.5.5",
+    "lodash.omit": "^4.5.0",
     "node-watch": "^0.5.5",
     "normalize.css": "^7.0.0",
     "prop-types": "^15.6.0",
