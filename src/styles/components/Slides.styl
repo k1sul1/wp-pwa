@@ -13,6 +13,18 @@
   color: #fff
   animation-duration: 0.3s
 
+  &.parent {
+    text-align: center
+
+    ul {
+      display: none
+    }
+  }
+
+  &.child {
+
+  }
+
   .wrapper {
     max-width: r(1200px)
     width: 100%
@@ -20,24 +32,41 @@
     padding: r(30px)
   }
 
+  h1, h2, h3, h4, h5, h6 {
+    text-align: center
+  }
+
   h1 {
-    font-size: r(50px)
+    font-size: r(80px)
   }
 
   h2 {
-
+    font-size: r(60px)
   }
 
   h3 {
-
+    font-sise: r(40px)
   }
 
   h4 {
-
+    font-size: r(30px)
   }
 
   p, ul, ol {
     font-size: r(24px)
+  }
+
+  ul {
+    list-style-type: none
+
+    li {
+      text-indent: r(-10px)
+      &:before {
+        content: '- '
+        font-weight: 700
+        font-family: monospace
+      }
+    }
   }
 
   .column {
