@@ -7,7 +7,7 @@ import SearchForm from '../components/SearchForm'
 export const defaultSidebar = {
   children: (
     <Fragment>
-      <h3>Sidebar</h3>
+      <h2>Sidebar</h2>
 
       <CurrentUser />
     </Fragment>
