@@ -284,12 +284,23 @@ console.log(this.getSlideBackground)
 
     const { slide } = this.state
 
-    const slides = await WP.getPostsFrom('slides', {
+    const response = await WP.getPostsFrom('slides', {
       perPage: 100, // if you have more than a hundred slides you have a problem
     }, {
       // preferCache: true,
       // cacheStaleTime: 3600000 / 12,
     })
+
+    const { posts, headers } = response
+    const slides = posts
+
+    if (!slides) {
+      throw Error('Unable to get slides. No reason to panic.')
+    } else if (parseInt(headers['x-wp-totalpages'], 10) > 1) {
+      alert(`I'm not dealing with pagination in the slides. Nope. NOPE.`)
+      return
+    }
+
     const relations = slides.reduce((acc, slide) => {
       if (slide.parent !== 0) {
         const parentID = slide.parent
