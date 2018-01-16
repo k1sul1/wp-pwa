@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
+import isEqual from 'lodash.isequal'
 
 import WP from '../lib/WP'
 
@@ -17,7 +18,7 @@ export default class PostList extends Component {
     super(props)
 
     this.state = {
-      posts: this.props.posts,
+      posts: props.posts,
       page: props.page,
       loading: true,
     }
@@ -52,15 +53,12 @@ export default class PostList extends Component {
         const result = await WP.getForContext('blog', { page })
 
         if (result) {
-          console.log(result)
           headers = result.headers
           posts = result.posts
         }
       } else if (context.term_id || context.taxonomy) {
         const { term_id, taxonomy } = context
         const result = await WP.getForContext('taxonomy', { term_id, taxonomy, page })
-
-        console.log(result)
 
         if (result) {
           headers = result.headers
@@ -101,8 +99,11 @@ export default class PostList extends Component {
     await this.getContents()
   }
 
-  async componentWillReceiveProps() {
-    await this.getContents()
+  async componentWillReceiveProps(nextProps) {
+    // Don't run this expensive op at every render.
+    if (!isEqual(this.props.page, nextProps.page) || !isEqual(this.props.posts, nextProps.posts)) {
+      await this.getContents()
+    }
   }
 
   pagination() {

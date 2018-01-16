@@ -24,6 +24,14 @@ export const searchSidebar = {
   )
 }
 
+export const blogSidebar = {
+  children: (
+    <Fragment>
+      <h2>What does a sidebar in a blog do?</h2>
+    </Fragment>
+  )
+}
+
 // Add more configurations if you'd like!
 
 export default class Sidebar extends Component {

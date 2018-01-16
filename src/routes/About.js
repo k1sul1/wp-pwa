@@ -10,7 +10,7 @@ const fancyHeader = (node, props) => {
 }
 
 const About = (props) => (
-  <Page {...props} filterTitle={fancyHeader} />
+  <Page {...props} className="about" filterTitle={fancyHeader} />
 )
 
 export default About

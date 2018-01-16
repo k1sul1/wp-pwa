@@ -14,6 +14,21 @@ class Resolver extends Component {
       ready: false,
       crashed: false,
 
+      navigation: {
+        open: false,
+        ready: false,
+        error: false,
+        items: [],
+        toggleMenu: () => {
+          this.setState(prevState => ({
+            navigation: {
+              ...prevState.navigation,
+              open: !prevState.navigation.open, // Invert the current value
+            }
+          }))
+        },
+      },
+
       // These will determine what will be rendered:
       // The component and it's props!
       ViewComponent: null,
@@ -27,29 +42,33 @@ class Resolver extends Component {
     // Transition the element out. React will re-render after setState,
     // reseting this and transitioning again.
     const wrapper = document.querySelector('.application__wrapper')
+    console.log(wrapper)
     if (!componentProps.disableTransition) {
-      wrapper.classList.add('lightSpeedOut')
+      console.log('wot')
+      wrapper.classList.add('fadeOut')
       await new Promise((resolve) => setTimeout(resolve, 300))
 
       // re-render handles most cases, but not everything causes a re-render
-      wrapper.classList.remove('lightSpeedOut')
+      wrapper.classList.remove('fadeOut')
     } else {
+      console.log('disabled')
       wrapper.classList.remove('animated')
-      wrapper.classList.remove('lightSpeedIn')
+      wrapper.classList.remove('fadeIn')
     }
 
-
+    console.log('find out how to disable the transition for the first load')
     this.setState({
       ViewComponent: component.default || component, // Support dynamic imports
       ViewComponentProps: {
         // In some cases you might want to merge the old and new props
         // But that's an insane default behaviour, so nah.
+        navigation: this.state.navigation,
         ...(merge ? this.state.ViewComponentProps : {}),
         ...componentProps,
       },
       ready: true,
     }, () => {
-      // wrapper.classList.add('animated', 'lightSpeedIn')
+      // wrapper.classList.add('animated', 'fadeIn')
     })
   }
 
@@ -70,7 +89,7 @@ class Resolver extends Component {
       }
 
       case Forbidden: {
-        // Uh oh.
+        // This could be a naughty user. Unmount everything and demand login.
         this.setState({
           crashed: { error },
         })
@@ -78,8 +97,8 @@ class Resolver extends Component {
       }
 
       case LookupError: {
-        // sshhh, it'll all be over soon
-
+        // Nothing matched the requested URL.
+        // Exchange the error for a generic one.
         return new Error404(`Query didn't find any results.`)
       }
 
@@ -111,7 +130,8 @@ class Resolver extends Component {
             error: {
               ...error,
               name: 'ApplicationIsGreedy',
-              message: `Is your disk full? This error shouldn't be shown, as it's a cache error and should die silently.`,
+              message: `Is your disk full? This error shouldn't be shown,
+              as it's a cache error and should die silently.`,
             }
           },
         })
@@ -137,6 +157,10 @@ class Resolver extends Component {
 
   async doRouting({ location }) {
     try {
+
+      if (location.search) {
+        console.error('hey you should probably handle these params')
+      }
       const url = WP.getWPURL() + location.pathname
 
       const cacheSettings = {
@@ -190,13 +214,6 @@ class Resolver extends Component {
           archive: allArchives.find(Boolean)
         })
       } else if (post) {
-        // Page templates are pretty much based on the slug.
-        // This ought to be enough for many. It's possible to use black magic
-        // and Webpack to reproduce the page-[slug].php behaviour, but
-        // create-react-app doesn't support it and nags if you try to.
-        // if (post === 404) {
-          // this.show404({ error: 'Post not found.' })
-        // }
         const { type } = post
         const componentProps = {}
 
@@ -207,6 +224,7 @@ class Resolver extends Component {
         } else {
           componentProps.post = post
         }
+
 
         switch (location.pathname) {
           case '/about/': {
@@ -275,6 +293,28 @@ class Resolver extends Component {
   async componentDidMount() {
     this.props.WP.connectErrorHandler(this.wpErrorHandler.bind(this))
     this.doRouting(this.props)
+
+    const menu = await WP.getMenu(3)
+
+    if (menu) {
+      const { items } = menu
+
+      console.log({
+        navigation: {
+          ...this.state.navigation,
+          items,
+          ready: true,
+        }
+      })
+
+      this.setState({
+        navigation: {
+          ...this.state.navigation,
+          items,
+          ready: true,
+        }
+      })
+    }
   }
 
   async componentWillReceiveProps(props) {

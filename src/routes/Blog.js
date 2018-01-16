@@ -12,7 +12,6 @@ export default class Blog extends Component {
   }
 
   render() {
-    console.log(this.props);
     const { post } = this.props
     return (
       <Layout {...this.props} className="blog">

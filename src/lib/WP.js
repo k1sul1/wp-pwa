@@ -17,11 +17,12 @@ const dataStore = localforage.createInstance({
 })
 
 export const getWPURL = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return p.homepage
-  } else {
-    return p.WPURL
-  }
+  return p.WPURL
+  // if (process.env.NODE_ENV === 'production') {
+    // return p.homepage
+  // } else {
+    // return p.WPURL
+  // }
 }
 
 class WP_Client {
@@ -465,10 +466,6 @@ class WP_Client {
       const reqOpts = {
         withCredentials: true,
         headers,
-        auth: process.env.NODE_ENV === 'production' ? {
-          username: 'k1sul1',
-          password: 'M4mw43ZufvDeRwQdES3zMAWM', // OMG PASSWORD IN PLAINTEXT
-        } : null
       }
       let response
 

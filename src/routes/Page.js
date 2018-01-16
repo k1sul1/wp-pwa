@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import AdminBar from '../components/AdminBar'
 import Layout from '../components/Layout'
 import { defaultSidebar } from '../components/Sidebar'
 import { connect } from '../lib/WP'
@@ -62,6 +63,11 @@ class Page extends Component {
   render() {
     const props = this.props
     const { filterTitle, filterContent, post, WP } = props
+
+    if (!post) {
+      throw new Error('Expected post to contain post data')
+    }
+
     const { title, content } = post
     const { authenticated } = this.state
 
@@ -69,17 +75,12 @@ class Page extends Component {
       <Layout sidebar={defaultSidebar} className="single-page" {...props}>
         <article className="single-page">
           {filterTitle(<h2>{title.rendered}</h2>, props)}
-
           {filterContent(
             content.rendered,
             props
           )}
 
-          {authenticated ? (
-            <div className="admin-bar">
-              <a href={`${WP.getWPURL()}/wp-admin/post.php?post=${post.id}&action=edit`}>Edit</a>
-            </div>
-          ) : false }
+          <AdminBar authenticated={authenticated} post={post} />
         </article>
       </Layout>
     )

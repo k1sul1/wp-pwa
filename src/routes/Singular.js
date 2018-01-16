@@ -1,15 +1,15 @@
 import React from 'react'
-import Layout from '../components/Layout'
+import Page from './Page'
+import { blogSidebar } from '../components/Sidebar'
 
-const Singular = (props) => {
-  const { title, content } = props.post
-
-  return (
-    <Layout {...props}>
-      <h1>{title.rendered}</h1>
-      {content.rendered}
-    </Layout>
-  )
-}
-
+const header = (node, props) => (
+  <header>
+    <h2>show the thumbnail here and so on</h2>
+    {node}
+  </header>
+)
+const Singular = (props) => <Page {...props}
+  sidebar={blogSidebar}
+  filterTitle={header}
+  className="singular" />
 export default Singular

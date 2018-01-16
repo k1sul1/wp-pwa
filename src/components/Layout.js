@@ -68,7 +68,7 @@ class Layout extends Component {
 
     const wrapperClass = `
     application__wrapper
-    ${!disableTransition ? 'animated lightSpeedIn' : ''}
+    ${!disableTransition ? 'animated fadeIn' : ''}
     ${className || ''}
     ${sidebar ? 'has-sidebar' : 'no-sidebar'}`
 

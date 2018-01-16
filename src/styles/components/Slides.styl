@@ -60,8 +60,10 @@
     list-style-type: none
 
     li {
-      text-indent: r(-10px)
+      position: relative
       &:before {
+        position: absolute
+        left: r(-30px)
         content: '- '
         font-weight: 700
         font-family: monospace
