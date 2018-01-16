@@ -1,10 +1,10 @@
 import React from 'react'
 import axios from 'axios'
 import localforage from 'localforage'
-import ReactHtmlParser from 'react-html-parser'
+// import ReactHtmlParser from 'react-html-parser'
 
 import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden } from '../errors'
-import { transformWPContent, isDevelopment } from '../lib/helpers'
+import { isDevelopment, renderHTML } from '../lib/helpers'
 import p from  '../../package.json'
 
 const requestCache = localforage.createInstance({
@@ -105,15 +105,11 @@ class WP_Client {
 
   renderContent(post) {
     if (post && post.content) {
-      post.content.rendered = ReactHtmlParser(post.content.rendered, {
-        transform: transformWPContent,
-      })
+      post.content.rendered = renderHTML(post.content.rendered)
     }
 
     if (post && post.title) {
-      post.title.rendered = ReactHtmlParser(post.title.rendered, {
-        transform: transformWPContent,
-      })
+      post.title.rendered = renderHTML(post.title.rendered)
     }
 
     return post

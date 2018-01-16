@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactHtmlParser from 'react-html-parser'
 
 export const dumpObject = (obj) => (
   <code>
@@ -22,8 +23,13 @@ const isDownloadComponent = (node) => {
 
 export const transformWPContent = (...args) => {
   if (isDownloadComponent(...args)) {
+    const [, index] = args // Skip the first param, we don't need the node
     return (
-      <a href="https://github.com/k1sul1/headless-wp-starter" target="_blank" rel="noopener noreferrer">
+      <a
+        href="https://github.com/k1sul1/headless-wp-starter"
+        target="_blank"
+        rel="noopener noreferrer"
+        key={index}>
         Download
       </a>
     )
@@ -31,6 +37,11 @@ export const transformWPContent = (...args) => {
 
   return undefined
 }
+
+export const renderHTML = string => ReactHtmlParser(string, {
+  transform: transformWPContent,
+})
+
 
 // Used to avoid caching in development and so on
 export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false

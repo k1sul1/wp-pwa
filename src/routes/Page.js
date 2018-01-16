@@ -43,9 +43,10 @@ class Page extends Component {
   }
 
   async componentDidMount() {
-    this.props.WP.addAuthenticationListeners(this)
-    const user = await this.props.WP.getCurrentUser()
-    console.log(this.props.hooks)
+    const { WP } = this.props
+    const user = await WP.getCurrentUser()
+
+    WP.addAuthenticationListeners(this)
 
     if (user) {
       this.setState({
@@ -70,9 +71,7 @@ class Page extends Component {
           {filterTitle(<h2>{title.rendered}</h2>, props)}
 
           {filterContent(
-            <section>
-              {content.rendered}
-            </section>,
+            content.rendered,
             props
           )}
 
