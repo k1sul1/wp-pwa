@@ -1,7 +1,6 @@
 import axios from 'axios'
 import localforage from 'localforage'
 import omit from 'lodash.omit'
-// import ReactHtmlParser from 'react-html-parser'
 
 import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden, Unauthorized } from '../errors'
 import { isDevelopment, renderHTML, taxonomyRESTBase } from '../lib/helpers'
@@ -118,13 +117,15 @@ class WP_Client {
   }
 
 
-  getCacheKey(endpoint, payload, options) {
+  getCacheKey(endpoint, payload, options, user) {
     return [
       this.cacheKeyPrefix,
       endpoint,
       JSON.stringify(payload),
       JSON.stringify(options),
-    ].join('_') // use hashing pls
+      JSON.stringify(user),
+    ].join('_')
+    // could save space by hashing
   }
 
   async getCacheSize(cb) {
@@ -416,7 +417,7 @@ class WP_Client {
       headers['Authorization'] = `Bearer ${jwt}`
     }
 
-    const cacheKey = this.getCacheKey(endpoint, payload, options)
+    const cacheKey = this.getCacheKey(endpoint, payload, options, user)
     const addCacheMeta = (data) => ({
       data,
       meta: {
@@ -433,6 +434,7 @@ class WP_Client {
         this.lastRequest.endpoint,
         this.lastRequest.payload,
         this.lastRequest.options,
+        this.user,
       ) ? this.lastRequest : {} : {}),
     }
 
