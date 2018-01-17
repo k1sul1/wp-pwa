@@ -8,8 +8,5 @@ const header = (node, props) => (
     {node}
   </header>
 )
-const Singular = (props) => <Page {...props}
-  sidebar={blogSidebar}
-  filterTitle={header}
-  className="singular" />
+const Singular = (props) => <Page {...props} sidebar={blogSidebar} filterTitle={header} className="singular" />
 export default Singular
