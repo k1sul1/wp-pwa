@@ -15,7 +15,12 @@ const dataStore = localforage.createInstance({
 })
 
 export const getWPURL = () => {
-  if (process.env.NODE_ENV === 'production') {
+  const urls = [p.prodWP, p.devWP]
+  const index = urls.indexOf(window.location.origin)
+  if (index > -1) {
+    console.log('using same domain')
+    return urls[index]
+  } else if (process.env.NODE_ENV === 'production') {
     return p.prodWP
   } else {
     return p.devWP
@@ -41,6 +46,7 @@ class WP_Client {
   }
 
   async onError(error) {
+    console.log(this.user)
     if (error.name === 'QuotaExceededError') {
       console.log(error) // Private browsing or disk full? Fail silently.
       this.saveIntoReqCache = false
@@ -502,7 +508,6 @@ class WP_Client {
       opts.allowCache && await requestCache.setItem(cacheKey, addCacheMeta(response)).catch(this.onError)
       return response
     } catch(e) {
-
       if (opts.ignoreAxiosError) {
         return e
       }
