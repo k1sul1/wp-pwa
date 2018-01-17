@@ -90,5 +90,6 @@ export const taxonomies = {
   }
 }
 
-export const taxonomyName = slug => console.log(slug) || taxonomies[slug].name
-export const taxonomyRESTBase = slug => taxonomies[slug].RESTBase
+export const taxonomyExists = slug => slug in taxonomies
+export const taxonomyName = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].name
+export const taxonomyRESTBase = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].RESTBase
