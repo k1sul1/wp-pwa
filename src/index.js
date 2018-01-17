@@ -11,4 +11,4 @@ if (module.hot) {
     ReactDOM.render(<App />, document.getElementById('root'))
   })
 }
-registerServiceWorker()
+// registerServiceWorker()
