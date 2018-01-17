@@ -1,7 +1,7 @@
 <?php
 
 $uri = $_SERVER['REQUEST_URI'];
-$allowed = ['/wp-admin', '/wp-json'];
+$allowed = ['/wp-admin', '/wp-json', '/wp-login'];
 
 foreach ($allowed as $x) {
   if (strpos($uri, $x) !== false) {
