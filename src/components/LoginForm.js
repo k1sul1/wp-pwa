@@ -32,7 +32,7 @@ export default class LoginForm extends Component {
     return (
       <form onSubmit={(e) => this.onSubmit(e)}>
         <input type="text" name="username" defaultValue="vincit.admin" />
-        <input type="password" name="password" defaultValue="bJ7Uml6adGPbHkyDOStpmNok4NtJPH9K" />
+        <input type="password" name="password" />
         <input type="submit" />
       </form>
     )
