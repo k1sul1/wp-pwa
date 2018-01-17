@@ -16,7 +16,7 @@ const Error = (props) => {
       <p>{message}</p>
       {dumpObject(props)}
 
-    {name === 'Forbidden' ? (
+    {name === 'Forbidden' || name === 'Unauthorized' ? (
       <LoginForm afterLogin={() => window.location.reload()} />
     ) : false}
     </Layout>

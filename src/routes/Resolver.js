@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { searchSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
-import { ResolverError, Error404, FatalError404, Forbidden, MenuLoadError, LookupError } from '../errors'
+import ExtendableError from 'es6-error'
+import { ResolverError, Error404, FatalError404, Forbidden, MenuLoadError, LookupError, Unauthorized } from '../errors'
 
 import Error from './Error'
 import Loading from './Loading'
@@ -68,8 +69,6 @@ class Resolver extends Component {
       wrapper.classList.remove('fadeIn')
     }
 
-    console.log(componentProps, { ...componentProps, navigation: this.state.navigation })
-
     this.setState({
       ViewComponent: component.default || component, // Support dynamic imports
       ViewComponentProps: {
@@ -101,6 +100,13 @@ class Resolver extends Component {
 
         case Forbidden: {
           // This could be a naughty user. Unmount everything and demand login.
+          this.setState({
+            crashed: { error },
+          })
+          break
+        }
+
+        case Unauthorized: {
           this.setState({
             crashed: { error },
           })
@@ -161,12 +167,7 @@ class Resolver extends Component {
 
   async doRouting({ location }) {
     try {
-
-      if (location.search) {
-        console.error('hey you should probably handle these params')
-      }
       const url = WP.getWPURL() + location.pathname
-
       const cacheSettings = {
         // preferCache: true,
         cacheStaleTime: 60 * 1000 * 10,
@@ -225,6 +226,9 @@ class Resolver extends Component {
         // don't put it into the component
         if (post instanceof LookupError) {
           // This only means that no post was found with the URL, can't return yet
+          // error = post
+        } else if (post instanceof ExtendableError || post instanceof Error) {
+          return this.wpErrorHandler(post)
         } else {
           componentProps.post = post
         }
@@ -239,24 +243,23 @@ class Resolver extends Component {
             return this.showComponent(await import('./Slides'), componentProps)
           }
 
-          case '/': {
+          /* case '/': {
+            console.log(post)
             if (post.isBlogpage) {
               return this.showComponent(await import('./Blog'), componentProps)
             } else if (post.isHomepage) {
               return this.showComponent(await import('./Home'), componentProps)
             } else {
-              console.log(
-                `Root post wasn't blog or homepage.
-  Is k1sul1/expose-more-pagedata-in-rest installed and activated in WordPress?`,
-                post
-              )
-              return this.showComponent(await import('./Home'), componentProps)
+              console.log(`/ didn't match for blog or homepage, does the API require auth or what?`)
+              if (isError) {
+
+              }
+              return this.wpErrorHandler(post)
+              return this.showComponent(await import('./InitError'), componentProps)
             }
-          }
+          } */
 
-          default: {
-
-          }
+          // no default
         }
 
         switch (type) {
@@ -288,6 +291,8 @@ class Resolver extends Component {
           return this.wpErrorHandler(new Error404(post.message))
         }
       }
+
+      return this.showComponent(await import('./RoutingError'), {}, true)
     } catch (e) {
       // console.log(e)
       throw e

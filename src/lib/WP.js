@@ -3,7 +3,7 @@ import localforage from 'localforage'
 import omit from 'lodash.omit'
 // import ReactHtmlParser from 'react-html-parser'
 
-import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden } from '../errors'
+import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden, Unauthorized } from '../errors'
 import { isDevelopment, renderHTML, taxonomyRESTBase } from '../lib/helpers'
 import p from  '../../package.json'
 
@@ -49,6 +49,8 @@ class WP_Client {
       return await this.retry()
     } else if (error.message === 'Request failed with status code 403') {
       return this.onError(new Forbidden('It appears this requires authentication'))
+    } else if (error.message === 'Request failed with status code 401') {
+      return this.onError(new Unauthorized('Resource demands that you authenticate first'))
     } else if (error.message === 'Request failed with status code 404') {
       // Endpoint wasn't found at all.
       return this.onError(new FatalError404('No endpoint found.'))
