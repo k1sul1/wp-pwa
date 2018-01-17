@@ -351,7 +351,7 @@ console.log(this.getSlideBackground)
 
   getSlideBackground(slide) {
     const defaultReturn = {
-      backgroundImage: false,
+      backgroundImage: '',
     }
 
     if (!slide) {
@@ -385,7 +385,7 @@ console.log(this.getSlideBackground)
     }
 
     const bg = this.getSlideBackground(slide)
-    const isGif = bg && bg.backgroundImage && bg.backgroundImage.indexOf('.gif') === false
+    const isGif = bg && bg.backgroundImage.indexOf('.gif') === false
     const { title, content } = slide
     return (
       <article
