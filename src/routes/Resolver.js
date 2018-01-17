@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { searchSidebar } from '../components/Sidebar'
-import WP, { connect } from '../lib/WP'
+import WP from '../lib/WP'
 import { ResolverError, Error404, FatalError404, Forbidden, MenuLoadError, LookupError } from '../errors'
 
 import Error from './Error'
@@ -20,12 +20,24 @@ class Resolver extends Component {
         error: false,
         items: [],
         toggleMenu: () => {
-          this.setState(prevState => ({
-            navigation: {
-              ...prevState.navigation,
-              open: !prevState.navigation.open, // Invert the current value
-            }
-          }))
+          this.setState(prevState => {
+            const clone = Object.assign({}, prevState)
+
+            const newState = Object.assign(clone, {
+              navigation: {
+                ...clone.navigation,
+                open: !clone.navigation.open
+              }
+            })
+            console.log(newState)
+            this.setState(newState)
+            /* return ({
+              navigation: {
+                ...prevState.navigation,
+                open: !prevState.navigation.open, // Invert the current value
+              }
+            }) */
+          })
         },
       },
 
@@ -41,30 +53,31 @@ class Resolver extends Component {
   async showComponent(component, componentProps, merge = false) {
     // Transition the element out. React will re-render after setState,
     // reseting this and transitioning again.
+    console.log('find out how to disable the transition for the first load')
+
     const wrapper = document.querySelector('.application__wrapper')
     console.log(wrapper)
     if (!componentProps.disableTransition) {
-      console.log('wot')
       wrapper.classList.add('fadeOut')
       await new Promise((resolve) => setTimeout(resolve, 300))
 
       // re-render handles most cases, but not everything causes a re-render
       wrapper.classList.remove('fadeOut')
     } else {
-      console.log('disabled')
       wrapper.classList.remove('animated')
       wrapper.classList.remove('fadeIn')
     }
 
-    console.log('find out how to disable the transition for the first load')
+    console.log(componentProps, { ...componentProps, navigation: this.state.navigation })
+
     this.setState({
       ViewComponent: component.default || component, // Support dynamic imports
       ViewComponentProps: {
         // In some cases you might want to merge the old and new props
         // But that's an insane default behaviour, so nah.
-        navigation: this.state.navigation,
         ...(merge ? this.state.ViewComponentProps : {}),
         ...componentProps,
+        navigation: this.state.navigation,
       },
       ready: true,
     }, () => {
@@ -291,21 +304,13 @@ class Resolver extends Component {
   }
 
   async componentDidMount() {
-    this.props.WP.connectErrorHandler(this.wpErrorHandler.bind(this))
+    WP.connectErrorHandler(this.wpErrorHandler.bind(this))
     this.doRouting(this.props)
 
     const menu = await WP.getMenu(3)
 
     if (menu) {
       const { items } = menu
-
-      console.log({
-        navigation: {
-          ...this.state.navigation,
-          items,
-          ready: true,
-        }
-      })
 
       this.setState({
         navigation: {
@@ -318,7 +323,7 @@ class Resolver extends Component {
   }
 
   async componentWillReceiveProps(props) {
-    // console.log(props)
+    console.log(props, this.props)
     this.doRouting(props)
   }
 
@@ -343,10 +348,9 @@ class Resolver extends Component {
     }
 
     return ready
-      ? <ViewComponent {...ViewComponentProps} />
+      ? <ViewComponent {...ViewComponentProps} navigation={this.state.navigation}/>
       : <Loading />
   }
 }
 
-// export ResolverError
-export default connect(Resolver)
+export default Resolver

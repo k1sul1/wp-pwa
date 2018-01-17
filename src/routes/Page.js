@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import AdminBar from '../components/AdminBar'
 import Layout from '../components/Layout'
 import { defaultSidebar } from '../components/Sidebar'
-import { connect } from '../lib/WP'
+import WP from '../lib/WP'
 
 const noop = n => n
 class Page extends Component {
@@ -44,7 +44,6 @@ class Page extends Component {
   }
 
   async componentDidMount() {
-    const { WP } = this.props
     const user = await WP.getCurrentUser()
 
     WP.addAuthenticationListeners(this)
@@ -57,12 +56,12 @@ class Page extends Component {
   }
 
   componentWillUnmount() {
-    this.props.WP.removeAuthenticationListeners(this)
+    WP.removeAuthenticationListeners(this)
   }
 
   render() {
     const props = this.props
-    const { filterTitle, filterContent, post, WP } = props
+    const { filterTitle, filterContent, post } = props
 
     if (!post) {
       throw new Error('Expected post to contain post data')
@@ -87,4 +86,4 @@ class Page extends Component {
   }
 }
 
-export default connect(Page)
+export default Page

@@ -512,10 +512,5 @@ class WP_Client {
 
 const WP = new WP_Client(getWPURL())
 window.WP = WP
+
 export default WP
-
-export const connect = ComponentToConnect => props => {
-  const connected = <ComponentToConnect {...props} WP={WP} />
-
-  return connected
-}

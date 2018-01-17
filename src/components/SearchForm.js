@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
-import { connect } from '../lib/WP'
+import WP from '../lib/WP'
 import { SearchError } from '../errors'
 import PostList from '../components/PostList'
 // import PropTypes from 'prop-types'
 
-export default connect(class SearchForm extends Component {
+export default class SearchForm extends Component {
   constructor(props) {
     super(props)
 
@@ -26,7 +26,6 @@ export default connect(class SearchForm extends Component {
   }
 
   async onSubmit(e) {
-    const { WP } = this.props
     const { searchQuery } = this.state
 
     e.preventDefault()
@@ -63,4 +62,4 @@ export default connect(class SearchForm extends Component {
       </form>
     )
   }
-})
+}
