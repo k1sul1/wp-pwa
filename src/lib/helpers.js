@@ -90,5 +90,5 @@ export const taxonomies = {
   }
 }
 
-export const taxonomyName = slug => taxonomies[slug].name
+export const taxonomyName = slug => console.log(slug) || taxonomies[slug].name
 export const taxonomyRESTBase = slug => taxonomies[slug].RESTBase
