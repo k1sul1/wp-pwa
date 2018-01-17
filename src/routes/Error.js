@@ -12,7 +12,7 @@ const Error = (props) => {
 
   return (
     <Layout {...props}>
-      <h1>{name}</h1>
+      <h1>Error.js: {name}</h1>
       <p>{message}</p>
       {dumpObject(props)}
 
