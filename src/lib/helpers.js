@@ -26,7 +26,7 @@ const isCodeblock = (node) => {
   const cond = node.name === 'code'
 
   if (cond) {
-    console.log(node)
+    // console.log(node)
   }
 
   return cond
@@ -36,7 +36,7 @@ const isCodechild = (node) => {
   const cond = (node.parent && node.parent.name === 'code')
 
   if (cond) {
-    console.log(node)
+    // console.log(node)
   }
 
   return cond
