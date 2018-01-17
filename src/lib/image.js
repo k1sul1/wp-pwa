@@ -1,4 +1,5 @@
 import React from 'react'
+import WP from './WP'
 import p from  '../../package.json'
 
 export const createSrcset = (sizes) => Object.keys(sizes).map((key) => `${sizes[key].source_url} ${sizes[key].width}w`)
@@ -51,7 +52,7 @@ export const getImageData = (image, size) => {
   }
 
   const srcset = isSVG ? false : createSrcset(sizes)
-  source_url = p.WPURL + source_url
+  source_url = WP.getWPURL() + source_url
 
   return {
     srcset,
