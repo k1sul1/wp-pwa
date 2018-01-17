@@ -85,55 +85,53 @@ class Resolver extends Component {
     })
   }
 
-  async wpErrorHandler(error) {
-    console.log('Resolver::wpErrorHandler', error)
+    async wpErrorHandler(error) {
+      console.log('Resolver::wpErrorHandler', error)
 
-    switch (error.constructor) {
-      case MenuLoadError: {
-        this.setState({
-          ViewComponentProps: {
-            ...this.state.ViewComponentProps,
+      switch (error.constructor) {
+        case MenuLoadError: {
+          this.setState({
             navigation: {
+              ...this.state.navigation,
               error: error.message,
             }
-          }
-        })
-        return
-      }
+          })
+          return
+        }
 
-      case Forbidden: {
-        // This could be a naughty user. Unmount everything and demand login.
-        this.setState({
-          crashed: { error },
-        })
-        break
-      }
+        case Forbidden: {
+          // This could be a naughty user. Unmount everything and demand login.
+          this.setState({
+            crashed: { error },
+          })
+          break
+        }
 
-      case LookupError: {
-        // Nothing matched the requested URL.
-        // Exchange the error for a generic one.
-        return new Error404(`Query didn't find any results.`)
-      }
+        case LookupError: {
+          // Nothing matched the requested URL.
+          // Exchange the error for a generic one.
+          return new Error404(`Query didn't find any results.`)
+        }
 
-      case Error404: {
-        this.setState({
-          ViewComponentProps: {
-            ...this.state.ViewComponentProps,
-            sidebar: searchSidebar
-          }
-        })
-        break // Stop the switch but fall down!
-      }
+        case Error404: {
+          this.setState({
+            ViewComponentProps: {
+              ...this.state.ViewComponentProps,
+              sidebar: searchSidebar
+            }
+          })
+          break // Stop the switch but fall down!
+        }
 
-      case FatalError404: {
-        this.setState({
-          crashed: { error }
-        })
-        break
-      }
+        case FatalError404: {
+          this.setState({
+            crashed: { error }
+          })
+          break
+        }
 
-      // no default
-    }
+        // no default
+      }
 
     // For errors that are not custom.
     switch (error.name) {
@@ -158,14 +156,7 @@ class Resolver extends Component {
     // Keep the props from previous view in case of error
     // It'll help track down the cause of the bug if there's one.
     // In production you might want to disable this and/or use something like Sentry.
-    return this.showComponent(
-      Error,
-      {
-        ...this.state.ViewComponentProps,
-        error
-      },
-      false // process.env.NODE_ENV === 'production' instead of true to disable in prod
-    )
+    return this.showComponent(Error, { error }, true) // process.env.NODE_ENV === 'production' instead of true to disable in prod
   }
 
   async doRouting({ location }) {

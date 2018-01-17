@@ -1,4 +1,3 @@
-import React from 'react'
 import axios from 'axios'
 import localforage from 'localforage'
 import omit from 'lodash.omit'
