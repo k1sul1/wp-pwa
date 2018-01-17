@@ -399,7 +399,7 @@ console.log(this.getSlideBackground)
           </h1>
           {content.rendered}
         </div>
-        <a className="edit" href={`${p.WPURL}/wp-admin/post.php?post=${slide.id}&action=edit`}>
+        <a className="edit" href={`${WP.getWPURL()}/wp-admin/post.php?post=${slide.id}&action=edit`}>
           Edit slide
         </a>
       </article>

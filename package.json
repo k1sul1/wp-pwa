@@ -2,7 +2,8 @@
   "name": "WordPress-SPA",
   "version": "1.0.0",
   "private": true,
-  "WPURL": "https://wcjkl.local",
+  "devWP": "https://wcjkl.local",
+  "prodWP": "https://ccthwpd.fi.seravo.com",
   "dependencies": {
     "animate.css": "^3.5.2",
     "axios": "^0.17.1",

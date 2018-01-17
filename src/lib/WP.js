@@ -16,12 +16,11 @@ const dataStore = localforage.createInstance({
 })
 
 export const getWPURL = () => {
-  return p.WPURL
-  // if (process.env.NODE_ENV === 'production') {
-    // return p.homepage
-  // } else {
-    // return p.WPURL
-  // }
+  if (process.env.NODE_ENV === 'production') {
+    return p.prodWP
+  } else {
+    return p.devWP
+  }
 }
 
 class WP_Client {
