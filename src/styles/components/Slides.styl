@@ -13,11 +13,19 @@
   color: #fff
   animation-duration: 0.3s
 
+  &.gif {
+    background-size: 100vh
+  }
+
   &.parent {
     text-align: center
 
     ul {
       display: none
+    }
+
+    .wrapper {
+      align-items: center
     }
   }
 
@@ -25,11 +33,22 @@
 
   }
 
+  pre.small {
+    padding: r(5px) !important
+    margin: 0
+    display: inline
+  }
+
   .wrapper {
-    max-width: r(1200px)
-    width: 100%
-    background: rgba(#000, 0.8)
+    // max-width: r(1800px)
+    width: 90%
+    height: 90%
+    background: rgba(#000, 0.9)
     padding: r(30px)
+    display: flex
+    flex-flow: column nowrap
+    justify-content: center
+    align-items: flex-start
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -72,8 +91,9 @@
   }
 
   .column {
-    float: left
-    width: 50%
+    // float: left
+    // width: 50%
+    display: flex
   }
 }
 

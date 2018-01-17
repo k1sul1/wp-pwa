@@ -384,13 +384,15 @@ console.log(this.getSlideBackground)
       return false
     }
 
+    const bg = this.getSlideBackground(slide)
+    const isGif = bg && bg.backgroundImage && bg.backgroundImage.indexOf('.gif') === false
     const { title, content } = slide
     return (
       <article
-        className={`single-slide animated ${slide.parent ? 'child' : 'parent'}`}
+        className={`single-slide animated ${slide.parent ? 'child' : 'parent'} ${isGif ? 'gif' : ''}`}
         onClick={({ target }) => target.classList.toggle('stop')}
         ref={(n) => this.slide = n}
-        style={this.getSlideBackground(slide)}>
+        style={bg}>
         <div className="wrapper">
           <h1>
             {title.rendered}

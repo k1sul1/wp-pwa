@@ -1,6 +1,13 @@
 import React from 'react'
 import ReactHtmlParser from 'react-html-parser'
 
+import SyntaxHighlighter, { registerLanguage } from 'react-syntax-highlighter/prism-light'
+import jsx from 'react-syntax-highlighter/languages/prism/jsx'
+import prism from 'react-syntax-highlighter/styles/prism/prism' // eslint-disable-line
+import { atomDark } from 'react-syntax-highlighter/styles/prism'
+
+registerLanguage('jsx', jsx)
+
 export const dumpObject = (obj) => (
   <code>
     <pre>
@@ -15,9 +22,29 @@ const isDownloadComponent = (node) => {
   return nodeText === '[download]';
 }
 
+const isCodeblock = (node) => {
+  const cond = node.name === 'code'
+
+  if (cond) {
+    console.log(node)
+  }
+
+  return cond
+}
+
+const isCodechild = (node) => {
+  const cond = (node.parent && node.parent.name === 'code')
+
+  if (cond) {
+    console.log(node)
+  }
+
+  return cond
+}
+
 export const transformWPContent = (...args) => {
+  const [node, index] = args
   if (isDownloadComponent(...args)) {
-    const [, index] = args // Skip the first param, we don't need the node
     return (
       <a
         href="https://github.com/k1sul1/headless-wp-starter"
@@ -27,6 +54,15 @@ export const transformWPContent = (...args) => {
         Download
       </a>
     )
+  } else if (isCodeblock(...args)) {
+    const string = node.children.map(child => child.data).join()
+    return (
+      <SyntaxHighlighter language='javascript' style={atomDark} className={string.length < 30 ? 'small' : 'normal'} key={index}>
+        {string}
+      </SyntaxHighlighter>
+    )
+  } else if (isCodechild(...args)) {
+    return false
   }
 
   return undefined
