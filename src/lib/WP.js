@@ -55,17 +55,24 @@ class WP_Client {
     this.errorHandler = null
     this.user = null
 
-    this.getCurrentUser().then(user => {
-      this.user = user
-      window.dispatchEvent(new CustomEvent('authenticated', { detail: { response: user } }))
-    }) // swallow any errors
-
+    this.setUser() // Async, will not be ready with the first request
     this.addNetworkStatusListeners(this)
     this.addAuthenticationListeners(this)
   }
 
+  async setUser() {
+    const user = await this.getCurrentUser()
+
+    if (user) {
+      this.user = user
+
+      window.dispatchEvent(new CustomEvent('authenticated', { detail: {
+        response: user }
+      }))
+    }
+  }
+
   async onError(error) {
-    console.log(this.user)
     if (error.name === 'QuotaExceededError') {
       console.log(error) // Private browsing or disk full? Fail silently.
       this.saveIntoReqCache = false
@@ -250,6 +257,16 @@ class WP_Client {
       case 'post_type': {
         // tl;dr use this.getPostsFrom and pick the type from params
         // might have to create a helper, because rest base..
+        const { restBase } = params
+        const response = await this.getPostsFrom(restBase, {
+          params: {
+            ...params,
+          }
+        }, options)
+
+        if (response) {
+          return formatResponse(response)
+        }
 
         break
       }
@@ -441,7 +458,7 @@ class WP_Client {
     }
 
     const headers = {}
-    const user = this.user
+    const user = this.user || await this.getCurrentUser() // this.user is null on initial req
     const jwt = user ? user.token : false
 
     if (jwt) {

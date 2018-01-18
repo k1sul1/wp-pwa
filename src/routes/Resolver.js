@@ -155,28 +155,20 @@ class Resolver extends Component {
     try {
       const url = WP.getWPURL() + location.pathname
       const cacheSettings = {
-        // preferCache: true,
         cacheStaleTime: 60 * 1000 * 10,
       }
       const [archives, post] = await Promise.all([
         WP.getArchives({}, cacheSettings),
         WP.getByURL(url, {}, cacheSettings),
-        // this.getSingularByURL(url, {}, cacheSettings),
       ]);
 
       const findObjectByProp = (key, compare, arr) => {
         if (!Array.isArray(arr)) {
-          console.log(arr)
           return false
         }
 
         const result = arr.filter(item => item[key] && item[key] === compare ? true : false)
-
-        if (result.length) {
-          return result.pop()
-        }
-
-        return false
+        return result.length ? result.pop : false
       }
 
       if (!archives) {
@@ -292,10 +284,104 @@ class Resolver extends Component {
       throw e
     }
   }
+  async route({ location }) {
+    try {
+      const url = WP.getWPURL() + location.pathname
+      const cacheSettings = {
+        cacheStaleTime: 60 * 1000 * 10,
+      }
+      let [post, archives] = await Promise.all([
+        WP.getByURL(url, {}, cacheSettings),
+        WP.getArchives({}, cacheSettings),
+      ])
+      const findObjectByProp = (key, compare, arr) => {
+        if (!Array.isArray(arr)) {
+          return false
+        }
+
+        const result = arr.filter(item => item[key] && item[key] === compare ? true : false)
+        return result.length ? result.pop() : false
+      }
+
+      if (!archives) {
+        return this.wpErrorHandler(new ResolverError('Unable to get WordPress archives. Is WordPress up?'))
+      }
+
+      // Just add taxonomies here as they appear.
+      const availableArchives = [
+        findObjectByProp('archive_link', url, archives.post_types),
+        findObjectByProp('archive_link', url, archives.taxonomies.category),
+        findObjectByProp('archive_link', url, archives.taxonomies.post_tag)
+      ]
+      const archive = availableArchives.find(Boolean)
+      const isArchive = archive ? true : false
+
+      if (post instanceof LookupError) {
+        // If the permalink endpoint says that nothing was found
+        // swallow the error, and unset post
+        post = null
+      } else if (post instanceof ExtendableError || post instanceof Error) {
+        // If it's an error, but of a different kind, handle the error
+        return this.wpErrorHandler(post)
+      } else {
+        console.log(post)
+      }
+
+      console.log(archive)
+
+      if (isArchive) {
+        switch (archive.name) {
+          case 'slides': {
+            return this.showComponent(await import('./Slides'), { archive })
+          }
+
+          default: {
+            return this.showComponent(await import('./Archive'), { archive })
+          }
+        }
+      }
+
+      if (post) {
+        const { type } = post
+        const componentProps = { post }
+
+        switch (type) {
+          case 'post': {
+            return this.showComponent(await import('./Singular'), componentProps)
+          }
+
+          case 'page': {
+            if (post.isBlogpage) {
+              return this.showComponent(await import('./Blog'), componentProps)
+            } else if (post.isHomepage) {
+              return this.showComponent(await import('./Home'), componentProps)
+            }
+
+            return this.showComponent(await import('./Page'), componentProps)
+          }
+
+          case 'slides': {
+            return this.showComponent(await import('./Slides'), componentProps)
+          }
+
+          default: {
+            console.log(`Unexpected post type ${type}.`)
+            return this.showComponent(await import('./Singular'), componentProps)
+            // return this.showComponent(await import('./Index'), {})
+          }
+        }
+      }
+
+      return this.wpErrorHandler(new Error404('No archive or single post matched your query.'))
+    } catch (e) {
+      throw e
+    }
+  }
 
   async componentDidMount() {
     WP.connectErrorHandler(this.wpErrorHandler.bind(this))
-    this.doRouting(this.props)
+    // this.doRouting(this.props)
+    this.route(this.props)
 
     const menu = await WP.getMenu(3)
 
@@ -312,13 +398,17 @@ class Resolver extends Component {
     }
   }
 
-  async componentWillReceiveProps(props) {
-    console.log(props, this.props)
-    this.doRouting(props)
+  async componentWillReceiveProps(nextProps) {
+    // console.log(nextProps, this.props)
+    // this.doRouting(props)
+
+    // Normally you'd check that the props have changed before running
+    // this kind of op again. Not necessary here.
+    this.route(nextProps)
   }
 
   componentWillUnmount() {
-    this.props.WP.disconnectErrorHandler()
+    WP.disconnectErrorHandler()
   }
 
   componentDidCatch(error, info) {

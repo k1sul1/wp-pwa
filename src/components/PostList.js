@@ -56,9 +56,18 @@ export default class PostList extends Component {
           headers = result.headers
           posts = result.posts
         }
-      } else if (context.term_id || context.taxonomy) {
+      } else if (context.term_id && context.taxonomy) {
         const { term_id, taxonomy } = context
         const result = await WP.getForContext('taxonomy', { term_id, taxonomy, page })
+
+        if (result) {
+          headers = result.headers
+          posts = result.posts
+        }
+      } else if (context.taxonomies) {
+        // post type
+        const restBase = context.rest_base || context.name
+        const result = await WP.getForContext('post_type', { restBase, page })
 
         if (result) {
           headers = result.headers
