@@ -331,6 +331,13 @@ class Resolver extends Component {
         const { type } = post
         const componentProps = { post }
 
+        // Let's do "slug" templates first
+        switch(location.pathname) {
+          case '/about/': {
+            return this.showComponent(await import('./About'), componentProps)
+          }
+        }
+
         switch (type) {
           case 'post': {
             return this.showComponent(await import('./Singular'), componentProps)
