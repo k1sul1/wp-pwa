@@ -14,11 +14,12 @@ const Error = (props) => {
     <Layout {...props}>
       <h1>Error.js: {name}</h1>
       <p>{message}</p>
-      {dumpObject(props)}
 
-    {name === 'Forbidden' || name === 'Unauthorized' ? (
-      <LoginForm afterLogin={() => window.location.reload()} />
-    ) : false}
+      {name === 'Forbidden' || name === 'Unauthorized' ? (
+        <LoginForm afterLogin={() => window.location.reload()} />
+      ) : false}
+
+      {dumpObject(props)}
     </Layout>
   )
 }
