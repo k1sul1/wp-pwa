@@ -8,6 +8,9 @@ const Archive = (props) => {
   const { archive } = props
   const prefix = taxonomyName(archive.taxonomy) || false
 
+  const titlePrefix = prefix && `${prefix}: `
+  const title = archive.label || archive.name
+
   if (!archive) {
     throw new Error(`Archive wasn't provided with archive data, unable to render archive.`);
   }
@@ -15,8 +18,8 @@ const Archive = (props) => {
   return (
     <Layout {...props} className="archive">
       <h1>
-        {prefix && `${prefix}: `}
-        {archive.name}
+        {titlePrefix}
+        {title}
       </h1>
 
       <PostList context={archive}/>
