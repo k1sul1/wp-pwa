@@ -37,7 +37,7 @@ class Resolver extends Component {
       // The component and it's props!
       ViewComponent: null,
       ViewComponentProps: {
-        disableTransition: true,
+        disableTransition: false,
       },
     }
   }
@@ -152,142 +152,9 @@ class Resolver extends Component {
     return this.showComponent(Error, { error }, true) // process.env.NODE_ENV === 'production' instead of true to disable in prod
   }
 
-  async doRouting({ location }) {
-    try {
-      const url = WP.getWPURL() + location.pathname
-      const cacheSettings = {
-        cacheStaleTime: 60 * 1000 * 10,
-      }
-      const [archives, post] = await Promise.all([
-        WP.getArchives({}, cacheSettings),
-        WP.getByURL(url, {}, cacheSettings),
-      ]);
-
-      const findObjectByProp = (key, compare, arr) => {
-        if (!Array.isArray(arr)) {
-          return false
-        }
-
-        const result = arr.filter(item => item[key] && item[key] === compare ? true : false)
-        return result.length ? result.pop : false
-      }
-
-      if (!archives) {
-        // console.log('no', archives)
-        return this.wpErrorHandler(
-          new ResolverError('Unable to load archive page data, which is required for the routing to work')
-        )
-      }
-
-      // Just add custom post types and taxonomies here as they appear.
-
-      const postTypeArchive = findObjectByProp('archive_link', url, archives.post_types);
-      const categoryArchive = findObjectByProp('archive_link', url, archives.taxonomies.category);
-      const postTagArchive = findObjectByProp('archive_link', url, archives.taxonomies.post_tag);
-      const allArchives = [postTypeArchive, categoryArchive, postTagArchive]
-      const isArchive = allArchives.some(Boolean)
-
-      if (isArchive) {
-        if (post) {
-          if (post.isBlogpage) {
-            return this.showComponent(await import ('./Blog'), { post })
-          }
-        }
-
-        const archive = allArchives.find(Boolean)
-
-        if (archive.name === 'slides') {
-          return this.showComponent(await import('./Slides'), {
-            archive,
-          })
-        }
-
-        return this.showComponent(await import('./Archive'), {
-          archive,
-        })
-      } else if (post) {
-        const { type } = post
-        const componentProps = {}
-
-        // post can contain a value or it can be undefined, but if it's an error
-        // don't put it into the component
-        if (post instanceof LookupError) {
-          // This only means that no post was found with the URL, can't return yet
-          // error = post
-        } else if (post instanceof ExtendableError || post instanceof Error) {
-          return this.wpErrorHandler(post)
-        } else {
-          componentProps.post = post
-        }
-
-
-        switch (location.pathname) {
-          case '/about/': {
-            return this.showComponent(await import('./About'), componentProps)
-          }
-
-          case '/slides/': {
-            return this.showComponent(await import('./Slides'), componentProps)
-          }
-
-          /* case '/': {
-            console.log(post)
-            if (post.isBlogpage) {
-              return this.showComponent(await import('./Blog'), componentProps)
-            } else if (post.isHomepage) {
-              return this.showComponent(await import('./Home'), componentProps)
-            } else {
-              console.log(`/ didn't match for blog or homepage, does the API require auth or what?`)
-              if (isError) {
-
-              }
-              return this.wpErrorHandler(post)
-              return this.showComponent(await import('./InitError'), componentProps)
-            }
-          } */
-
-          // no default
-        }
-
-        switch (type) {
-          case "post": {
-            return this.showComponent(await import('./Singular'), componentProps)
-          }
-
-          case "page": {
-            if (post.isBlogpage) {
-              return this.showComponent(await import('./Blog'), componentProps)
-            } else if (post.isHomepage) {
-              return this.showComponent(await import('./Home'), componentProps)
-            }
-
-            return this.showComponent(await import('./Page'), componentProps)
-          }
-
-          case "slides": {
-            return this.showComponent(await import('./Slides'), componentProps)
-          }
-
-          // default: {
-            // return this.showComponent(await import('./Index'), {})
-          // }
-          // no default
-        }
-
-        if (post instanceof LookupError) {
-          return this.wpErrorHandler(new Error404(post.message))
-        }
-      }
-
-      return this.showComponent(await import('./RoutingError'), {}, true)
-    } catch (e) {
-      // console.log(e)
-      throw e
-    }
-  }
   async route({ location }) {
     try {
-      const url = WP.getWPURL() + location.pathname
+      const url = WP.getWPURL() + location.pathname + location.search
       const cacheSettings = {
         cacheStaleTime: 60 * 1000 * 10,
       }
