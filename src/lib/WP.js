@@ -358,6 +358,14 @@ class WP_Client {
     window.removeEventListener('logout', component)
   }
 
+  async getMedia(id) {
+    return await this.req(`/wp-json/wp/v2/media/${id}`)
+  }
+
+  async getUser(id) {
+    return await this.req(`/wp-json/wp/v2/users/${id}`)
+  }
+
   async getByURL(url, params, options) {
     const post = await this.req(`/wp-json/rpl/v1/lookup`, {
       params: {
@@ -382,13 +390,8 @@ class WP_Client {
     if (post) {
       // This portion of the code only exists because WP refuses to work with the _embed parameter
       // with internal requests. No one seems to know why.
-      const featuredImage = !post.featured_media ? false : [await this.req(
-        `/wp-json/wp/v2/media/${post.featured_media}`
-      )]
-
-      const author = !post.author ? false : [await this.req(
-        `/wp-json/wp/v2/users/${post.author}`
-      )]
+      const featuredImage = !post.featured_media ? false : [await this.getMedia(post.featured_media)]
+      const author = !post.author ? false : [await this.getUser(post.author)]
 
       post['_embedded'] = {
         'wp:featuredmedia': featuredImage || [],
