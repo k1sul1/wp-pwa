@@ -41,7 +41,7 @@ class Resolver extends Component {
     }
   }
 
-  async showComponent(component, componentProps, merge = false) {
+  async showComponent(component, componentProps = {}, merge = false) {
     // Transition the element out. React will re-render after setState,
     // reseting this and transitioning again.
 
@@ -64,7 +64,7 @@ class Resolver extends Component {
         // But that's an insane default behaviour, so nah.
         ...(merge ? this.state.ViewComponentProps : {}),
         ...componentProps,
-        navigation: this.state.navigation,
+        // navigation: this.state.navigation,
       },
       ready: true,
     })
@@ -327,20 +327,6 @@ class Resolver extends Component {
         console.log(post)
       }
 
-      console.log(archive)
-
-      if (isArchive) {
-        switch (archive.name) {
-          case 'slides': {
-            return this.showComponent(await import('./Slides'), { archive })
-          }
-
-          default: {
-            return this.showComponent(await import('./Archive'), { archive })
-          }
-        }
-      }
-
       if (post) {
         const { type } = post
         const componentProps = { post }
@@ -368,6 +354,22 @@ class Resolver extends Component {
             console.log(`Unexpected post type ${type}.`)
             return this.showComponent(await import('./Singular'), componentProps)
             // return this.showComponent(await import('./Index'), {})
+          }
+        }
+      }
+
+      console.log(archive)
+
+      if (isArchive) {
+        switch (archive.name) {
+          case 'slides': {
+            return this.showComponent(await import('./Slides'), { archive })
+          }
+
+          default: {
+            console.log('this is a ridiculous fix for postlist')
+            this.showComponent(Error, {})
+            return this.showComponent(await import('./Archive'), { archive })
           }
         }
       }
