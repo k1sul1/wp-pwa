@@ -9,6 +9,7 @@ import { dumpObject } from '../lib/helpers'
 
 const Error = (props) => {
   const { name, message } = props.error
+  const afterLogin = props.afterLogin || (() => window.location.reload())
 
   return (
     <Layout {...props}>
@@ -16,7 +17,7 @@ const Error = (props) => {
       <p>{message}</p>
 
       {name === 'Forbidden' || name === 'Unauthorized' ? (
-        <LoginForm afterLogin={() => window.location.reload()} />
+        <LoginForm afterLogin={() => afterLogin()} />
       ) : false}
 
       {dumpObject(props)}

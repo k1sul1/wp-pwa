@@ -14,6 +14,7 @@ class Resolver extends Component {
     this.state = {
       ready: false,
       crashed: false,
+      authenticationRequired: false,
 
       navigation: {
         open: false,
@@ -74,6 +75,7 @@ class Resolver extends Component {
 
     async wpErrorHandler(error) {
       console.log('Resolver::wpErrorHandler', error)
+      // this.props.history contains additional helpful data
 
       switch (error.constructor) {
         case MenuLoadError: {
@@ -87,18 +89,15 @@ class Resolver extends Component {
         }
 
         case Forbidden: {
-          // This could be a naughty user. Unmount everything and demand login.
-          this.setState({
-            crashed: { error },
+          return this.setState({
+            authenticationRequired: true,
           })
-          break
         }
 
         case Unauthorized: {
-          this.setState({
-            crashed: { error },
+          return this.setState({
+            authenticationRequired: true,
           })
-          break
         }
 
         case LookupError: {
@@ -326,7 +325,7 @@ class Resolver extends Component {
         // If it's an error, but of a different kind, handle the error
         return this.wpErrorHandler(post)
       } else {
-        console.log(post)
+        // Nothing to do here.
       }
 
       if (post) {
@@ -373,8 +372,6 @@ class Resolver extends Component {
         }
       }
 
-      console.log(archive)
-
       if (isArchive) {
         switch (archive.name) {
           case 'slides': {
@@ -387,6 +384,19 @@ class Resolver extends Component {
             return this.showComponent(await import('./Archive'), { archive })
           }
         }
+      }
+
+      if (this.state.authenticationRequired) {
+        const afterLogin = () => {
+          this.setState({
+            authenticationRequired: false,
+          })
+        }
+
+        return this.showComponent(Error, {
+          error: new Unauthorized(`I'm afraid that requires authentication.`),
+          afterLogin,
+        })
       }
 
       return this.wpErrorHandler(new Error404('No archive or single post matched your query.'))
@@ -441,7 +451,7 @@ class Resolver extends Component {
     const { ready, crashed, ViewComponent, ViewComponentProps } = this.state
 
     if (crashed) {
-      return <Error {...crashed } />
+      return <Error {...crashed} />
     }
 
     return ready
