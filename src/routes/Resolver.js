@@ -22,22 +22,12 @@ class Resolver extends Component {
         items: [],
         toggleMenu: () => {
           this.setState(prevState => {
-            const clone = Object.assign({}, prevState)
-
-            const newState = Object.assign(clone, {
-              navigation: {
-                ...clone.navigation,
-                open: !clone.navigation.open
-              }
-            })
-            console.log(newState)
-            this.setState(newState)
-            /* return ({
+            return ({
               navigation: {
                 ...prevState.navigation,
                 open: !prevState.navigation.open, // Invert the current value
               }
-            }) */
+            })
           })
         },
       },
