@@ -44,10 +44,8 @@ class Resolver extends Component {
   async showComponent(component, componentProps, merge = false) {
     // Transition the element out. React will re-render after setState,
     // reseting this and transitioning again.
-    console.log('find out how to disable the transition for the first load')
 
     const wrapper = document.querySelector('.application__wrapper')
-    console.log(wrapper)
     if (!componentProps.disableTransition) {
       wrapper.classList.add('fadeOut')
       await new Promise((resolve) => setTimeout(resolve, 300))
@@ -69,8 +67,6 @@ class Resolver extends Component {
         navigation: this.state.navigation,
       },
       ready: true,
-    }, () => {
-      // wrapper.classList.add('animated', 'fadeIn')
     })
   }
 
