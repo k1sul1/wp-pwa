@@ -14,7 +14,7 @@
   animation-duration: 0.3s
 
   &.gif {
-    background-size: 100vh
+    // background-size: 100vh
   }
 
   &.parent {
@@ -49,7 +49,7 @@
     width: 90%
     // min-height: 90%
     background: rgba(#000, 0.9)
-    padding: r(30px)
+    padding: 0 r(30px)
     // display: flex
     // flex-flow: column nowrap
     // justify-content: center
@@ -93,6 +93,35 @@
         font-weight: 700
         font-family: monospace
       }
+    }
+  }
+
+  .slide-title {
+    margin-top: r(50px)
+    margin-bottom: r(25px)
+    padding-bottom: r(10px)
+    border-bottom: r(3px) solid #222
+  }
+
+  .slide-content {
+    margin-bottom: r(50px)
+  }
+
+  .edit {
+    position: fixed
+    right: 0
+    bottom: 0
+    color: transparent
+    text-decoration: none
+    display: inline-block
+    padding: r(12px)
+    font-size: r(20px)
+    font-weight: 700
+    transition: 0.3s
+
+    &:hover, &:focus, &:active {
+      background: #222
+      color: #fff
     }
   }
 

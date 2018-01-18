@@ -386,23 +386,33 @@ console.log(this.getSlideBackground)
 
     const bg = this.getSlideBackground(slide)
     const isGif = bg && bg.backgroundImage.indexOf('.gif') !== -1
+    const cn = `single-slide animated ${slide.parent ? 'child' : 'parent'} ${isGif ? 'gif' : ''}`
 
     const { title, content } = slide
+    const Title = ({ children }) => children.length > 0 && (
+      <h1 className="slide-title">{children}</h1>
+    )
+    const Content = ({ children }) => children.length > 0 && (
+      <div className="slide-content">
+        {content.rendered}
+      </div>
+    )
     return (
       <article
-        className={`single-slide animated ${slide.parent ? 'child' : 'parent'} ${isGif ? 'gif' : ''}`}
+        className={cn}
         onClick={({ target }) => target.classList.toggle('stop')}
         ref={(n) => this.slide = n}
         style={bg}>
         <div className="wrapper">
-          <h1>
-            {title.rendered}
-          </h1>
-          <div className="content">
-            {content.rendered}
-          </div>
+          <Title>{title.rendered}</Title>
+          <Content>{content.rendered}</Content>
         </div>
-        <a className="edit" href={`${WP.getWPURL()}/wp-admin/post.php?post=${slide.id}&action=edit`}>
+        <a
+          className="edit"
+          href={`${WP.getWPURL()}/wp-admin/post.php?post=${slide.id}&action=edit`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Edit slide
         </a>
       </article>
