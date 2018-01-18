@@ -6,6 +6,25 @@ import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden,
 import { isDevelopment, renderHTML, taxonomyRESTBase } from '../lib/helpers'
 import p from  '../../package.json'
 
+console.log(`rewrite wp client so that req doesn't cache anything,
+and each method will use a cache function (this.cache()) and handle/transform errors in each method
+
+so that error handling when the method is used looks like
+  const response = await WP.getPosts()
+  if (response instanceof MethodError) {
+    return this.setState({ component: { error: message } })
+  }
+
+  const { posts, request } = response
+  const { headers } = request
+
+  // carry on
+
+    but still redirect the view to an error screen if authentication is needed or an endpoint didn't exist at all
+
+    and also rewrite resolver
+    `)
+
 const requestCache = localforage.createInstance({
   name: 'requestCache',
 })

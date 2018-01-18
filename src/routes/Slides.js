@@ -385,7 +385,9 @@ console.log(this.getSlideBackground)
     }
 
     const bg = this.getSlideBackground(slide)
-    const isGif = bg && bg.backgroundImage.indexOf('.gif') === false
+    const isGif = bg && bg.backgroundImage.indexOf('.gif') !== -1
+
+    console.log(bg, isGif)
     const { title, content } = slide
     return (
       <article
@@ -397,7 +399,9 @@ console.log(this.getSlideBackground)
           <h1>
             {title.rendered}
           </h1>
-          {content.rendered}
+          <div className="content">
+            {content.rendered}
+          </div>
         </div>
         <a className="edit" href={`${WP.getWPURL()}/wp-admin/post.php?post=${slide.id}&action=edit`}>
           Edit slide

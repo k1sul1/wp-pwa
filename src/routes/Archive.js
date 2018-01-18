@@ -7,6 +7,7 @@ import { taxonomyName } from '../lib/helpers'
 export default class Archive extends Component {
   render() {
     const { archive } = this.props
+    const prefix = taxonomyName(archive.taxonomy) || false
 
     if (!archive) {
       throw new Error(`Archive wasn't provided with archive data, unable to render archive.`);
@@ -15,7 +16,7 @@ export default class Archive extends Component {
     return (
       <Layout {...this.props} className="archive">
         <h1>
-          {taxonomyName(archive.taxonomy) + ': '}
+          {prefix && `${prefix}: `}
           {archive.name}
         </h1>
 

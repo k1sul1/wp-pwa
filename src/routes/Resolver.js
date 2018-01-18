@@ -215,8 +215,16 @@ class Resolver extends Component {
           }
         }
 
+        const archive = allArchives.find(Boolean)
+
+        if (archive.name === 'slides') {
+          return this.showComponent(await import('./Slides'), {
+            archive,
+          })
+        }
+
         return this.showComponent(await import('./Archive'), {
-          archive: allArchives.find(Boolean)
+          archive,
         })
       } else if (post) {
         const { type } = post

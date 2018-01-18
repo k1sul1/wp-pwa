@@ -20,17 +20,16 @@
   &.parent {
     text-align: center
 
-    ul {
-      display: none
-    }
-
     .wrapper {
       align-items: center
     }
   }
 
   &.child {
-
+    h1 {
+      align-self: flex-start
+      text-align: center
+    }
   }
 
   pre.small {
@@ -45,10 +44,10 @@
     height: 90%
     background: rgba(#000, 0.9)
     padding: r(30px)
-    display: flex
-    flex-flow: column nowrap
-    justify-content: center
-    align-items: flex-start
+    // display: flex
+    // flex-flow: column nowrap
+    // justify-content: center
+    // align-items: flex-start
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -91,9 +90,14 @@
   }
 
   .column {
-    // float: left
-    // width: 50%
-    display: flex
+    float: left
+    width: 48%
+    margin-right: auto
+
+    &:last-child {
+      margin-right: 0
+    }
+    // display: flex
   }
 }
 
