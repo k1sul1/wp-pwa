@@ -22,6 +22,8 @@
 
     .wrapper {
       align-items: center
+      justify-content: center
+      display: flex
     }
   }
 
@@ -41,7 +43,7 @@
   .wrapper {
     // max-width: r(1800px)
     width: 90%
-    height: 90%
+    // min-height: 90%
     background: rgba(#000, 0.9)
     padding: r(30px)
     // display: flex
@@ -52,6 +54,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     text-align: center
+    margin: r(20px) 0
   }
 
   h1 {
@@ -93,6 +96,10 @@
     float: left
     width: 48%
     margin-right: auto
+
+    &+:not(.column) {
+      clear: both
+    }
 
     &:last-child {
       margin-right: 0
