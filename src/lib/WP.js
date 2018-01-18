@@ -386,10 +386,13 @@ class WP_Client {
         `/wp-json/wp/v2/media/${post.featured_media}`
       )]
 
-      if (featuredImage) {
-        post['_embedded'] = {
-          'wp:featuredmedia': featuredImage || [],
-        }
+      const author = !post.author ? false : [await this.req(
+        `/wp-json/wp/v2/users/${post.author}`
+      )]
+
+      post['_embedded'] = {
+        'wp:featuredmedia': featuredImage || [],
+        'author': author || [],
       }
     }
 
