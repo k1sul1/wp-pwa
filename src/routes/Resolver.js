@@ -336,6 +336,8 @@ class Resolver extends Component {
           case '/about/': {
             return this.showComponent(await import('./About'), componentProps)
           }
+
+          // no default
         }
 
         switch (type) {
