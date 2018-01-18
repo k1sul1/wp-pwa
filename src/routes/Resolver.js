@@ -333,6 +333,10 @@ class Resolver extends Component {
         const { type } = post
         const componentProps = { post }
 
+        if (archive) {
+          componentProps.archive = archive
+        }
+
         // Let's do "slug" templates first
         switch(location.pathname) {
           case '/about/': {
@@ -378,8 +382,8 @@ class Resolver extends Component {
           }
 
           default: {
-            console.log('this is a ridiculous fix for postlist')
-            this.showComponent(Error, {})
+            console.log('this is a ridiculous fix for postlist and causes flashing')
+            this.showComponent(Loading, {})
             return this.showComponent(await import('./Archive'), { archive })
           }
         }
