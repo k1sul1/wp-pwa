@@ -60,6 +60,7 @@ export default class PostList extends Component {
         const { term_id, taxonomy } = context
         const result = await WP.getForContext('taxonomy', { term_id, taxonomy, page })
 
+
         if (result) {
           headers = result.headers
           posts = result.posts
@@ -110,7 +111,9 @@ export default class PostList extends Component {
 
   async componentWillReceiveProps(nextProps) {
     // Don't run this expensive op at every render.
-    if (!isEqual(this.props.page, nextProps.page) || !isEqual(this.props.posts, nextProps.posts)) {
+    if (!isEqual(this.props.page, nextProps.page) ||
+        !isEqual(this.props.posts, nextProps.posts) ||
+        !isEqual(this.props.context, nextProps.context)) {
       await this.getContents()
     }
   }
