@@ -257,7 +257,7 @@ class Resolver extends Component {
         const afterLogin = () => {
           this.setState({
             authenticationRequired: false,
-          })
+          }, () => window.location.reload())
         }
 
         return this.showComponent(Error, {
