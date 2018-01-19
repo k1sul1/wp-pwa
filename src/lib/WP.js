@@ -1,29 +1,11 @@
 import axios from 'axios'
 import localforage from 'localforage'
 import omit from 'lodash.omit'
+import queryString from 'query-string'
 
 import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden, Unauthorized } from '../errors'
 import { isDevelopment, renderHTML, taxonomyRESTBase } from '../lib/helpers'
 import p from  '../../package.json'
-
-console.log(`rewrite wp client so that req doesn't cache anything,
-and each method will use a cache function (this.cache()) and handle/transform errors in each method
-
-so that error handling when the method is used looks like
-  const response = await WP.getPosts()
-  if (response instanceof MethodError) {
-    return this.setState({ component: { error: message } })
-  }
-
-  const { posts, request } = response
-  const { headers } = request
-
-  // carry on
-
-    but still redirect the view to an error screen if authentication is needed or an endpoint didn't exist at all
-
-    and also rewrite resolver
-    `)
 
 const requestCache = localforage.createInstance({
   name: 'requestCache',
@@ -137,6 +119,7 @@ class WP_Client {
   }
 
   renderContent(post) {
+    post = { ...post }
     if (post && post.content) {
       post.content.rendered = renderHTML(post.content.rendered)
     }
@@ -383,40 +366,49 @@ class WP_Client {
     return await this.req(`/wp-json/wp/v2/users/${id}`)
   }
 
-  async getByURL(url, params, options) {
-    const post = await this.req(`/wp-json/rpl/v1/lookup`, {
-      params: {
-        url,
-        ...params,
-      }
-    }, options)
-
-    if (post && post.error) {
-      const { error } = post
-
-      if (error === 'No post found.') {
-        return new LookupError(error) // Send this through as is, handle it there.
-        // return this.onError(new LookupError('Lookup request failed'))
-        // return this.onError(new Error404('Nothing found with that URL.'))
-      } else {
-        console.log('UNHANDLED ERROR!')
-        throw error
-      }
+  async getByURL(url, params) {
+    const cacheParams = {
+      method: 'getByURL',
+      url,
+      params,
     }
 
-    if (post) {
-      // This portion of the code only exists because WP refuses to work with the _embed parameter
-      // with internal requests. No one seems to know why.
-      const featuredImage = !post.featured_media ? false : [await this.getMedia(post.featured_media)]
-      const author = !post.author ? false : [await this.getUser(post.author)]
+    const endpoint = '/wp-json/rpl/v1/lookup?test=true'
+    const request = (await this.getCached(endpoint, cacheParams)) || (await this.get(endpoint, {
+      ...params,
+      url,
+    }))
 
-      post['_embedded'] = {
-        'wp:featuredmedia': featuredImage || [],
-        'author': author || [],
+    console.log(request)
+    const { data } = request
+
+    if (data) {
+      const { error } = data
+
+      if (error) {
+        if (error === 'No post found.') {
+          return new LookupError(error)
+        }
+
+        return error
       }
-    }
 
-    return this.renderContent(post)
+      const featuredImage = !data.featured_media ? false : [await this.getMedia(data.featured_media)]
+      const author = !data.author ? false : [await this.getUser(data.author)]
+      const post = {
+        ...data,
+        _embedded: {
+          'wp:featuredmedia': featuredImage || [],
+          'author': author || [],
+        }
+      }
+
+      if (!data.__cached) {
+        await this.cache(request, cacheParams)
+      }
+
+      return this.renderContent(post)
+    }
   }
 
   async retry(maxTimes = 3) {
@@ -554,6 +546,101 @@ class WP_Client {
         return e
       }
 
+      return this.onError(e)
+    }
+  }
+
+  addCacheMeta(data, meta = {}) {
+    const cacheTime =  Date.now()
+    return {
+      data: {
+        ...data,
+        __cached: cacheTime,
+      },
+      meta: {
+        cacheTime,
+        cacheExpiry: 1000 * 60 * 10, // 10 minutes
+        ...meta,
+      }
+    }
+  }
+
+  async cacheKey(params = {}) {
+    const user = await this.getCurrentUser()
+
+    return [
+      this.cacheKeyPrefix,
+      params,
+      omit(user, 'token'),
+    ].map(i => JSON.stringify(i)).join('_')
+  }
+
+  async getCached(endpoint, params) {
+    const key = await this.cacheKey(params)
+
+    try {
+      const cached = JSON.parse(await requestCache.getItem(key))
+
+      if (cached) {
+        console.log('hit cache', endpoint, cached)
+        const { cacheTime, cacheExpiry } = cached.meta
+
+        if (Date.now() - cacheTime < cacheExpiry) {
+          return cached.data
+        } else {
+          console.log('Cache stale for', endpoint)
+
+          if (this.offline) {
+            // Return the data anyway, user should see an offline indicator
+            return cached.data
+          }
+        }
+      }
+
+      console.log('cache miss', endpoint)
+      return false
+    } catch(e) {
+      return this.onError(e)
+    }
+  }
+
+  async cache(request, params, options = {}) {
+    const key = await this.cacheKey(params)
+    const withMeta = JSON.stringify(this.addCacheMeta(request, options))
+
+    try {
+      await requestCache.setItem(key, withMeta)
+      return true
+    } catch (e) {
+      // TODO: Ignore if it's Safari complaining in private browsing
+      return this.onError(e)
+    }
+  }
+
+  async get(url, payload = {}) {
+    try {
+      // parse url, remove querystrings and append them to payload
+      const [endpoint, qs] = url.split('?')
+      const response = await axios.get(`${this.url}${endpoint}`, {
+        params: {
+          ...queryString.parse(qs),
+          ...payload,
+        }
+      })
+
+      return response
+    } catch (e) {
+      return this.onError(e)
+    }
+  }
+
+  async post(url, payload = {}) {
+    try {
+      const endpoint = url
+      const response = await axios.get(`${this.url}${endpoint}`, payload)
+
+      return response
+    } catch (e) {
       return this.onError(e)
     }
   }
