@@ -196,8 +196,13 @@ class WP_Client {
 
     if (data) {
       await this.cache(request, cacheParams)
+
+      const posts = Object.values(data)
+        .map(post => this.turnURLRelative('link', post))
+        .map(this.renderContent)
+
       return  {
-        posts: data,
+        posts,
         headers,
       }
     } else {
@@ -386,8 +391,10 @@ class WP_Client {
     const endpoint = '/wp-json/rpl/v1/lookup'
     const cached = await this.getCached(endpoint, cacheParams)
     const request = cached ? cached : await this.get(endpoint, {
-      ...params,
-      url,
+      params: {
+        ...params,
+        url,
+      }
     })
 
     const { data } = request
