@@ -48,8 +48,10 @@ class WP_Client {
     if (user) {
       this.user = user
 
-      window.dispatchEvent(new CustomEvent('authenticated', { detail: {
-        response: user }
+      window.dispatchEvent(new CustomEvent('authenticated', {
+        detail: {
+          response: user
+        }
       }))
     }
   }
@@ -177,7 +179,6 @@ class WP_Client {
     const page = payload.page ? payload.page : false
     const perPage = payload.perPage ? payload.perPage : 10
     const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
-    // const response = await this.req(endpoint, payload, options)
 
     const cacheParams = {
       method: 'getPostsFrom',
@@ -375,24 +376,26 @@ class WP_Client {
   }
 
   async authenticate(username, password) {
-    const response = await this.req('/wp-json/jwt-auth/v1/token', {
+    const response = await this.post('/wp-json/jwt-auth/v1/token', {
       username,
       password,
-    }, {
-      method: 'post',
-      allowCache: false,
-      ignoreAxiosError: true,
     })
 
-    if (response && response.token) {
-      window.dispatchEvent(new CustomEvent('authenticated', { detail: { response } }))
-      return true
+    if (response) {
+      const { data } = response
+
+      if (data && data.token) {
+        window.dispatchEvent(new CustomEvent('authenticated', {
+          detail: {
+            response: data,
+          },
+        }))
+        return true
+      }
     }
 
-    return this.onError(response)
-    // console.log(response)
-
-    // return false
+    // maybe return a custom error
+    return false
   }
 
   addNetworkStatusListeners(component) {
@@ -416,11 +419,11 @@ class WP_Client {
   }
 
   async getMedia(id) {
-    return await this.req(`/wp-json/wp/v2/media/${id}`)
+    return await this.get(`/wp-json/wp/v2/media/${id}`)
   }
 
   async getUser(id) {
-    return await this.req(`/wp-json/wp/v2/users/${id}`)
+    return await this.get(`/wp-json/wp/v2/users/${id}`)
   }
 
   async getByURL(url, params) {
@@ -701,7 +704,7 @@ class WP_Client {
   async post(url, payload = {}) {
     try {
       const endpoint = url
-      const response = await axios.get(`${this.url}${endpoint}`, payload)
+      const response = await axios.post(`${this.url}${endpoint}`, payload)
 
       return response
     } catch (e) {
