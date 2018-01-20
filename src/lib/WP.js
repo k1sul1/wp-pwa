@@ -173,23 +173,33 @@ class WP_Client {
     }
   }
 
-  async getPostsFrom(type = 'posts', payload = {}, options = {}) {
+  async getPostsFrom(type = 'posts', payload = {}) {
     const page = payload.page ? payload.page : false
     const perPage = payload.perPage ? payload.perPage : 10
     const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
-    const response = await this.req(endpoint, payload, options)
+    // const response = await this.req(endpoint, payload, options)
 
-    if (response) {
-      const { __headers } = response
-      const posts = Object.values(omit(response, '__headers'))
-        .map(post => this.turnURLRelative('link', post))
-        .map(this.renderContent)
+    const cacheParams = {
+      method: 'getPostsFrom',
+      type,
+      payload,
+    }
 
-      return {
-        posts,
-        headers: __headers,
+    const cached = await this.getCached(endpoint, cacheParams)
+    const request = cached ? cached : await this.get(endpoint, {
+      page,
+      per_page: perPage,
+      ...payload,
+    })
+
+    const { data, headers } = request
+
+    if (data) {
+      await this.cache(request, cacheParams)
+      return  {
+        posts: data,
+        headers,
       }
-
     } else {
       console.log('Throw something here? Like plates?')
     }
@@ -373,13 +383,13 @@ class WP_Client {
       params,
     }
 
-    const endpoint = '/wp-json/rpl/v1/lookup?test=true'
-    const request = (await this.getCached(endpoint, cacheParams)) || (await this.get(endpoint, {
+    const endpoint = '/wp-json/rpl/v1/lookup'
+    const cached = await this.getCached(endpoint, cacheParams)
+    const request = cached ? cached : await this.get(endpoint, {
       ...params,
       url,
-    }))
+    })
 
-    console.log(request)
     const { data } = request
 
     if (data) {
@@ -558,6 +568,7 @@ class WP_Client {
         __cached: cacheTime,
       },
       meta: {
+        always: false,
         cacheTime,
         cacheExpiry: 1000 * 60 * 10, // 10 minutes
         ...meta,
@@ -582,9 +593,13 @@ class WP_Client {
       const cached = JSON.parse(await requestCache.getItem(key))
 
       if (cached) {
-        console.log('hit cache', endpoint, cached)
         const { cacheTime, cacheExpiry } = cached.meta
 
+        if (process.env.NODE_ENV !== 'production' || params.always) {
+          return false
+        }
+
+        console.log('hit cache', endpoint, cached)
         if (Date.now() - cacheTime < cacheExpiry) {
           return cached.data
         } else {
@@ -622,10 +637,10 @@ class WP_Client {
       // parse url, remove querystrings and append them to payload
       const [endpoint, qs] = url.split('?')
       const response = await axios.get(`${this.url}${endpoint}`, {
-        params: {
+        // params: {
           ...queryString.parse(qs),
           ...payload,
-        }
+        // }
       })
 
       return response
