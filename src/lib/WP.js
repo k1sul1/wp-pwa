@@ -319,21 +319,39 @@ class WP_Client {
   }
 
   async getArchives(params = {}, options = {}) {
-    const archives = await this.req('/wp-json/emp/v1/archives', params, {
-      // crashAppOnError: true,
-      ...options
-    })
+    const cacheParams = {
+      method: 'getMenu',
+      ...params,
+    }
+    const endpoint = '/wp-json/emp/v1/archives'
+    const cached = await this.getCached(endpoint, cacheParams)
+    const response = cached ? cached : await this.get(endpoint, params)
 
-    if (!archives) {
-
-      return this.onError(new ArchiveLoadError('Unable to load archives'))
+    if (response) {
+      await this.cache(response, cacheParams)
+      return response.data
     }
 
-    return archives
+    return this.onError(new ArchiveLoadError('Unable to load archives'))
   }
 
   async query(params = {}, options = {}) {
-    return await this.req('/wp-json/wp_query/args/', params, options)
+    // not used anywhere, might be broken
+
+    const cacheParams = {
+      method: 'query',
+      ...params,
+    }
+    const endpoint = '/wp-json/wp_query/args/'
+    const cached = await this.getCached(endpoint, cacheParams)
+    const response = cached ? cached : await this.get(endpoint, params)
+
+    if (response) {
+      await this.cache(response, cacheParams)
+      return response
+    }
+
+    return this.onError(new Error('????? query error'))
   }
 
   async getCurrentUser() {
