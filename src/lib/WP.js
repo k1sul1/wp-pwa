@@ -275,19 +275,43 @@ class WP_Client {
   }
 
   async getMenus(params = {}, options = {}) {
-    return await this.req(`/wp-json/wp-api-menus/v2/menus`, params, options)
+    const cacheParams = {
+      method: 'getMenus',
+      ...params,
+    }
+    const endpoint = `/wp-json/wp-api-menus/v2/menus`
+    const cached = await this.getCached(endpoint, cacheParams)
+    const response = cached ? cached : await this.get(endpoint, params)
+
+    if (response) {
+      !cached && await this.cache(response, cacheParams, { always: true })
+
+      return response.data
+    } else {
+      return this.onError(new MenuLoadError('Unable to load menus'))
+    }
   }
 
   async getMenu(menu_id, params = {}, options = {}) {
-    const menu = await this.req(`/wp-json/wp-api-menus/v2/menus/${menu_id}`, params, {
-      // preferCache: true,
-      ...options
-    })
+    const cacheParams = {
+      method: 'getMenu',
+      ...params,
+    }
+    const endpoint = `/wp-json/wp-api-menus/v2/menus/${menu_id}`
+    const cached = await this.getCached(endpoint, cacheParams)
+    const response = cached ? cached : await this.get(endpoint, params)
 
-    if (menu && menu.items) {
-      return {
-        ...menu,
-        items: menu.items.map(item => this.turnURLRelative('url', item)),
+    console.log(response)
+
+    if (response) {
+      const { data } = response
+      !cached && await this.cache(response, cacheParams, { always: true })
+
+      if (data.items) {
+        return {
+          ...data,
+          items: data.items.map(item => this.turnURLRelative('url', item)),
+        }
       }
     }
 
@@ -600,9 +624,9 @@ class WP_Client {
       const cached = JSON.parse(await requestCache.getItem(key))
 
       if (cached) {
-        const { cacheTime, cacheExpiry } = cached.meta
+        const { cacheTime, cacheExpiry, always } = cached.meta
 
-        if (process.env.NODE_ENV !== 'production' || params.always) {
+        if (!always && process.env.NODE_ENV !== 'production') {
           return false
         }
 
