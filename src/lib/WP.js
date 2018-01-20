@@ -302,8 +302,6 @@ class WP_Client {
     const cached = await this.getCached(endpoint, cacheParams)
     const response = cached ? cached : await this.get(endpoint, params)
 
-    console.log(response)
-
     if (response) {
       const { data } = response
       !cached && await this.cache(response, cacheParams, { always: true })
@@ -630,16 +628,19 @@ class WP_Client {
 
   async cacheKey(params = {}) {
     const user = await this.getCurrentUser()
-
-    return [
+    const key = [
       this.cacheKeyPrefix,
       params,
       omit(user, 'token'),
     ].map(i => JSON.stringify(i)).join('_')
+
+    return key
   }
 
   async getCached(endpoint, params) {
     const key = await this.cacheKey(params)
+    console.log('keygeneration broken', key, endpoint)
+    return false
 
     try {
       const cached = JSON.parse(await requestCache.getItem(key))
