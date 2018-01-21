@@ -101,7 +101,6 @@ export default class Slides extends Component {
         if (currentIndex < slideCount) {
           console.log(slide)
           const nextSlide = rootSlides[currentIndex + 1]
-console.log(this.getSlideBackground)
           document.body.style.backgroundImage = this.getSlideBackground(slide.featured_media === 0 ? parent : slide).backgroundImage
           await this.animate('bounceOutLeft')
 
@@ -270,7 +269,7 @@ console.log(this.getSlideBackground)
             break
           }
 
-          // no default
+          // no ?_embed=default
         }
       }
 
@@ -293,6 +292,8 @@ console.log(this.getSlideBackground)
 
     const { posts, headers } = response
     const slides = posts
+
+    console.log(slides)
 
     if (!slides) {
       throw Error('Unable to get slides. No reason to panic.')
@@ -350,6 +351,7 @@ console.log(this.getSlideBackground)
   }
 
   getSlideBackground(slide) {
+    console.log(slide)
     const defaultReturn = {
       backgroundImage: '',
     }

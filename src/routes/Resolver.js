@@ -71,6 +71,8 @@ class Resolver extends Component {
       },
       ready: true,
     })
+
+    return
   }
 
     async wpErrorHandler(error) {
@@ -85,19 +87,24 @@ class Resolver extends Component {
               error: error.message,
             }
           })
-          return
+
+          return false
         }
 
         case Forbidden: {
-          return this.setState({
+          this.setState({
             authenticationRequired: true,
           })
+
+          return false
         }
 
         case Unauthorized: {
-          return this.setState({
+          this.setState({
             authenticationRequired: true,
           })
+
+          return false
         }
 
         case LookupError: {
@@ -174,6 +181,8 @@ class Resolver extends Component {
       if (!archives) {
         return this.wpErrorHandler(new ResolverError('Unable to get WordPress archives. Is WordPress up?'))
       }
+
+      console.log(archives)
 
       // Just add taxonomies here as they appear.
       const availableArchives = [

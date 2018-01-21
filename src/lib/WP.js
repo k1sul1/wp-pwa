@@ -60,8 +60,7 @@ class WP_Client {
     if (error.name === 'QuotaExceededError') {
       console.log(error) // Private browsing or disk full? Fail silently.
       this.saveIntoReqCache = false
-
-      return await this.retry()
+      // return await this.retry()
     } else if (error.message === 'Request failed with status code 403') {
       return this.onError(new Forbidden('It appears this requires authentication'))
     } else if (error.message === 'Request failed with status code 401') {
@@ -176,9 +175,12 @@ class WP_Client {
   }
 
   async getPostsFrom(type = 'posts', payload = {}) {
-    const page = payload.page ? payload.page : false
+    const page = payload.page ? payload.page : 1
     const perPage = payload.perPage ? payload.perPage : 10
-    const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
+    // const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
+    const endpoint = `/wp-json/wp/v2/${type}`
+
+    console.log(endpoint)
 
     const cacheParams = {
       method: 'getPostsFrom',
@@ -188,9 +190,12 @@ class WP_Client {
 
     const cached = await this.getCached(endpoint, cacheParams)
     const request = cached ? cached : await this.get(endpoint, {
-      page,
-      per_page: perPage,
       ...payload,
+      params: {
+        page,
+        per_page: perPage,
+        '_embed': 1,
+      }
     })
 
     const { data, headers } = request
@@ -417,11 +422,23 @@ class WP_Client {
   }
 
   async getMedia(id) {
-    return await this.get(`/wp-json/wp/v2/media/${id}`)
+    const response = await this.get(`/wp-json/wp/v2/media/${id}`)
+
+    if (response) {
+      return response.data
+    }
+
+    return false
   }
 
   async getUser(id) {
-    return await this.get(`/wp-json/wp/v2/users/${id}`)
+    const response = await this.get(`/wp-json/wp/v2/users/${id}`)
+
+    if (response) {
+      return response.data
+    }
+
+    return false
   }
 
   async getByURL(url, params) {
@@ -639,8 +656,11 @@ class WP_Client {
 
   async getCached(endpoint, params) {
     const key = await this.cacheKey(params)
+
+    /* eslint-disable no-unreachable */
     console.log('keygeneration broken', key, endpoint)
     return false
+
 
     try {
       const cached = JSON.parse(await requestCache.getItem(key))
@@ -670,9 +690,14 @@ class WP_Client {
     } catch(e) {
       return this.onError(e)
     }
+    /* eslint-enable no-unreachable */
   }
 
   async cache(request, params, options = {}) {
+    if (!this.saveIntoReqCache) {
+      return false
+    }
+
     const key = await this.cacheKey(params)
     const withMeta = JSON.stringify(this.addCacheMeta(request, options))
 
@@ -685,7 +710,20 @@ class WP_Client {
     }
   }
 
+  async addAuthHeader(headers) {
+    const user = this.user || await this.getCurrentUser() // this.user is null on initial req
+    const jwt = user ? user.token : false
+
+    if (jwt) {
+      headers['Authorization'] = `Bearer ${jwt}`
+    }
+
+    return headers
+  }
+
   async get(url, payload = {}) {
+    const headers = await this.addAuthHeader(payload.headers || {})
+
     try {
       // parse url, remove querystrings and append them to payload
       const [endpoint, qs] = url.split('?')
@@ -693,6 +731,7 @@ class WP_Client {
         // params: {
           ...queryString.parse(qs),
           ...payload,
+          headers,
         // }
       })
 
@@ -703,9 +742,14 @@ class WP_Client {
   }
 
   async post(url, payload = {}) {
+    const headers = await this.addAuthHeader(payload.headers || {})
+
     try {
       const endpoint = url
-      const response = await axios.post(`${this.url}${endpoint}`, payload)
+      const response = await axios.post(`${this.url}${endpoint}`, {
+        ...payload,
+        headers
+      })
 
       return response
     } catch (e) {
