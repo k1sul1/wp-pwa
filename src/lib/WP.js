@@ -19,7 +19,6 @@ export const getWPURL = () => {
   const urls = [p.prodWP, p.devWP]
   const index = urls.indexOf(window.location.origin)
   if (index > -1) {
-    console.log('using same domain')
     return urls[index]
   } else if (process.env.NODE_ENV === 'production') {
     return p.prodWP
@@ -34,6 +33,7 @@ class WP_Client {
     this.offline = !navigator.onLine
     this.saveIntoReqCache = true
     this.cacheKeyPrefix = ''
+    this.cacheLogging = false
     this.errorHandler = null
     this.user = null
 
@@ -659,12 +659,6 @@ class WP_Client {
   async getCached(endpoint, params) {
     const key = await this.cacheKey(params)
 
-    console.log(key, endpoint)
-    /* eslint-disable no-unreachable */
-    // console.log('keygeneration broken', key, endpoint)
-    // return false
-
-
     try {
       const cached = JSON.parse(await requestCache.getItem(key))
 
@@ -675,11 +669,11 @@ class WP_Client {
           return false
         }
 
-        console.log('hit cache', endpoint, cached)
+        this.cacheLogging && console.log('hit cache', endpoint, cached)
         if (Date.now() - cacheTime < cacheExpiry) {
           return cached.data
         } else {
-          console.log('Cache stale for', endpoint)
+          this.cacheLogging && console.log('Cache stale for', endpoint)
 
           if (this.offline) {
             // Return the data anyway, user should see an offline indicator
@@ -688,12 +682,11 @@ class WP_Client {
         }
       }
 
-      console.log('cache miss', endpoint)
+      this.cacheLogging && console.log('cache miss', endpoint)
       return false
     } catch(e) {
       return this.onError(e)
     }
-    /* eslint-enable no-unreachable */
   }
 
   async cache(request, params, options = {}) {

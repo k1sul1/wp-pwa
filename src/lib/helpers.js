@@ -42,6 +42,26 @@ const isCodechild = (node) => {
   return cond
 }
 
+// Used to avoid caching in development and so on
+export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false
+console.log(isDevelopment ? 'Running development build' : 'Running production build')
+
+// TODO: Maybe add this data to the REST API via expose-more-pagedata?
+export const taxonomies = {
+  post_tag: {
+    name: 'Tag',
+    RESTBase: 'tags',
+  },
+
+  category: {
+    name: 'Category',
+    RESTBase: 'categories',
+  }
+}
+
+export const taxonomyExists = slug => slug in taxonomies
+export const taxonomyName = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].name
+export const taxonomyRESTBase = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].RESTBase
 export const transformWPContent = (...args) => {
   const [node, index] = args
   if (isDownloadComponent(...args)) {
@@ -68,28 +88,8 @@ export const transformWPContent = (...args) => {
   return undefined
 }
 
-export const renderHTML = string => ReactHtmlParser(string, {
+export const renderHTML = (str) => ReactHtmlParser(str, {
   transform: transformWPContent,
 })
 
 
-// Used to avoid caching in development and so on
-export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false
-console.log(isDevelopment ? 'Running development build' : 'Running production build')
-
-// TODO: Maybe add this data to the REST API via expose-more-pagedata?
-export const taxonomies = {
-  post_tag: {
-    name: 'Tag',
-    RESTBase: 'tags',
-  },
-
-  category: {
-    name: 'Category',
-    RESTBase: 'categories',
-  }
-}
-
-export const taxonomyExists = slug => slug in taxonomies
-export const taxonomyName = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].name
-export const taxonomyRESTBase = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].RESTBase
