@@ -174,13 +174,14 @@ class WP_Client {
     }
   }
 
-  async getPostsFrom(type = 'posts', payload = {}) {
-    const page = payload.page ? payload.page : 1
-    const perPage = payload.perPage ? payload.perPage : 10
+  async getPostsFrom(type = 'posts', payload = { params: {} }) {
+    // const { params } = payload
+    // const page = params.page ? params.page : 1
+    // const perPage = params.perPage ? params.perPage : 10
     // const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
     const endpoint = `/wp-json/wp/v2/${type}`
 
-    console.log(endpoint)
+    console.log(endpoint, payload)
 
     const cacheParams = {
       method: 'getPostsFrom',
@@ -191,11 +192,12 @@ class WP_Client {
     const cached = await this.getCached(endpoint, cacheParams)
     const request = cached ? cached : await this.get(endpoint, {
       ...payload,
-      params: {
+      _embed: 1,
+      /* params: {
         page,
         per_page: perPage,
         '_embed': 1,
-      }
+      } */
     })
 
     const { data, headers } = request
@@ -324,7 +326,7 @@ class WP_Client {
 
   async getArchives(params = {}, options = {}) {
     const cacheParams = {
-      method: 'getMenu',
+      method: 'getArchives',
       ...params,
     }
     const endpoint = '/wp-json/emp/v1/archives'
@@ -379,7 +381,7 @@ class WP_Client {
   }
 
   async authenticate(username, password) {
-    const response = await this.post('/wp-json/jwt-auth/v1/token', {
+    const response = await this.post('/wp-json/simple-jwt-authentication/v1/token', {
       username,
       password,
     })
@@ -657,9 +659,10 @@ class WP_Client {
   async getCached(endpoint, params) {
     const key = await this.cacheKey(params)
 
+    console.log(key, endpoint)
     /* eslint-disable no-unreachable */
-    console.log('keygeneration broken', key, endpoint)
-    return false
+    // console.log('keygeneration broken', key, endpoint)
+    // return false
 
 
     try {

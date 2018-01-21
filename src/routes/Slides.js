@@ -269,7 +269,7 @@ export default class Slides extends Component {
             break
           }
 
-          // no ?_embed=default
+          // no default
         }
       }
 
@@ -284,7 +284,10 @@ export default class Slides extends Component {
     const { slide } = this.state
 
     const response = await WP.getPostsFrom('slides', {
-      perPage: 100, // if you have more than a hundred slides you have a problem
+      params: {
+        per_page: 100, // if you have more than a hundred slides you have a problem
+        _embed: 1,
+      },
     }, {
       // preferCache: true,
       // cacheStaleTime: 3600000 / 12,
@@ -351,7 +354,6 @@ export default class Slides extends Component {
   }
 
   getSlideBackground(slide) {
-    console.log(slide)
     const defaultReturn = {
       backgroundImage: '',
     }
@@ -366,7 +368,7 @@ export default class Slides extends Component {
     if (featuredImages) {
       const first = featuredImages[0]
 
-      if (first.code === 'rest_forbidden') {
+      if (first && first.code === 'rest_forbidden') {
         // https://core.trac.wordpress.org/ticket/41445
         return defaultReturn
       }
