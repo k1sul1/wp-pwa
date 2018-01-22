@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 
+import logo from '../img/vincit-logo'
 import p from '../../package.json'
 import WP from '../lib/WP'
 import { getImageData } from '../lib/image'
@@ -411,6 +412,7 @@ export default class Slides extends Component {
           <Title>{title.rendered}</Title>
           <Content>{content.rendered}</Content>
         </div>
+
         <a
           className="edit"
           href={`${WP.getWPURL()}/wp-admin/post.php?post=${slide.id}&action=edit`}
@@ -419,6 +421,8 @@ export default class Slides extends Component {
         >
           Edit slide
         </a>
+
+        <img src={logo} alt="Vincit" className="vincit-logo" />
       </article>
     )
   }
