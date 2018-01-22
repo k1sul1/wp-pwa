@@ -459,9 +459,8 @@ class WP_Client {
       }
     })
 
-    const { data } = request
-
-    if (data) {
+    if (request) {
+      const { data } = request
       const { error } = data
 
       if (error) {
@@ -488,6 +487,8 @@ class WP_Client {
 
       return this.renderContent(post)
     }
+
+    return false
   }
 
   async retry(maxTimes = 3) {
