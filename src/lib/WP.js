@@ -311,7 +311,7 @@ class WP_Client {
 
     if (response) {
       const { data } = response
-      !cached && await this.cache(response, cacheParams, { always: true })
+      !cached && await this.cache(response, cacheParams, { always: false })
 
       if (data.items) {
         return {
