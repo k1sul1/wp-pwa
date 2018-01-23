@@ -1,175 +1,55 @@
-import React, { Component, Fragment } from 'react'
-import PropTypes from 'prop-types'
+import React from 'react'
 import { Link } from 'react-router-dom'
-import isEqual from 'lodash.isequal'
+import PaginatingList from './PaginatingList'
 
 import WP from '../lib/WP'
 
-export const SinglePost = ({ post }) => (
-  <article className="post-list__single">
-    <Link to={post.link}>
-      <h2>{post.title.rendered}</h2>
-    </Link>
-  </article>
-)
+export const SinglePost = (post, context) => {
+  return (
+    <article className="post-list__single" key={post.id}>
+      <Link to={post.link}>
+        <h2>{post.title.rendered}</h2>
+      </Link>
+    </article>
+  )
+}
 
-export default class PostList extends Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      posts: props.posts,
-      page: props.page,
-      loading: true,
-    }
+const loadItems = async (page, context) => {
+  if (!context) {
+    throw new Error('Unable to load items without context')
   }
 
-  static propTypes = {
-    posts: PropTypes.array,
-    page: PropTypes.number,
-    context: PropTypes.object,
-    query: PropTypes.object,
+  let result = null
+
+  if (context.isBlogpage) {
+    result = await WP.getForContext('blog', { page })
+  } else if (context.term_id && context.taxonomy) {
+    const { term_id, taxonomy } = context
+    result = await WP.getForContext('taxonomy', { term_id, taxonomy, page })
+  } else if (context.taxonomies) {
+    // post type
+    const restBase = context.rest_base || context.name
+    result = await WP.getForContext('post_type', { restBase, page })
   }
 
-  static defaultProps = {
-    posts: [],
-    page: 1,
+  const posts = result ? result.posts : [];
+  const headers = result ? result.headers : {};
+  const maxPages = headers && headers['x-wp-totalpages']
+    ? parseInt(headers['x-wp-totalpages'], 10)
+    : 0
+
+  return {
+    items: posts,
+    maxPages,
   }
+}
 
-  async getContents() {
-    const { context } = this.props
-    const { page } = this.state
-
-    if (this.props.posts.length) {
-      return this.setState({
-        posts: this.props.posts,
-        loading: false,
-      })
-    } else if (context) {
-      let posts = []
-      let headers = {}
-
-      if (context.isBlogpage) {
-        const result = await WP.getForContext('blog', { page })
-
-        if (result) {
-          headers = result.headers
-          posts = result.posts
-        }
-      } else if (context.term_id && context.taxonomy) {
-        const { term_id, taxonomy } = context
-        const result = await WP.getForContext('taxonomy', { term_id, taxonomy, page })
-
-
-        if (result) {
-          headers = result.headers
-          posts = result.posts
-        }
-      } else if (context.taxonomies) {
-        // post type
-        const restBase = context.rest_base || context.name
-        const result = await WP.getForContext('post_type', { restBase, page })
-
-        if (result) {
-          headers = result.headers
-          posts = result.posts
-        }
-      }
-
-      const maxPages = headers && headers['x-wp-totalpages']
-        ? parseInt(headers['x-wp-totalpages'], 10)
-        : 0
-
-      return this.setState({
-        posts,
-        maxPages,
-        loading: false,
-      })
-    }
-
-    const posts = await WP.query({
-      ...this.props.query,
-      page
-    })
-
-    this.setState({
-      posts,
-      loading: false,
-    })
-  }
-
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState.page !== this.state.page) {
-      console.log('update postlist')
-      await this.getContents()
-    }
-  }
-
-  async componentDidMount() {
-    await this.getContents()
-  }
-
-  async componentWillReceiveProps(nextProps) {
-    // Don't run this expensive op at every render.
-    if (!isEqual(this.props.page, nextProps.page) ||
-        !isEqual(this.props.posts, nextProps.posts) ||
-        !isEqual(this.props.context, nextProps.context)) {
-      await this.getContents()
-    }
-  }
-
-  pagination() {
-    const { page, maxPages } = this.state
-    const previousPage = (e) => {
-      e.preventDefault();
-      this.setState({
-        page: this.state.page - 1,
-        loading: true,
-      })
-    }
-    const nextPage = (e) => {
-      e.preventDefault();
-      this.setState({
-        page: this.state.page + 1,
-        loading: true,
-      })
-    }
-
-    const Previous = page > 1 ? (
-      <button onClick={previousPage}>
-        Previous
-      </button>
-    ) : false
-
-    const Next = page < maxPages ? (
-      <button onClick={nextPage}>
-        Next
-      </button>
-    ) : false
-
-    return (
-      <div className="pagination">
-        {Previous || false}
-        {Next || false}
-      </div>
-    )
-  }
-
-  render() {
-    const { posts, loading } = this.state
-    return (
-      <div className="post-list">
-        {loading ? (
-          <p>Please wait while we load the posts...</p>
-        ) : posts && !posts.length ? (
-          <p>It appears that there is no posts.</p>
-        ) : (
-          <Fragment>
-            {posts.map(post => <SinglePost key={post.id} post={post} />)}
-            {this.pagination()}
-          </Fragment>
-        )}
-      </div>
-    )
-  }
+export default function PostList(props) {
+  return (
+    <PaginatingList
+      loadItems={loadItems}
+      renderItem={SinglePost}
+      {...props}
+    />
+  )
 }

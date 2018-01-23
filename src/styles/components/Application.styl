@@ -33,6 +33,14 @@
       background: #f1f1f1
       color: #222
       min-height: 100vh
+
+      padding-top: r(20px)
+      padding-bottom: @padding-top
+
+      > *:not(.fancy-header) {
+        padding-left: @padding-top
+        padding-right: @padding-top
+      }
     }
 
     > aside {

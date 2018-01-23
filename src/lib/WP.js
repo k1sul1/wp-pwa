@@ -181,8 +181,6 @@ class WP_Client {
     // const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
     const endpoint = `/wp-json/wp/v2/${type}`
 
-    console.log(endpoint, payload)
-
     const cacheParams = {
       method: 'getPostsFrom',
       type,
@@ -201,6 +199,7 @@ class WP_Client {
     })
 
     const { data, headers } = request
+
 
     if (data) {
       await this.cache(request, cacheParams)
@@ -269,6 +268,16 @@ class WP_Client {
             ...params,
           }
         }, options)
+
+        if (response) {
+          return formatResponse(response)
+        }
+
+        break
+      }
+
+      case 'comments': {
+        const response = await this.getPostsFrom('comments', params)
 
         if (response) {
           return formatResponse(response)

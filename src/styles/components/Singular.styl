@@ -4,15 +4,6 @@
 .home,
 .loading {
 
-  #content {
-    padding-top: r(20px)
-    padding-bottom: @padding-top
-
-    > *:not(.fancy-header) {
-      padding-left: @padding-top
-      padding-right: @padding-top
-    }
-  }
 }
 
 // import 'Singular/*'
@@ -23,5 +14,44 @@
 
   h2 {
     margin: 0
+  }
+}
+
+.comment-list {
+  max-width: r(550px)
+
+  &__single {
+    background: lighten(#ccc, 10%)
+
+    header {
+      overflow: hidden
+      position: relative
+
+      img {
+        float: left
+        max-width: r(50px)
+      }
+    }
+
+    .author-name {
+      display: inline-block
+      position: absolute
+      top: 50%
+      transform: translateY(-50%) translateX(r(10px))
+    }
+
+    .comment {
+      padding: 1% 2%
+    }
+
+    .child-comment-list {
+      // padding: 2%
+      margin: 2%
+
+      .comment-list__single {
+        border-top: r(2px) solid darken(#ccc, 10%)
+        padding-top: r(20px)
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import Page from './Page'
 import { blogSidebar } from '../components/Sidebar'
+import CommentList from '../components/CommentList'
 
 const AuthorLine = ({ author }) => (
   <address>
@@ -17,7 +18,15 @@ const header = (node, { post }) => (
     ) : false}
   </header>
 )
+
+const content = (node, { post }) => (
+  <Fragment>
+    {node}
+
+    <CommentList context={post} />
+  </Fragment>
+)
 const Singular = (props) => console.log(props) || (
-  <Page {...props} sidebar={blogSidebar} filterTitle={header} className="singular" />
+  <Page {...props} sidebar={blogSidebar} filterTitle={header} filterContent={content} className="singular" />
 )
 export default Singular
