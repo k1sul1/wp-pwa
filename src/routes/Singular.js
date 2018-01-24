@@ -26,7 +26,9 @@ const content = (node, { post }) => (
     <CommentList context={post} />
   </Fragment>
 )
+
 const Singular = (props) => console.log(props) || (
   <Page {...props} sidebar={blogSidebar} filterTitle={header} filterContent={content} className="singular" />
 )
+
 export default Singular
