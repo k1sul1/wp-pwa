@@ -3,7 +3,7 @@ import localforage from 'localforage'
 import omit from 'lodash.omit'
 import queryString from 'query-string'
 
-import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden, Unauthorized } from '../errors'
+import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden, Unauthorized, OfflineError } from '../errors'
 import { isDevelopment, renderHTML, taxonomyRESTBase } from '../lib/helpers'
 import p from  '../../package.json'
 
@@ -61,6 +61,8 @@ class WP_Client {
       console.log(error) // Private browsing or disk full? Fail silently.
       this.saveIntoReqCache = false
       // return await this.retry()
+    } else if (error.message === 'Network Error') {
+      return this.onError(new OfflineError('Unable to connect to network'))
     } else if (error.message === 'Request failed with status code 403') {
       return this.onError(new Forbidden('It appears this requires authentication'))
     } else if (error.message === 'Request failed with status code 401') {

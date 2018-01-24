@@ -31,6 +31,10 @@ export class Unauthorized extends ExtendableError {
   name = 'Unauthorized'
 }
 
+export class OfflineError extends ExtendableError {
+  name = 'OfflineError'
+}
+
 export class ResolverError extends ExtendableError {
   name = 'ResolverError'
   // FAILED_TO_LOAD_ARCHIVE = 'Unable to load archive page data, which is required for the routing to work'
