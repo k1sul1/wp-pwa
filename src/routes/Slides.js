@@ -166,11 +166,6 @@ export default class Slides extends Component {
         console.log(key, parent.id, children)
       })
 
-      console.log(slide)
-      console.log(parent)
-      console.log(relations)
-      console.log(relations[parent.id])
-
       // find next or previous slide by checking direction and comparing current slide position in the relations
       const currentSlideIndex = relations[parent.id].findIndex(s => s.id === slide.id)
       const nextSlide = relations[parent.id][currentSlideIndex + 1]
@@ -178,10 +173,6 @@ export default class Slides extends Component {
       const newSlide = direction === 'upwards' ? currentSlideIndex === 0 // If going up and it's the first slide, switch to parent.
         ? parent : prevSlide
         : nextSlide
-
-      console.log(currentSlideIndex)
-      console.log(nextSlide)
-      console.log(prevSlide)
 
       if (newSlide) {
         document.body.style.backgroundImage = this.getSlideBackground(newSlide).backgroundImage
@@ -296,8 +287,6 @@ export default class Slides extends Component {
 
     const { posts, headers } = response
     const slides = posts
-
-    console.log(slides)
 
     if (!slides) {
       throw Error('Unable to get slides. No reason to panic.')
