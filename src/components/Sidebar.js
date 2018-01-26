@@ -27,7 +27,7 @@ export const searchSidebar = {
 export const blogSidebar = {
   children: (
     <Fragment>
-      <h2>What does a sidebar in a blog do?</h2>
+      <h2>Blog sidebar</h2>
     </Fragment>
   )
 }
