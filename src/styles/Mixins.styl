@@ -7,3 +7,31 @@ r(value) { /* https://davidwalsh.name/stylus-rem */
     return unit(value, u)
   }
 }
+
+setHeadings(largest = 60px) {
+  base = largest / 6
+
+  h1 {
+    font-size: r(largest)
+  }
+
+  h2 {
+    font-size: r(base * 4)
+  }
+
+  h3 {
+    font-size: r(base * 3.5)
+  }
+
+  h4 {
+    font-size: r(base * 3)
+  }
+
+  h4 {
+    font-size: r(base * 2)
+  }
+
+  h6 {
+    font-size: r(base * 1.5)
+  }
+}

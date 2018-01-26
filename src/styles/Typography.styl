@@ -1,0 +1,39 @@
+body {
+  font-family: 'Source Sans Pro', sans-serif
+}
+
+setHeadings(60px)
+
+p, ul, ol {
+  font-size: r(24px)
+}
+
+pre {
+  font-family: 'Source Code Pro', monospace !important
+
+  &.small {
+    padding: r(5px) !important
+    margin: 0
+    display: inline
+  }
+}
+
+code {
+  font-family: 'Source Code Pro', monospace !important
+}
+
+ul {
+  list-style-type: none
+
+  li {
+    position: relative
+
+    &:before {
+      position: absolute
+      left: r(-30px)
+      content: '- '
+      font-weight: 700
+      font-family: monospace
+    }
+  }
+}

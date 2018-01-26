@@ -34,15 +34,6 @@
     }
   }
 
-  pre {
-    background: rgba(29, 31, 33, 0.6) !important
-  }
-
-  pre.small {
-    padding: r(5px) !important
-    margin: 0
-    display: inline
-  }
 
   .wrapper {
     // max-width: r(1800px)
@@ -61,39 +52,8 @@
     margin: r(20px) 0
   }
 
-  h1 {
-    font-size: r(80px)
-  }
-
-  h2 {
-    font-size: r(60px)
-  }
-
-  h3 {
-    font-size: r(40px)
-  }
-
-  h4 {
-    font-size: r(30px)
-  }
-
-  p, ul, ol {
-    font-size: r(24px)
-  }
-
-  ul {
-    list-style-type: none
-
-    li {
-      position: relative
-      &:before {
-        position: absolute
-        left: r(-30px)
-        content: '- '
-        font-weight: 700
-        font-family: monospace
-      }
-    }
+  pre {
+    background: rgba(29, 31, 33, 0.6) !important
   }
 
   .slide-title {
@@ -134,6 +94,14 @@
     bottom: r(20px)
     left: r(20px)
     max-width: r(200px)
+  }
+
+  .handle {
+    position: absolute
+    bottom: r(20px)
+    right: r(20px)
+    font-size: r(40px)
+    font-weight: 900
   }
 
   .column {
@@ -196,14 +164,18 @@
     bottom: r(30px)
     overflow: hidden
     display: flex
+    flex-flow: row wrap
     max-width: 100%
+    width: 95%
 
 
     .slide-preview {
       width: r(80px)
       height:r(80px)
+      flex-grow: 1
       margin: 0
-      border-right: r(1px) solid #000
+      // border-right: r(1px) solid #000
+      outline: r(1px) solid #000
       transition: 0.2s ease-in
       float: left
       background-image: none !important
