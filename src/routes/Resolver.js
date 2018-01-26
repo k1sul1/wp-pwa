@@ -166,7 +166,7 @@ class Resolver extends Component {
         cacheStaleTime: 60 * 1000 * 10,
       }
       let [post, archives] = await Promise.all([
-        WP.getByURL(url, {}, cacheSettings),
+        WP.getByURL(url, cacheSettings),
         WP.getArchives({}, cacheSettings),
       ])
       const findObjectByProp = (key, compare, arr) => {
@@ -325,7 +325,7 @@ class Resolver extends Component {
     const { ready, crashed, ViewComponent, ViewComponentProps } = this.state
 
     if (crashed) {
-      return <Error {...crashed} />
+      return <Error {...crashed} navigation={this.state.navigation} />
     }
 
     return ready

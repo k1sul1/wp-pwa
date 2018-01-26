@@ -276,13 +276,8 @@ export default class Slides extends Component {
     const { slide } = this.state
 
     const response = await WP.getPostsFrom('slides', {
-      params: {
-        per_page: 100, // if you have more than a hundred slides you have a problem
-        _embed: 1,
-      },
-    }, {
-      // preferCache: true,
-      // cacheStaleTime: 3600000 / 12,
+      per_page: 100, // if you have more than a hundred slides you have a problem
+      _embed: 1,
     })
 
     const { posts, headers } = response
@@ -412,6 +407,7 @@ export default class Slides extends Component {
         </a>
 
         <img src={logo} alt="Vincit" className="vincit-logo" />
+        <span className="handle">@k1sul1</span>
       </article>
     )
   }

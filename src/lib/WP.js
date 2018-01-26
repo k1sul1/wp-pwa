@@ -3,9 +3,17 @@ import localforage from 'localforage'
 import omit from 'lodash.omit'
 import queryString from 'query-string'
 
-import { MenuLoadError, ArchiveLoadError, LookupError, FatalError404, Forbidden, Unauthorized, OfflineError } from '../errors'
 import { isDevelopment, renderHTML, taxonomyRESTBase } from '../lib/helpers'
 import p from  '../../package.json'
+import {
+  MenuLoadError,
+  ArchiveLoadError,
+  LookupError,
+  FatalError404,
+  // Forbidden,
+  Unauthorized,
+  OfflineError
+} from '../errors'
 
 const requestCache = localforage.createInstance({
   name: 'requestCache',
@@ -29,13 +37,27 @@ export const getWPURL = () => {
 
 class WP_Client {
   constructor(url = undefined) {
-    this.url = url || '' // Use relative urls, assume current domain
     this.offline = !navigator.onLine
     this.saveIntoReqCache = true
-    this.cacheKeyPrefix = ''
     this.cacheLogging = false
     this.errorHandler = null
     this.user = null
+    this.axios = axios.create({
+      baseURL: url || '', // Use relative urls
+      validateStatus: status => {
+        // 403 and 401 shouldn't fall into catch
+
+        const successRange = status >= 200 && status < 300
+        const exceptions = status === 403 || status === 401
+
+        return successRange || exceptions
+      }
+    })
+
+    // Remove
+    this.url = url || '' // Use relative urls, assume current domain
+    this.cacheKeyPrefix = ''
+    // End remove
 
     this.setUser() // Async, will not be ready with the first request
     this.addNetworkStatusListeners(this)
@@ -60,16 +82,19 @@ class WP_Client {
     if (error.name === 'QuotaExceededError') {
       console.log(error) // Private browsing or disk full? Fail silently.
       this.saveIntoReqCache = false
-      // return await this.retry()
-    } else if (error.message === 'Network Error') {
-      return this.onError(new OfflineError('Unable to connect to network'))
-    } else if (error.message === 'Request failed with status code 403') {
-      return this.onError(new Forbidden('It appears this requires authentication'))
-    } else if (error.message === 'Request failed with status code 401') {
-      return this.onError(new Unauthorized('Resource demands that you authenticate first'))
-    } else if (error.message === 'Request failed with status code 404') {
-      // Endpoint wasn't found at all.
-      return this.onError(new FatalError404('No endpoint found.'))
+      return false
+    }
+
+    switch (error.message) {
+      case 'Network Error': {
+        return this.onError(new OfflineError('Unable to connect to network'))
+      }
+
+      case 'Request failed with status code of 404': {
+        return this.onError(new FatalError404('No endpoint found.'))
+      }
+
+      // no default
     }
 
     if (this.errorHandler) {
@@ -176,11 +201,7 @@ class WP_Client {
     }
   }
 
-  async getPostsFrom(type = 'posts', payload = { params: {} }) {
-    // const { params } = payload
-    // const page = params.page ? params.page : 1
-    // const perPage = params.perPage ? params.perPage : 10
-    // const endpoint = `/wp-json/wp/v2/${type}?${page ? `page=${page}&` : ''}per_page=${perPage}&_embed=1`
+  async getPostsFrom(type = 'posts', payload = {}, options) {
     const endpoint = `/wp-json/wp/v2/${type}`
 
     const cacheParams = {
@@ -193,12 +214,7 @@ class WP_Client {
     const request = cached ? cached : await this.get(endpoint, {
       ...payload,
       _embed: 1,
-      /* params: {
-        page,
-        per_page: perPage,
-        '_embed': 1,
-      } */
-    })
+    }, options)
 
     const { data, headers } = request
 
@@ -248,10 +264,8 @@ class WP_Client {
       case 'taxonomy': {
         const { term_id, taxonomy } = params
         const response = await this.getPostsFrom('posts', {
-          params: {
-            [taxonomyRESTBase(taxonomy)]: term_id,
-            ...params,
-          }
+          [taxonomyRESTBase(taxonomy)]: term_id,
+          ...params,
         }, options)
 
         if (response) {
@@ -266,9 +280,7 @@ class WP_Client {
         // might have to create a helper, because rest base..
         const { restBase } = params
         const response = await this.getPostsFrom(restBase, {
-          params: {
-            ...params,
-          }
+          ...params,
         }, options)
 
         if (response) {
@@ -338,7 +350,7 @@ class WP_Client {
   async getArchives(params = {}, options = {}) {
     const cacheParams = {
       method: 'getArchives',
-      ...params,
+      ...options,
     }
     const endpoint = '/wp-json/emp/v1/archives'
     const cached = await this.getCached(endpoint, cacheParams)
@@ -414,6 +426,25 @@ class WP_Client {
     return false
   }
 
+  async validateAuthentication(token) {
+    const response = await this.post('/wp-json/simple-jwt-authentication/v1/validate', {}, {
+      validateStatus: (status) => (status >= 200 && status < 300) || (status >= 401 && status <= 403),
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    })
+
+    if (response) {
+      const { status } = response
+
+      if (status === 200) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   addNetworkStatusListeners(component) {
     window.addEventListener('online', component)
     window.addEventListener('offline', component)
@@ -454,20 +485,17 @@ class WP_Client {
     return false
   }
 
-  async getByURL(url, params) {
+  async getByURL(url, options) {
     const cacheParams = {
       method: 'getByURL',
       url,
-      params,
+      options,
     }
 
     const endpoint = '/wp-json/rpl/v1/lookup'
     const cached = await this.getCached(endpoint, cacheParams)
     const request = cached ? cached : await this.get(endpoint, {
-      params: {
-        ...params,
-        url,
-      }
+      url,
     })
 
     if (request) {
@@ -500,145 +528,6 @@ class WP_Client {
     }
 
     return false
-  }
-
-  async retry(maxTimes = 3) {
-    console.log('retrying is untested, does it work?')
-    console.log('it does to some extent')
-    if (this.lastRequest) {
-      const { endpoint, payload, options, retries } = this.lastRequest
-
-      if (retries && retries >= maxTimes) {
-        // console.log('Retried too many times.')
-        return this.wpErrorHandler(new Error('Retried too many times.'))
-      }
-
-      console.log(this.lastRequest, retries)
-
-      this.lastRequest.retries = retries + 1
-      return this.req(endpoint, payload, options)
-    }
-
-    return false
-  }
-
-  async req(endpoint, payload = {}, options = {}) {
-    const opts = {
-      method: 'get',
-      raw: false,
-
-      crashAppOnError: false,
-      ignoreAxiosError: false,
-      allowCache: true,
-      preferCache: isDevelopment ? false : true,
-      cacheStaleTime: 3600000 * 3, // 3 hours
-
-      ...options, // Overwrite the defaults
-    }
-
-    if (!this.saveIntoReqCache) {
-      opts.allowCache = false
-    }
-
-    const headers = {}
-    const user = this.user || await this.getCurrentUser() // this.user is null on initial req
-    const jwt = user ? user.token : false
-
-    if (jwt) {
-      headers['Authorization'] = `Bearer ${jwt}`
-    }
-
-    const cacheKey = this.getCacheKey(endpoint, payload, options, user)
-    const addCacheMeta = (data) => ({
-      data,
-      meta: {
-        cacheTime: Date.now(),
-      }
-    })
-
-    this.lastRequest = {
-      endpoint,
-      payload,
-      options,
-      retries: 0,
-      ...(this.lastRequest ? cacheKey === this.getCacheKey(
-        this.lastRequest.endpoint,
-        this.lastRequest.payload,
-        this.lastRequest.options,
-        this.user,
-      ) ? this.lastRequest : {} : {}),
-    }
-
-    if (!endpoint) {
-      throw new Error('Endpoint URL mustn\'t be empty.')
-    }
-
-    if ((this.offline || opts.preferCache) && opts.allowCache) {
-      const cached = await requestCache.getItem(cacheKey).catch(this.onError)
-
-      if (cached) {
-        console.log('hit cache', endpoint)
-        const { cacheTime } = cached.meta
-
-        if (Date.now() - cacheTime < opts.cacheStaleTime) {
-          return cached.data
-        } else {
-          // Cache stale!
-          console.log('Cache stale for', endpoint)
-          if (this.offline) {
-            // Better something than nothing?
-            return cached.data
-          }
-        }
-      }
-
-      console.log('cache miss', endpoint)
-    }
-
-    try {
-      const reqOpts = {
-        withCredentials: true,
-        headers,
-      }
-      let response
-
-      switch (opts.method) {
-        case 'get': {
-          response = await axios.get(`${this.url}${endpoint}`, {
-            ...reqOpts,
-            ...payload,
-          })
-          break
-        }
-
-        case 'post': {
-          response = await axios.post(`${this.url}${endpoint}`, {
-            ...payload,
-          }, reqOpts)
-          break
-        }
-
-        // no default
-      }
-
-      response.data.__headers = response.headers
-
-      // If a raw response wasn't requested, return the data only
-      // Could also implement a method that returns the last request (by storing the last req)
-      if (!opts.raw) {
-        opts.allowCache && await requestCache.setItem(cacheKey, addCacheMeta(response.data)).catch(this.onError)
-        return response.data
-      }
-
-      opts.allowCache && await requestCache.setItem(cacheKey, addCacheMeta(response)).catch(this.onError)
-      return response
-    } catch(e) {
-      if (opts.ignoreAxiosError) {
-        return e
-      }
-
-      return this.onError(e)
-    }
   }
 
   addCacheMeta(data, meta = {}) {
@@ -677,7 +566,7 @@ class WP_Client {
       if (cached) {
         const { cacheTime, cacheExpiry, always } = cached.meta
 
-        if (!always && process.env.NODE_ENV !== 'production') {
+        if (!always && isDevelopment) {
           return false
         }
 
@@ -720,28 +609,38 @@ class WP_Client {
 
   async addAuthHeader(headers) {
     const user = this.user || await this.getCurrentUser() // this.user is null on initial req
+    const expiry = user ? user.token_expires : 0
     const jwt = user ? user.token : false
 
-    if (jwt) {
+    if (jwt && expiry * 1000 > Date.now()) {
       headers['Authorization'] = `Bearer ${jwt}`
     }
 
     return headers
   }
 
-  async get(url, payload = {}) {
-    const headers = await this.addAuthHeader(payload.headers || {})
+  async get(url, payload = {}, config = {}) {
+    const headers = await this.addAuthHeader(config.headers || {})
 
     try {
       // parse url, remove querystrings and append them to payload
       const [endpoint, qs] = url.split('?')
-      const response = await axios.get(`${this.url}${endpoint}`, {
-        // params: {
-          ...queryString.parse(qs),
-          ...payload,
+      const response = await this.axios.get(
+        endpoint,
+        {
+          ...config,
+          params: {
+            ...queryString.parse(qs),
+            ...payload,
+          },
           headers,
-        // }
-      })
+        }
+      )
+
+      const { status } = response
+      if (status === 401 || status === 403) {
+        return this.onError(new Unauthorized('Resource requires authentication'))
+      }
 
       return response
     } catch (e) {
@@ -749,15 +648,20 @@ class WP_Client {
     }
   }
 
-  async post(url, payload = {}) {
-    const headers = await this.addAuthHeader(payload.headers || {})
+  async post(url, payload = {}, config = {}) {
+    const headers = await this.addAuthHeader(config.headers || {})
 
     try {
       const endpoint = url
-      const response = await axios.post(`${this.url}${endpoint}`, {
-        ...payload,
+      const response = await this.axios.post(endpoint, payload, {
+        ...config,
         headers
       })
+
+      const { status } = response
+      if (status === 401 || status === 403) {
+        return this.onError(new Unauthorized('Resource requires authentication'))
+      }
 
       return response
     } catch (e) {
