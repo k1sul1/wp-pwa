@@ -13,19 +13,51 @@
     animation-duration: 0.3s
 
     &.has-sidebar {
-      > main {
-        flex-basis: 65%
-      }
+      // > main {
+        // flex-basis: 65%
+      // }
 
-      > aside {
-        flex-basis: 35%
-        flex-shrink: 0
-      }
+      // > aside {
+        // flex-basis: 35%
+        // flex-shrink: 0
+      // }
     }
 
     &.no-sidebar {
+      // > main {
+        // flex-basis: 90%
+      // }
+    }
+
+    &.sidebar-open {
       > main {
-        flex-basis: 90%
+        // flex-basis: 65%
+        width: 65%
+
+        @media (max-width: 768px) {
+          width: 10%
+        }
+      }
+
+      aside {
+        width: 35%
+
+        @media (max-width: 768px) {
+          width: 90%
+        }
+      }
+    }
+
+    &.sidebar-closed {
+      main {
+        // flex-basis: 90%
+        width: 90%
+      }
+
+      aside {
+        white-space: nowrap
+        overflow: hidden
+        width: 10%
       }
     }
 
@@ -45,6 +77,7 @@
 
     > aside {
       padding: r(20px)
+      min-height: 100vh
     }
   }
 }

@@ -20,6 +20,7 @@ export const searchSidebar = {
       <h2>Try the search</h2>
 
       <SearchForm />
+      <CurrentUser />
     </Fragment>
   )
 }
@@ -28,6 +29,7 @@ export const blogSidebar = {
   children: (
     <Fragment>
       <h2>Blog sidebar</h2>
+      <CurrentUser />
     </Fragment>
   )
 }
@@ -52,10 +54,10 @@ export default class Sidebar extends Component {
       return <aside></aside>
     }
 
-    const { children } = this.props
+    const { children, onClick } = this.props
 
     return (
-      <aside>
+      <aside onClick={(e) => onClick(e)}>
         { children }
       </aside>
     )

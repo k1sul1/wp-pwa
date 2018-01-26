@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
+import debounce from 'debounce'
 import WP from '../lib/WP'
 
 import Header from './Header'
@@ -16,7 +17,8 @@ class Layout extends Component {
     // When these change, a re-render will trigger and everything can be updated accordingly
     // except the child components.
     this.state = {
-      online: navigator.onLine
+      online: navigator.onLine,
+      sidebarOpen: window.innerWidth > 768,
     }
   }
 
@@ -50,27 +52,53 @@ class Layout extends Component {
     })
   }
 
+  maybeToggleSidebar(e) {
+    e.preventDefault()
+
+    if (window.innerWidth <= 768) {
+      this.setState({
+        sidebarOpen: !this.state.sidebarOpen,
+      })
+    }
+  }
+
+  resize(e) {
+    if (window.innerWidth > 768) {
+      return this.setState({
+        sidebarOpen: true
+      })
+    }
+
+    return this.setState({
+      sidebarOpen: false
+    })
+  }
+
+  onresize = debounce((e) => this.resize(e), 100)
+
   handleEvent(e) {
     this[`on${e.type}`](e)
   }
 
   async componentDidMount() {
     WP.addNetworkStatusListeners(this)
+    window.addEventListener('resize', this.onresize)
   }
 
   async componentWillUnmount() {
     WP.removeNetworkStatusListeners(this)
+    window.removeEventListener('resize', this.onresize)
   }
 
   render() {
     const { children, sidebar, navigation, disableTransition, className } = this.props;
-    const { online } = this.state
+    const { online, sidebarOpen } = this.state
 
     const wrapperClass = `
     application__wrapper
     ${!disableTransition ? 'animated fadeIn' : ''}
     ${className || ''}
-    ${sidebar ? 'has-sidebar' : 'no-sidebar'}`
+    ${sidebar ? `has-sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}` : 'no-sidebar'}`
 
     return (
       <Fragment>
@@ -81,7 +109,7 @@ class Layout extends Component {
             {children}
           </main>
 
-          <Sidebar {...sidebar} />
+          <Sidebar {...sidebar} onClick={(e) => this.maybeToggleSidebar(e)} />
           {/* Pass contents of sidebar object as props,
           if there's no props, no sidebar contents will be rendered.
 
