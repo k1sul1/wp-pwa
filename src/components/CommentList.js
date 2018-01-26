@@ -12,6 +12,8 @@ const loadChildren = async (page, context) => {
     throw new Error('Unable to load comments without context')
   }
 
+  await new Promise(resolve => setTimeout(resolve, 2000))
+
   const params = {
     page,
     parent: context.id,
@@ -70,8 +72,8 @@ export const Comment = (post, context) => {
         {post.content.rendered}
       </div>
 
-      {/* One level of hierarchy is going to have to be enough. */}
-      {post.parent === 0 ? (
+      {/* Hierarchical comments are so hard to implement that this is an infinite loop */}
+      {post.parent === 0 ? false && (
         <Comments
           context={post}
           loadItems={loadChildren}
