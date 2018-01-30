@@ -14,6 +14,7 @@
   animation-duration: 0.3s
 
   @media (max-width: 768px) {
+    position: relative
     min-height: 100vh
     height: auto
     // margin-top: r(20px)
@@ -22,7 +23,9 @@
   }
 
   &.gif {
-    // background-size: 100vh
+    @media (max-width: 768px) {
+      background-size: contain
+    }
   }
 
   &.parent {
@@ -103,7 +106,7 @@
 
   @media (max-width: 768px) {
     .vincit-logo, .handle {
-      position: static
+      // position: static
       margin: r(20px) 0
     }
 
