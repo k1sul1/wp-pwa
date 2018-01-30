@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
+import ExtendableError from 'es6-error'
 import debounce from 'debounce'
+
 import { searchSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
-import ExtendableError from 'es6-error'
 import { ResolverError, Error404, FatalError404, Forbidden, MenuLoadError, LookupError, Unauthorized } from '../errors'
 
 import Error from './Error'
