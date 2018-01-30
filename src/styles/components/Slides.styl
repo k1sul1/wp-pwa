@@ -13,17 +13,20 @@
   color: #fff
   animation-duration: 0.3s
 
+  @media (max-width: 768px) {
+    min-height: 100vh
+    height: auto
+    // margin-top: r(20px)
+    padding-top: r(20px)
+    // padding-bottom: r(80px)
+  }
+
   &.gif {
     // background-size: 100vh
   }
 
   &.parent {
-    // text-align: center
-
     .wrapper {
-      // align-items: center
-      // justify-content: center
-      // display: flex
     }
   }
 
@@ -36,15 +39,9 @@
 
 
   .wrapper {
-    // max-width: r(1800px)
     width: 90%
-    // min-height: 90%
     background: rgba(#000, 0.9)
     padding: 0 r(30px)
-    // display: flex
-    // flex-flow: column nowrap
-    // justify-content: center
-    // align-items: flex-start
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -102,6 +99,17 @@
     right: r(20px)
     font-size: r(40px)
     font-weight: 900
+  }
+
+  @media (max-width: 768px) {
+    .vincit-logo, .handle {
+      position: static
+      margin: r(20px) 0
+    }
+
+    .edit-link {
+      display: none
+    }
   }
 
   .column {

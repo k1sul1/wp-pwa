@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import { Manager, Swipe } from 'hammerjs'
 
 import logo from '../img/vincit-logo'
 import p from '../../package.json'
@@ -110,6 +111,7 @@ export default class Slides extends Component {
             parent: relations[nextSlide.id] ? nextSlide : null,
             animationDir: 'left',
           }, this.afterSwitch)
+          return true
         }
 
         break
@@ -126,6 +128,7 @@ export default class Slides extends Component {
             parent: relations[prevSlide.id] ? prevSlide : null,
             animationDir: 'right'
           }, this.afterSwitch)
+          return true
         }
         break
       }
@@ -159,7 +162,7 @@ export default class Slides extends Component {
           // parent,
         }, this.afterSwitch)
 
-        return
+        return true
       }
     } else {
       Object.entries(relations).forEach(([key, children]) => {
@@ -181,6 +184,8 @@ export default class Slides extends Component {
           slide: newSlide,
           animationDir: direction === 'upwards' ? 'up' : 'down',
         }, this.afterSwitch)
+
+        return true
       }
 
       if (!parent) {
@@ -188,52 +193,22 @@ export default class Slides extends Component {
         console.log('Or wait a bit.');
         return
       }
+    }
+  }
 
-      /* const relationsLength = relations[parent.id].length
-      const slideCount = relationsLength > 1 ? relationsLength - 1 : relationsLength
+  async nextSlide() {
+    const subslide = await this.switchSubSlide('downwards')
 
+    if (!subslide) {
+      this.switchSlide('forwards')
+    }
+  }
 
-      switch (direction) {
-        case 'downwards': {
-          if (currentIndex < slideCount) {
-            // document.body.style.backgroundImage = this.getSlideBackground(relations[parent.id][currentIndex + 1]).backgroundImage
-            await this.animate('bounceOutUp')
+  async previousSlide() {
+    const subslide = await this.switchSubSlide('upwards')
 
-            this.setState({
-              slide: relations[parent.id][currentIndex + 1],
-              parent,
-              animationDir: 'down',
-            }, this.afterSwitch)
-          }
-
-          break
-        }
-
-        case 'upwards': {
-          if (currentIndex - 1 >= 0) {
-            // document.body.style.backgroundImage = this.getSlideBackground(relations[parent.id][currentIndex - 1]).backgroundImage
-            await this.animate('bounceOutDown')
-
-            this.setState({
-              slide: relations[parent.id][currentIndex - 1],
-              parent,
-              animationDir: 'up',
-            }, this.afterSwitch)
-          } else if (currentIndex - 1 < 0) {
-            await this.animate('bounceOutDown')
-            // document.body.style.backgroundImage = this.getSlideBackground(parent).backgroundImage
-
-
-            this.setState({
-              slide: parent,
-              animationDir: 'up',
-            }, this.afterSwitch)
-          }
-          break
-        }
-
-        // no default
-      } */
+    if (!subslide) {
+      this.switchSlide('backwards')
     }
   }
 
@@ -261,6 +236,16 @@ export default class Slides extends Component {
             break
           }
 
+          case 'PageDown': {
+            await this.nextSlide()
+            break
+          }
+
+          case 'PageUp': {
+            await this.previousSlide()
+            break
+          }
+
           // no default
         }
       }
@@ -270,7 +255,7 @@ export default class Slides extends Component {
   }
 
   async componentDidMount() {
-    document.body.classList.add('fullscreen')
+    document.body.classList.add('desktop-fullscreen')
     window.addEventListener('keydown', this)
 
     const { slide } = this.state
@@ -321,6 +306,8 @@ export default class Slides extends Component {
       parent,
       ready: true,
     })
+
+    this.addTouchGestures()
   }
 
   async componentWillReceiveProps(props) {
@@ -333,9 +320,36 @@ export default class Slides extends Component {
     }
   }
 
+  componentDidUpdate() {
+    this.hammer && this.hammer.destroy()
+    this.addTouchGestures()
+  }
+
   componentWillUnmount() {
-    document.body.classList.remove('fullscreen')
+    document.body.classList.remove('desktop-fullscreen')
     window.removeEventListener('keydown', this)
+
+    this.hammer && this.hammer.destroy()
+  }
+
+  addTouchGestures() {
+    this.hammer = new Manager(this.slide)
+    this.hammer.add(new Swipe())
+
+    this.hammer.on('swipe', (e) => {
+      switch (e.direction) {
+        case 4: {
+          return this.nextSlide()
+        }
+
+        case 2: {
+          return this.previousSlide()
+        }
+
+        // no default
+      }
+      console.log(e)
+    })
   }
 
   getSlideBackground(slide) {

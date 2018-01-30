@@ -18,9 +18,11 @@ html {
 body {
   overflow-y: scroll
 
-  &.fullscreen {
-    overflow: hidden
-    background: #222
+  &.desktop-fullscreen {
+    @media (min-width: 1280px) {
+      overflow: hidden
+      background: #222
+    }
   }
 }
 
