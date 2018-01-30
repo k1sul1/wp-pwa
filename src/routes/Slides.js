@@ -333,6 +333,10 @@ export default class Slides extends Component {
   }
 
   addTouchGestures() {
+    if (!this.slide) {
+      return false
+    }
+
     this.hammer = new Manager(this.slide)
     this.hammer.add(new Swipe())
 
@@ -451,7 +455,7 @@ export default class Slides extends Component {
     const { slide, ready } = this.state
 
     if (!ready) {
-      return <p>Any moment now...</p>
+      return <p className="slide-loading-text">Any moment now...</p>
     }
 
     if (!slide) {
