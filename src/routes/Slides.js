@@ -352,7 +352,6 @@ export default class Slides extends Component {
 
         // no default
       }
-      console.log(e)
     })
   }
 
