@@ -27,7 +27,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "postbuild": "cat build/index.html >> build/index.php && rm -rf ../htdocs/static/ && cp -r build/* ../htdocs/",
+    "postbuild": "mv build/index.html build/app.html && rm -rf ../htdocs/static/ && cp -r build/* ../htdocs/",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
