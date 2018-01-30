@@ -6,6 +6,7 @@ setHeadings(60px)
 
 p, ul, ol {
   font-size: r(24px)
+  line-height: 1.5
 }
 
 pre {
@@ -35,5 +36,30 @@ ul {
       font-weight: 700
       font-family: monospace
     }
+  }
+}
+
+textInput() {
+  background: lighten(#ccc, 10%)
+  border-radius: 0
+  appearance: none
+  border: 0
+  outline: 0
+  padding: r(4px) r(8px)
+  margin: r(5px) 0
+  transition: 0.3s
+
+  &:focus, &:hover, &:active {
+    border: 0
+    outline: 0
+    background: #fff
+  }
+}
+
+input {
+  &[type="text"],
+  &[type="email"],
+  &[type="password"] {
+    textInput()
   }
 }

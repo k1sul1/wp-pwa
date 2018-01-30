@@ -61,7 +61,7 @@ class Page extends Component {
 
   render() {
     const props = this.props
-    const { filterTitle, filterContent, post } = props
+    const { filterTitle, filterContent, post, sidebar } = props
 
     if (!post) {
       throw new Error('Expected post to contain post data')
@@ -71,7 +71,7 @@ class Page extends Component {
     const { authenticated } = this.state
 
     return (
-      <Layout sidebar={defaultSidebar} className="single-page" {...props}>
+      <Layout sidebar={defaultSidebar(sidebar)} className="single-page" {...props}>
         <article className="single-page">
           {filterTitle(<h2>{title.rendered}</h2>, props)}
           {filterContent(

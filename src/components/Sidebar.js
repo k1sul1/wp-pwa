@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import CurrentUser from './CurrentUser'
 import SearchForm from '../components/SearchForm'
 
-export const defaultSidebar = {
+export const defaultSidebar = (props) => merge({
   children: (
     <Fragment>
       <h2>Sidebar</h2>
@@ -12,7 +12,7 @@ export const defaultSidebar = {
       <CurrentUser />
     </Fragment>
   ),
-}
+}, props)
 
 export const searchSidebar = {
   children: (
@@ -25,14 +25,19 @@ export const searchSidebar = {
   )
 }
 
-export const blogSidebar = {
+export const blogSidebar = (props) => merge({
   children: (
     <Fragment>
       <h2>Blog sidebar</h2>
       <CurrentUser />
     </Fragment>
   )
-}
+}, props)
+
+const merge = (sidebarProps, overridingProps) => ({
+  ...sidebarProps,
+  ...overridingProps,
+})
 
 // Add more configurations if you'd like!
 
@@ -45,9 +50,8 @@ export default class Sidebar extends Component {
 
   static propTypes = {
     children: PropTypes.node,
+    onClick: PropTypes.func,
   }
-
-  // static defaultProps = defaultSidebar
 
   render() {
     if (!this.props) {

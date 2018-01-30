@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import debounce from 'debounce'
 import { searchSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
 import ExtendableError from 'es6-error'
@@ -15,6 +16,11 @@ class Resolver extends Component {
       ready: false,
       crashed: false,
       authenticationRequired: false,
+
+      sidebar: {
+        open: window.innerWidth > 768,
+        onClick: (e) => this.maybeToggleSidebar(e),
+      },
 
       navigation: {
         open: false,
@@ -40,6 +46,43 @@ class Resolver extends Component {
         disableTransition: false,
       },
     }
+  }
+
+  maybeToggleSidebar(e) {
+    // e.preventDefault() // Enabling prevents onSubmit from working in LoginForm
+    if (e.target.tagName !== 'ASIDE') {
+      return
+    }
+
+    if (window.innerWidth <= 768) {
+      const newState = {
+        sidebar: {
+          ...this.state.sidebar,
+          open: !this.state.sidebar.open,
+        }
+      }
+
+      this.setState(newState)
+    }
+  }
+
+  resize(e) {
+    if (window.innerWidth > 768) {
+      this.setState({
+        sidebarOpen: true
+      })
+    } else {
+      this.setState({
+        sidebarOpen: false
+      })
+    }
+  }
+
+  onresize = debounce((e) => this.resize(e), 100)
+
+  handleEvent(e) {
+    console.log(e)
+    this[`on${e.type}`](e)
   }
 
   async showComponent(component, componentProps = {}, merge = false) {
@@ -325,11 +368,11 @@ class Resolver extends Component {
     const { ready, crashed, ViewComponent, ViewComponentProps } = this.state
 
     if (crashed) {
-      return <Error {...crashed} navigation={this.state.navigation} />
+      return <Error {...crashed} navigation={this.state.navigation} sidebar={this.state.sidebar} />
     }
 
     return ready
-      ? <ViewComponent {...ViewComponentProps} navigation={this.state.navigation}/>
+      ? <ViewComponent {...ViewComponentProps} navigation={this.state.navigation} sidebar={this.state.sidebar} />
       : <Loading />
   }
 }

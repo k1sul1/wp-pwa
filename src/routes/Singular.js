@@ -27,8 +27,8 @@ const content = (node, { post }) => (
   </Fragment>
 )
 
-const Singular = (props) => console.log(props) || (
-  <Page {...props} sidebar={blogSidebar} filterTitle={header} filterContent={content} className="singular" />
+const Singular = (props) => (
+  <Page {...props} sidebar={blogSidebar(props.sidebar)} filterTitle={header} filterContent={content} className="singular" />
 )
 
 export default Singular

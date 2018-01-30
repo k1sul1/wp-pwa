@@ -82,10 +82,10 @@ export default class CurrentUser extends Component {
       return <p>Loading...</p>
     }
 
-    return (
-      <article>
-        {user ? <User {...user} logout={WP.logout} /> : <LoginForm WP={WP} />}
-      </article>
+    return user ? (
+      <User {...user} logout={WP.logout} />
+    ) : (
+      <LoginForm />
     )
   }
 }

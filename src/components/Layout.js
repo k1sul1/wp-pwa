@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
-import debounce from 'debounce'
 import WP from '../lib/WP'
 
 import Header from './Header'
@@ -18,7 +17,7 @@ class Layout extends Component {
     // except the child components.
     this.state = {
       online: navigator.onLine,
-      sidebarOpen: window.innerWidth > 768,
+      // sidebarOpen: window.innerWidth > 768,
     }
   }
 
@@ -52,8 +51,11 @@ class Layout extends Component {
     })
   }
 
-  maybeToggleSidebar(e) {
-    e.preventDefault()
+  /* maybeToggleSidebar(e) {
+    // e.preventDefault() // Enabling prevents onSubmit from working in LoginForm
+    if (e.target.tagName !== 'ASIDE') {
+      return
+    }
 
     if (window.innerWidth <= 768) {
       this.setState({
@@ -64,21 +66,22 @@ class Layout extends Component {
 
   resize(e) {
     if (window.innerWidth > 768) {
-      return this.setState({
+      this.setState({
         sidebarOpen: true
       })
+    } else {
+      this.setState({
+        sidebarOpen: false
+      })
     }
-
-    return this.setState({
-      sidebarOpen: false
-    })
   }
 
   onresize = debounce((e) => this.resize(e), 100)
 
   handleEvent(e) {
+    console.log(e)
     this[`on${e.type}`](e)
-  }
+  } */
 
   async componentDidMount() {
     WP.addNetworkStatusListeners(this)
@@ -92,13 +95,13 @@ class Layout extends Component {
 
   render() {
     const { children, sidebar, navigation, disableTransition, className } = this.props;
-    const { online, sidebarOpen } = this.state
+    const { online } = this.state
 
     const wrapperClass = `
     application__wrapper
     ${!disableTransition ? 'animated fadeIn' : ''}
     ${className || ''}
-    ${sidebar ? `has-sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}` : 'no-sidebar'}`
+    ${sidebar ? `has-sidebar ${sidebar.open ? 'sidebar-open' : 'sidebar-closed'}` : 'no-sidebar'}`
 
     return (
       <Fragment>
@@ -109,7 +112,7 @@ class Layout extends Component {
             {children}
           </main>
 
-          <Sidebar {...sidebar} onClick={(e) => this.maybeToggleSidebar(e)} />
+          <Sidebar {...sidebar} />
           {/* Pass contents of sidebar object as props,
           if there's no props, no sidebar contents will be rendered.
 
