@@ -9,11 +9,8 @@ import { atomDark } from 'react-syntax-highlighter/styles/prism'
 registerLanguage('jsx', jsx)
 
 export const dumpObject = (obj) => {
-const code = Object.entries(obj).map(([key, value]) => `${key}: ${JSON.stringify(value, null, 2)}`)
-    .reduce((acc, line) => acc = acc + line + ',\n', '')
-  const string = `{
-${code}
-}`
+  const string = JSON.stringify({ ...obj }, null, 2)
+
   return (
     <SyntaxHighlighter language='javascript' style={atomDark}>
       {string}
