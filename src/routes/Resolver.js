@@ -4,7 +4,16 @@ import debounce from 'debounce'
 
 import { searchSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
-import { ResolverError, Error404, FatalError404, Forbidden, MenuLoadError, LookupError, Unauthorized } from '../errors'
+import {
+  ResolverError,
+  Error404,
+  FatalError404,
+  Forbidden,
+  MenuLoadError,
+  LookupError,
+  Unauthorized,
+  OfflineError
+} from '../errors'
 
 import Error from './Error'
 import Loading from './Loading'
@@ -172,6 +181,15 @@ class Resolver extends Component {
             crashed: { error }
           })
           break
+        }
+
+        case OfflineError: {
+        console.log(`
+You can just swallow OfflineError by returning before the error page is displayed.
+
+That gets rid of the OfflineError flash when offline. Other error handling will kick in if content isn't found.`)
+
+          // return // uncomment to swallow error
         }
 
         // no default

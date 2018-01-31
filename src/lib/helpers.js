@@ -8,13 +8,19 @@ import { atomDark } from 'react-syntax-highlighter/styles/prism'
 
 registerLanguage('jsx', jsx)
 
-export const dumpObject = (obj) => (
-  <code>
-    <pre>
-      {Object.entries(obj).map(([key, value]) => `${key}: ${JSON.stringify(value, null, 2)}\n`)}
-    </pre>
-  </code>
-)
+export const dumpObject = (obj) => {
+const code = Object.entries(obj).map(([key, value]) => `${key}: ${JSON.stringify(value, null, 2)}`)
+    .reduce((acc, line) => acc = acc + line + ',\n', '')
+  const string = `{
+${code}
+}`
+  return (
+    <SyntaxHighlighter language='javascript' style={atomDark}>
+      {string}
+    </SyntaxHighlighter>
+  )
+}
+
 
 const isDownloadComponent = (node) => {
   // readrepo url from package.json
