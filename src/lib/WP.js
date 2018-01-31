@@ -24,6 +24,8 @@ const dataStore = localforage.createInstance({
 })
 
 export const getWPURL = () => {
+  return p.prodWP
+
   const urls = [p.prodWP, p.devWP]
   const index = urls.indexOf(window.location.origin)
   if (index > -1) {
