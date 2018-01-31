@@ -47,7 +47,7 @@ const loadTopLevelComments = async (page, context) => {
     post: context.id,
   }
 
-  const result = await WP.getForContext('comments', { params })
+  const result = await WP.getForContext('comments', { ...params })
   const posts = result ? result.posts : [];
   const headers = result ? result.headers : {};
   const maxPages = headers && headers['x-wp-totalpages']
