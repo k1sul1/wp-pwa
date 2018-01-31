@@ -61,7 +61,10 @@ export const getImageData = (image, size) => {
 }
 
 export const Image = ({ imageObj, size = 'medium', ...remaining }) => {
-  if (!imageObj) return false
+  if (!imageObj) {
+    return false
+  }
+
   const image = getImageData(imageObj, size)
   const url = image.source_url
 

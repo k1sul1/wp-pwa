@@ -6,14 +6,40 @@
 
 }
 
-// import 'Singular/*'
-.fancy-header {
+.fancy-header,
+.post-header {
   background: #222
   padding: r(20px)
   color: #fff
 
+  // I don't have time to CSS properly.
+  // Don't judge me.
+  margin: r(-20px)
+  margin-bottom: r(20px)
+
   h2 {
     margin: 0
+  }
+}
+
+.post-header {
+  padding: 0
+
+  .overlay {
+    width: 100%
+    padding: r(20px)
+    background: #222
+  }
+
+  &.has-image {
+    position: relative
+
+    .overlay {
+      background: rgba(#000000, 0.7)
+      position: absolute
+      bottom: 0
+      left: 0
+    }
   }
 }
 

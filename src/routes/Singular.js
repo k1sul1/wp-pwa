@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react'
 import Page from './Page'
+import { Image } from '../lib/image'
 import { blogSidebar } from '../components/Sidebar'
 import CommentList from '../components/CommentList'
 
@@ -9,15 +10,23 @@ const AuthorLine = ({ author }) => (
   </address>
 )
 
-const header = (node, { post }) => (
-  <header>
-    {node}
+const header = (node, { post }) => {
+  const embedded = post._embedded
+  const featuredImages = embedded && embedded['wp:featuredmedia'].length ? embedded['wp:featuredmedia'] : null
 
-    {post && post._embedded && post._embedded.author ? (
-      <AuthorLine author={post._embedded.author[0]} />
-    ) : false}
-  </header>
-)
+  return (
+    <header className={`post-header ${featuredImages ? 'has-image' : 'no-image'}`}>
+      {featuredImages ? <Image imageObj={featuredImages[0]} /> : false}
+
+      <div className="overlay">
+        {node}
+        {post && post._embedded && post._embedded.author ? (
+          <AuthorLine author={post._embedded.author[0]} />
+        ) : false}
+      </div>
+    </header>
+  )
+}
 
 const content = (node, { post }) => (
   <Fragment>
