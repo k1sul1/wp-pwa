@@ -493,6 +493,11 @@ class WP_Client {
       url,
       options,
     }
+    const cacheOpts = {}
+
+    if (url.indexOf('preview=true') > -1) {
+      cacheOpts.cacheTime = 0
+    }
 
     const endpoint = '/wp-json/rpl/v1/lookup'
     const cached = await this.getCached(endpoint, cacheParams)
@@ -522,9 +527,7 @@ class WP_Client {
         }
       }
 
-      if (!data.__cached) {
-        await this.cache(request, cacheParams)
-      }
+      !cached &&  await this.cache(request, cacheParams, cacheOpts)
 
       return this.renderContent(post)
     }
