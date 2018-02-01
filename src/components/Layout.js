@@ -98,10 +98,10 @@ class Layout extends Component {
     const { online } = this.state
 
     const wrapperClass = `
-    application__wrapper
-    ${!disableTransition ? 'animated fadeIn' : ''}
-    ${className || ''}
-    ${sidebar ? `has-sidebar ${sidebar.open ? 'sidebar-open' : 'sidebar-closed'}` : 'no-sidebar'}`
+      application__wrapper
+      ${!disableTransition ? 'animated fadeIn' : ''}
+      ${className || ''}
+      ${sidebar ? `has-sidebar ${sidebar.open ? 'sidebar-open' : 'sidebar-closed'}` : 'no-sidebar'}`
 
     return (
       <Fragment>
@@ -109,7 +109,7 @@ class Layout extends Component {
         <Header navigation={navigation} />
         <div className={wrapperClass}>
           <main id="content">
-            {children}
+            {children /* <Layout><p>Child 1</p><p>Child 2</p></Layout> */}
           </main>
 
           <Sidebar {...sidebar} />
