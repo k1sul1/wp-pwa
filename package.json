@@ -29,7 +29,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "postbuild": "mv build/index.html build/app.html && rm -rf ../htdocs/static/ && cp -r build/* ../htdocs/",
+    "postbuild": "rm -rf ../htdocs/static/ && cp -r build/* ../htdocs/ && mv ../htdocs/index.html ../htdocs/app.html",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
