@@ -17,7 +17,6 @@ class Layout extends Component {
     // except the child components.
     this.state = {
       online: navigator.onLine,
-      // sidebarOpen: window.innerWidth > 768,
     }
   }
 
@@ -50,38 +49,6 @@ class Layout extends Component {
       online: true,
     })
   }
-
-  /* maybeToggleSidebar(e) {
-    // e.preventDefault() // Enabling prevents onSubmit from working in LoginForm
-    if (e.target.tagName !== 'ASIDE') {
-      return
-    }
-
-    if (window.innerWidth <= 768) {
-      this.setState({
-        sidebarOpen: !this.state.sidebarOpen,
-      })
-    }
-  }
-
-  resize(e) {
-    if (window.innerWidth > 768) {
-      this.setState({
-        sidebarOpen: true
-      })
-    } else {
-      this.setState({
-        sidebarOpen: false
-      })
-    }
-  }
-
-  onresize = debounce((e) => this.resize(e), 100)
-
-  handleEvent(e) {
-    console.log(e)
-    this[`on${e.type}`](e)
-  } */
 
   async componentDidMount() {
     WP.addNetworkStatusListeners(this)

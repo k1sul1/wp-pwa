@@ -11,6 +11,8 @@ const Archive = (props) => {
   const titlePrefix = prefix && `${prefix}: `
   const title = archive.label || archive.name
 
+  console.log(props)
+
   if (!archive) {
     throw new Error(`Archive wasn't provided with archive data, unable to render archive.`);
   }

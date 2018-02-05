@@ -3,8 +3,9 @@ import PropTypes from 'prop-types'
 
 import CurrentUser from './CurrentUser'
 import SearchForm from '../components/SearchForm'
+import Download from '../components/Download'
 
-export const defaultSidebar = (props) => merge({
+export const defaultSidebar = (props) => merge(props, {
   children: (
     <Fragment>
       <h2>Sidebar</h2>
@@ -12,9 +13,9 @@ export const defaultSidebar = (props) => merge({
       <CurrentUser />
     </Fragment>
   ),
-}, props)
+})
 
-export const searchSidebar = {
+export const searchSidebar = (props) => merge (props, {
   children: (
     <Fragment>
       <h2>Try the search</h2>
@@ -23,16 +24,17 @@ export const searchSidebar = {
       <CurrentUser />
     </Fragment>
   )
-}
+})
 
-export const blogSidebar = (props) => merge({
+export const blogSidebar = (props) => merge(props, {
   children: (
     <Fragment>
       <h2>Blog sidebar</h2>
       <CurrentUser />
+      <Download />
     </Fragment>
   )
-}, props)
+})
 
 const merge = (sidebarProps, overridingProps) => ({
   ...sidebarProps,

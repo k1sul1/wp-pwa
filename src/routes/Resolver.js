@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import ExtendableError from 'es6-error'
 import debounce from 'debounce'
 
-import { searchSidebar } from '../components/Sidebar'
+import { searchSidebar, defaultSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
 import {
   ResolverError,
@@ -22,15 +22,17 @@ class Resolver extends Component {
   constructor() {
     super()
 
+    console.log(defaultSidebar)
+
     this.state = {
       ready: false,
       crashed: false,
       authenticationRequired: false,
 
-      sidebar: {
+      sidebar: defaultSidebar({
         open: window.innerWidth > 768,
         onClick: (e) => this.maybeToggleSidebar(e),
-      },
+      }),
 
       navigation: {
         open: false,
@@ -170,8 +172,13 @@ class Resolver extends Component {
           this.setState({
             ViewComponentProps: {
               ...this.state.ViewComponentProps,
-              sidebar: searchSidebar
-            }
+              // sidebar: searchSidebar
+            },
+            // sidebar: {
+              // ...this.state.sidebar,
+              // ...searchSidebar()
+            // },
+            sidebar: searchSidebar(this.state.sidebar)
           })
           break // Stop the switch but fall down!
         }
@@ -392,7 +399,7 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
 
     return ready
       ? <ViewComponent {...ViewComponentProps} navigation={this.state.navigation} sidebar={this.state.sidebar} />
-      : <Loading />
+      : <Loading navigation={this.state.navigation} sidebar={this.state.sidebar} />
   }
 }
 
