@@ -1,0 +1,29 @@
+.application__wrapper {
+  &.single-page,
+  &.single-post {
+    #content article > {
+      h1, h2, h3, h4, h5, h6, p,
+      #comments {
+        margin-left: r(20px)
+        margin-right:  @margin-left
+      }
+    }
+  }
+
+  &.blog,
+  &.archive {
+    h1 {
+      margin-left: r(20px)
+      margin-right: @margin-left
+    }
+  }
+
+  &.home {
+    #content article {
+      p {
+        margin-left: auto
+        margin-right: auto
+      }
+    }
+  }
+}

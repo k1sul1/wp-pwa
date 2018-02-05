@@ -1,26 +1,12 @@
-.single-page,
-.blog,
-.archive,
-.home,
-.loading {
-
-}
-
-.fancy-header,
 .post-header {
   background: colors.darkgrey
-  padding: r(20px)
+  // padding: r(20px)
   color: colors.white
-  fightBoxModel()
+  // fightBoxModel()
 
   h2 {
     margin: 0
   }
-}
-
-.post-header {
-  padding: 0
-
   .overlay {
     width: 100%
     padding: r(20px)
@@ -39,44 +25,3 @@
   }
 }
 
-.comment-list {
-  max-width: r(550px)
-
-  &__single {
-    background: lighten(#ccc, 10%)
-    margin-bottom: r(20px)
-
-    header {
-      overflow: hidden
-      position: relative
-      background: colors.darkgrey
-      color: colors.white
-
-      img {
-        float: left
-        max-width: r(50px)
-      }
-    }
-
-    .author-name {
-      display: inline-block
-      position: absolute
-      top: 50%
-      transform: translateY(-50%) translateX(r(10px))
-    }
-
-    .comment {
-      padding: 1% 2%
-    }
-
-    .child-comment-list {
-      // padding: 2%
-      margin: 2%
-
-      .comment-list__single {
-        border-top: r(2px) solid darken(#ccc, 10%)
-        padding-top: r(20px)
-      }
-    }
-  }
-}

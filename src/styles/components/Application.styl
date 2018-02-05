@@ -2,6 +2,7 @@
   min-height: 100%
 
   &__header {
+
   }
 
   &__wrapper {
@@ -11,23 +12,6 @@
     background: colors.darkgrey
     color: colors.white
     animation-duration: 0.3s
-
-    &.has-sidebar {
-      // > main {
-        // flex-basis: 65%
-      // }
-
-      // > aside {
-        // flex-basis: 35%
-        // flex-shrink: 0
-      // }
-    }
-
-    &.no-sidebar {
-      // > main {
-        // flex-basis: 90%
-      // }
-    }
 
     &.sidebar-open {
       > main {
@@ -62,25 +46,12 @@
     }
 
     > main {
-      background: colors.white
-      color: colors.darkgrey
       min-height: 100vh
-
-      padding-top: r(20px)
-      padding-bottom: @padding-top
       overflow: hidden
       transition: 0.3s
 
-      > *:not(.fancy-header) {
-        padding-left: @padding-top
-        padding-right: @padding-top
-      }
-
-      > pre {
-        // error display
-        border-radius: 0 !important
-        margin-top: r(20px) !important
-        margin-bottom: r(-20px) !important
+      p {
+        max-width: r(700px)
       }
     }
 
@@ -90,5 +61,10 @@
       transition: 0.3s
     }
   }
+}
+
+main {
+  background: colors.white
+  color: colors.darkgrey
 }
 

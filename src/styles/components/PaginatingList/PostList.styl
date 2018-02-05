@@ -1,0 +1,24 @@
+.post-list {
+  padding: r(10px) r(0px)
+  background: colors.darkgrey
+
+  &__single {
+    transition: 0.2s
+    color: colors.beige
+    padding: r(5px) r(20px)
+
+    &:hover, &:focus-within {
+      background: colors.bluishgrey
+      color: colors.orange
+    }
+
+    h2 {
+      margin: 0
+    }
+
+    a {
+      color: inherit
+      text-decoration: none
+    }
+  }
+}

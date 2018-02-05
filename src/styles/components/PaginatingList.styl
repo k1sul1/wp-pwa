@@ -1,0 +1,33 @@
+.paginating-list {
+  > p {
+    // message, like error
+    margin-left: r(20px)
+    margin-right: @margin-left
+  }
+
+  .pagination {
+    margin-top: r(10px)
+    margin-left: r(20px)
+    margin-right: r(20px)
+    display: flex
+    flex-flow: row nowrap
+    align-items: center
+    justify-content: space-between
+
+    .previous, .next {
+      // margin-top: r(20px)
+      // margin-bottom: r(40px)
+    }
+
+    .next {
+      // align-self: flex-end
+      margin-left: auto
+    }
+
+    .previous {
+      margin-right: auto
+    }
+  }
+}
+
+@import './PaginatingList/*'

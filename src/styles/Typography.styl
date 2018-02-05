@@ -3,6 +3,8 @@ body {
 }
 
 setHeadings(60px)
+generateBackgroundClasses()
+
 @media (max-width: 768px) {
   setHeadings(40px)
 }
@@ -88,14 +90,33 @@ button() {
   font-size: 1.4em
   font-weight: 700
   transition: 0.3s
+  border: 0
 
   &:hover, &:focus, &:active {
     background: colors.beige
     color: colors.orange
+  }
+
+  for color, hex in colors {
+    &--{color} {
+      background: hex
+      color: colors.white
+
+      &:hover, &:focus, &:active {
+        background: lighten(hex, 10%)
+        color: colors.white
+      }
+    }
   }
 }
 
 .button,
 button {
   button()
+}
+
+pre {
+  border-radius: 0 !important
+  margin-top: r(20px) !important
+  // margin-bottom: r(-20px) !important
 }
