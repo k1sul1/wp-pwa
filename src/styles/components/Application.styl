@@ -8,8 +8,8 @@
     display: flex
     flex-flow: row nowrap
     align-items: flex-start
-    background: #222
-    color: #f1f1f1
+    background: colors.darkgrey
+    color: colors.white
     animation-duration: 0.3s
 
     &.has-sidebar {
@@ -62,8 +62,8 @@
     }
 
     > main {
-      background: #f1f1f1
-      color: #222
+      background: colors.white
+      color: colors.darkgrey
       min-height: 100vh
 
       padding-top: r(20px)
@@ -92,28 +92,3 @@
   }
 }
 
-.offline-notice,
-.admin-bar {
-  position: fixed
-  z-index: 99999
-  top: r(20px)
-  left: r(20px)
-  padding: r(7px)
-  display: inline-block
-  font-size: r(20px)
-  text-transform: uppercase
-  font-weight: 700
-  color: #fff
-  background: darken(#222, 15%)
-}
-
-.admin-bar {
-  top: initial
-  left: 0
-  bottom: 0
-  right: 0
-
-  a {
-    color: inherit
-  }
-}

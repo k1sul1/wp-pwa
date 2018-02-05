@@ -35,9 +35,15 @@ ul {
     &:before {
       position: absolute
       left: r(-30px)
-      content: '- '
-      font-weight: 700
-      font-family: monospace
+      top: r(17px)
+      content: ''
+      display: inline-block
+      width: r(20px)
+      height: r(4px)
+      background: currentColor
+      // content: '- '
+      // font-weight: 700
+      // font-family: monospace
     }
   }
 }
@@ -55,7 +61,7 @@ textInput() {
   &:focus, &:hover, &:active {
     border: 0
     outline: 0
-    background: #fff
+    background: colors.white
   }
 }
 
@@ -70,4 +76,26 @@ input {
 img {
   max-width: 100%
   height: auto
+}
+
+button() {
+  appearance: none
+  background-color: colors.orange
+  color: colors.white
+  text-decoration: none
+  display: inline-block
+  padding: r(6px) r(10px)
+  font-size: 1.4em
+  font-weight: 700
+  transition: 0.3s
+
+  &:hover, &:focus, &:active {
+    background: colors.beige
+    color: colors.orange
+  }
+}
+
+.button,
+button {
+  button()
 }

@@ -8,14 +8,10 @@
 
 .fancy-header,
 .post-header {
-  background: #222
+  background: colors.darkgrey
   padding: r(20px)
-  color: #fff
-
-  // I don't have time to CSS properly.
-  // Don't judge me.
-  margin: r(-20px)
-  margin-bottom: r(20px)
+  color: colors.white
+  fightBoxModel()
 
   h2 {
     margin: 0
@@ -28,7 +24,7 @@
   .overlay {
     width: 100%
     padding: r(20px)
-    background: #222
+    background: colors.darkgrey
   }
 
   &.has-image {
@@ -53,8 +49,8 @@
     header {
       overflow: hidden
       position: relative
-      background: #222
-      color: #fff
+      background: colors.darkgrey
+      color: colors.white
 
       img {
         float: left

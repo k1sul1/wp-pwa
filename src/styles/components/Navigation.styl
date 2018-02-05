@@ -1,6 +1,6 @@
 .navigation {
   cursor: pointer
-  background: #ae1414
+  background: colors.orange
 
   ul {
     list-style: none
@@ -15,7 +15,7 @@
   }
 
   a {
-    color: #f1f1f1
+    color: colors.white
     text-decoration: none
   }
 
@@ -30,19 +30,19 @@
     border: none
     text-transform: uppercase
     font-weight: bold
-    color: #f1f1f1
+    color: colors.white
     text-align: right
     padding-right: 20px
     transition: 0.3s ease-out
 
     &:focus, &:hover {
       outline: 0
-      background: #222
+      background: colors.darkgrey
       transition: 0.3s ease-in
     }
 
     &:focus {
-      background: darken(#222, 30%) // I know, bad a11y
+      background: darken(colors.darkgrey, 30%) // I know, bad a11y
     }
   }
 
@@ -61,7 +61,7 @@
     z-index: 9999
 
     .navigation__toggle {
-      background: #222
+      background: colors.darkgrey
       transition: 0.3s ease-in
     }
   }

@@ -1,3 +1,6 @@
+@import 'styles/Variables'
+@import 'styles/Mixins'
+
 html, body {
   height: 100%
   width: 100%
@@ -21,7 +24,7 @@ body {
   &.desktop-fullscreen {
     @media (min-width: 1280px) {
       overflow: hidden
-      background: #222
+      background: colors.darkgrey
     }
   }
 }
@@ -30,7 +33,6 @@ body {
   height: 100%
 }
 
-@import 'styles/Mixins'
 @import 'styles/Typography'
 @import 'styles/components/*'
 

@@ -1,5 +1,5 @@
 .single-slide {
-  background: #222
+  background: colors.darkgrey
   background-size: cover
   background-position: center
   display: flex
@@ -10,7 +10,7 @@
   // width: 100%
   height: 100vh
   width: 100vw
-  color: #fff
+  color: colors.white
   animation-duration: 0.3s
 
   @media (max-width: 768px) {
@@ -60,7 +60,7 @@
     margin-top: r(50px)
     margin-bottom: r(25px)
     padding-bottom: r(10px)
-    border-bottom: r(3px) solid #222
+    border-bottom: r(3px) solid colors.darkgrey
 
     &:last-child {
       border-bottom: 0
@@ -84,8 +84,8 @@
     transition: 0.3s
 
     &:hover, &:focus, &:active {
-      background: #222
-      color: #fff
+      background: colors.darkgrey
+      color: colors.white
     }
   }
 
@@ -135,7 +135,7 @@
   width: 25vw
   height: 25vw
   padding: r(30px)
-  background: #222
+  background: colors.darkgrey
   background-size: cover
   background-position: center
   display: flex
@@ -166,7 +166,7 @@
   h2 {
     text-align: center
     width: 100%
-    color: #fff
+    color: colors.white
   }
 
   .subslides {
@@ -214,7 +214,7 @@
 
 .all-slides {
   overflow: hidden
-  background: darken(#222, 10%)
+  background: darken(colors.darkgrey, 10%)
   height: 100vh
   overflow-y: scroll
   display: flex
