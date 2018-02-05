@@ -11,14 +11,12 @@ const Archive = (props) => {
   const titlePrefix = prefix && `${prefix}: `
   const title = archive.label || archive.name
 
-  console.log(props)
-
   if (!archive) {
     throw new Error(`Archive wasn't provided with archive data, unable to render archive.`);
   }
 
   return (
-    <Layout {...props} className="archive">
+    <Layout className="archive" {...props}>
       <h1>
         {titlePrefix}
         {title}
@@ -29,4 +27,17 @@ const Archive = (props) => {
   )
 }
 
-export default Archive
+export default class ArchiveComponent extends React.Component {
+  componentDidMount() {
+    document.querySelector('main#content').classList.add('bg--grey')
+  }
+
+  componentWillUnmount() {
+    document.querySelector('main#content').classList.remove('bg--grey')
+  }
+
+  render() {
+    return <Archive {...this.props} />
+  }
+}
+// export default Archive
