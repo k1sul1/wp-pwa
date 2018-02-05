@@ -37,7 +37,13 @@ const content = (node, { post }) => (
 )
 
 const Singular = (props) => (
-  <Page {...props} sidebar={blogSidebar(props.sidebar)} filterTitle={header} filterContent={content} className="singular" />
+  <Page
+    {...props}
+    sidebar={blogSidebar(props.sidebar)}
+    filterTitle={header}
+    filterContent={content}
+    className="single-post"
+  />
 )
 
 export default Singular
