@@ -24,7 +24,6 @@ export const dumpObject = (obj) => {
 
 
 const isDownloadComponent = (node) => {
-  // readrepo url from package.json
   const nodeText = node.data || (node.children[0] && node.children[0].data);
   return nodeText === '[download]';
 }

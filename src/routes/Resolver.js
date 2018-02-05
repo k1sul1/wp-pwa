@@ -49,8 +49,7 @@ class Resolver extends Component {
         },
       },
 
-      // These will determine what will be rendered:
-      // The component and it's props!
+      // These will determine what will be rendered
       ViewComponent: null,
       ViewComponentProps: {
         disableTransition: false,

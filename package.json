@@ -2,6 +2,10 @@
   "name": "WordPress-SPA",
   "version": "1.0.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/k1sul1/wp-pwa.git"
+  },
   "devWP": "https://wcjkl.local",
   "prodWP": "https://ccthwpd.fi.seravo.com",
   "dependencies": {

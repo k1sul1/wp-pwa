@@ -1,4 +1,5 @@
 import React from 'react'
+import p from '../../package.json'
 
 const Download = () => (
   <section className="download-project">
@@ -7,7 +8,7 @@ const Download = () => (
       <p>Released under MIT, so you can do pretty much whatever you want with it.</p>
 
       <a
-        href="https://github.com/k1sul1/wp-pwa"
+        href={p.repository.url}
         target="_blank"
         rel="noopener noreferrer"
         className="button"
