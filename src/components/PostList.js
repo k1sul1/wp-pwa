@@ -48,6 +48,7 @@ export default function PostList(props) {
     <PaginatingList
       loadItems={loadItems}
       renderItem={SinglePost}
+      className="post-list"
       {...props}
     />
   )

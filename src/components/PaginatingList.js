@@ -81,13 +81,13 @@ export default class PaginatingList extends Component {
     }
 
     const Previous = page > 1 ? (
-      <button onClick={previousPage}>
+      <button onClick={previousPage} className="button--bluishgrey previous">
         Previous
       </button>
     ) : false
 
     const Next = page < maxPages ? (
-      <button onClick={nextPage}>
+      <button onClick={nextPage} className="button--bluishgrey next">
         Next
       </button>
     ) : false
@@ -104,7 +104,7 @@ export default class PaginatingList extends Component {
     const { items, loading } = this.state
     const { renderItem, context, className, messages } = this.props
     return (
-      <div className={className || 'post-list'}>
+      <div className={`${className || ''} paginating-list`}>
         {loading ? (
           messages.loading
         ) : items && !items.length ? (
