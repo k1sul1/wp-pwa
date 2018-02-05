@@ -319,8 +319,11 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
           }
 
           default: {
-            console.log('this is a ridiculous fix for postlist and causes flashing')
-            this.showComponent(Loading, {})
+            console.log('bug trigger')
+            // console.log('this is a ridiculous fix for postlist and causes flashing')
+            console.log(this.props)
+            console.log(archive)
+            // this.showComponent(Loading, {})
             return this.showComponent(await import('./Archive'), { archive })
           }
         }
