@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
-import isEqual from 'lodash.isequal'
+// import isEqual from 'lodash.isequal'
 
 export default class PaginatingList extends Component {
   constructor(props) {
@@ -29,6 +29,8 @@ export default class PaginatingList extends Component {
     const { context, loadItems } = this.props
     const { page } = this.state
 
+    this.setState({ items: [] })
+
     try {
       const loaded = await loadItems(page, context)
 
@@ -54,14 +56,14 @@ export default class PaginatingList extends Component {
     await this.getContents()
   }
 
-  async componentWillReceiveProps(nextProps) {
+  /* async componentWillReceiveProps(nextProps) {
     // Don't run this expensive op at every render.
     if (!isEqual(this.props.page, nextProps.page) ||
         !isEqual(this.props.items, nextProps.items) ||
         !isEqual(this.props.context, nextProps.context)) {
       await this.getContents()
     }
-  }
+  } */
 
   pagination() {
     const { page, maxPages } = this.state
