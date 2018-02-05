@@ -22,8 +22,6 @@ class Resolver extends Component {
   constructor() {
     super()
 
-    console.log(defaultSidebar)
-
     this.state = {
       ready: false,
       crashed: false,
@@ -279,14 +277,14 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
           componentProps.archive = archive
         }
 
-        // Let's do "slug" templates first
-        switch(location.pathname) {
+        // This is how you select a template based on the slug
+        /*switch(location.pathname) {
           case '/about/': {
             return this.showComponent(await import('./About'), componentProps)
           }
 
           // no default
-        }
+        }*/
 
         switch (type) {
           case 'post': {
