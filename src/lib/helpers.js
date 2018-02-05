@@ -3,10 +3,14 @@ import ReactHtmlParser from 'react-html-parser'
 
 import SyntaxHighlighter, { registerLanguage } from 'react-syntax-highlighter/prism-light'
 import jsx from 'react-syntax-highlighter/languages/prism/jsx'
+import javascript from 'react-syntax-highlighter/languages/prism/javascript'
 import prism from 'react-syntax-highlighter/styles/prism/prism' // eslint-disable-line
 import { atomDark } from 'react-syntax-highlighter/styles/prism'
 
+import Download from '../components/Download'
+
 registerLanguage('jsx', jsx)
+registerLanguage('javascript', javascript)
 
 export const dumpObject = (obj) => {
   const string = JSON.stringify({ ...obj }, null, 2)
@@ -65,18 +69,11 @@ export const taxonomies = {
 export const taxonomyExists = slug => slug in taxonomies
 export const taxonomyName = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].name
 export const taxonomyRESTBase = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].RESTBase
+
 export const transformWPContent = (...args) => {
   const [node, index] = args
   if (isDownloadComponent(...args)) {
-    return (
-      <a
-        href="https://github.com/k1sul1/headless-wp-starter"
-        target="_blank"
-        rel="noopener noreferrer"
-        key={index}>
-        Download
-      </a>
-    )
+    return <Download key={index} />
   } else if (isCodeblock(...args)) {
     const string = node.children.map(child => child.data).join()
     return (
