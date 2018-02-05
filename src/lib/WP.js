@@ -161,48 +161,6 @@ class WP_Client {
     return post
   }
 
-
-  getCacheKey(endpoint, payload, options, user) {
-    return [
-      this.cacheKeyPrefix,
-      endpoint,
-      JSON.stringify(payload),
-      JSON.stringify(options),
-      JSON.stringify(user),
-    ].join('_')
-    // could save space by hashing
-  }
-
-  async getCacheSize(cb) {
-    try {
-      const keys = await localforage.keys()
-      const filtered = keys
-        .filter(key => key.indexOf(this.cacheKeyPrefix) === 0)
-      const values = await Promise.all(filtered.map(key => localforage.getItem(key)))
-
-
-      // May not actually be bytes because UTF-16 and multibyte chars and AAAAA
-      const keyByteCount = keys.reduce((sum, key) => sum + key.length, 0)
-      const valueByteCount = values.reduce((sum, value) => sum + JSON.stringify(value).length, 0)
-      const totalByteCount = valueByteCount + keyByteCount
-      const itemCount = keys.length
-      const obj = {
-        itemCount,
-        keyByteCount,
-        valueByteCount,
-        totalByteCount,
-      }
-
-      if (cb) {
-        cb(obj)
-      }
-
-      return obj
-    } catch (e) {
-      throw e
-    }
-  }
-
   async getPostsFrom(type = 'posts', payload = {}, options) {
     const endpoint = `/wp-json/wp/v2/${type}`
 
