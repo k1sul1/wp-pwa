@@ -20,6 +20,9 @@
 
         @media (max-width: 768px) {
           width: 10%
+          flex-shrink: 0
+          width: 90%
+          transform: translateX(-90%)
         }
       }
 
@@ -28,6 +31,8 @@
 
         @media (max-width: 768px) {
           width: 90%
+          flex-shrink: 0
+          transform: translateX(-90%)
         }
       }
     }
@@ -36,12 +41,27 @@
       main {
         // flex-basis: 90%
         width: 90%
+
+        @media (max-width: 768px) {
+          flex-shrink: 0
+        }
       }
 
       aside {
-        white-space: nowrap
+        // white-space: nowrap
         overflow: hidden
         width: 10%
+
+        @media (max-width: 768px) {
+          flex-shrink: 0
+          width: 90%
+        }
+      }
+
+      .download-project {
+        > * {
+          // display: none
+        }
       }
     }
 

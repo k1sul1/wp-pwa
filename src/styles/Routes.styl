@@ -23,6 +23,11 @@
       p {
         margin-left: auto
         margin-right: auto
+
+        @media (max-width: 900px) {
+          margin-left: r(20px)
+          margin-right: @margin-left
+        }
       }
     }
   }
