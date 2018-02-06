@@ -135,29 +135,6 @@ class Resolver extends Component {
   }
 
   async showComponent(component, componentProps = {}, merge = false) {
-    // Transition the element out. React will re-render after setState,
-    // reseting this and transitioning again.
-
-    // This is a *dirty* hack.
-    // Direct DOM manipulation & fixed animation delay
-    // Should listen to transitionend event and so on.
-
-    /* const wrapper = document.querySelector('.application__wrapper')
-    if (wrapper) {
-      if (!componentProps.disableTransition) {
-        wrapper.classList.add('fadeOut')
-        await new Promise((resolve) => setTimeout(resolve, 300))
-
-        // re-render handles most cases, but not everything causes a re-render
-        wrapper.classList.remove('fadeOut')
-      } else {
-        wrapper.classList.remove('animated')
-        wrapper.classList.remove('fadeIn')
-      }
-    } */
-
-    // End dirty hack
-
     this.setState({
       ViewComponent: component.default || component, // Support dynamic imports
       ViewComponentProps: {
