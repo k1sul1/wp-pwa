@@ -102,7 +102,6 @@ class Resolver extends Component {
 
 
   maybeToggleSidebar(e) {
-    // e.preventDefault() // Enabling prevents onSubmit from working in LoginForm
     if (e.target.tagName !== 'ASIDE') {
       return
     }
