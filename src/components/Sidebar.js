@@ -80,7 +80,7 @@ export default class Sidebar extends Component {
       return <aside></aside>
     }
 
-    const { children, onClick } = this.props
+    const { children } = this.props
 
     return (
       <aside ref={n => this.element = n}>

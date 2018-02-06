@@ -29,7 +29,6 @@ class Resolver extends Component {
 
       sidebar: defaultSidebar({
         open: window.innerWidth > 768,
-        onClick: (e) => this.maybeToggleSidebar(e),
         actions: {
           deactivate: () => this.closeSidebar(),
           activate: () => this.openSidebar(),
@@ -80,9 +79,6 @@ class Resolver extends Component {
   }
 
   async componentWillReceiveProps(nextProps) {
-    // console.log(nextProps, this.props)
-    // this.doRouting(props)
-
     // Normally you'd check that the props have changed before running
     // this kind of op again. Not necessary here.
     this.route(nextProps)
@@ -98,25 +94,6 @@ class Resolver extends Component {
     })
 
     console.log(error, info)
-  }
-
-
-  maybeToggleSidebar(e) {
-    if (e.target.tagName !== 'ASIDE') {
-      return
-    }
-
-    // On resolutions over this breakpoint, the sidebar is visible at all times
-    if (window.innerWidth <= 768) {
-      const newState = {
-        sidebar: {
-          ...this.state.sidebar,
-          open: !this.state.sidebar.open,
-        }
-      }
-
-      this.setState(newState)
-    }
   }
 
   closeSidebar() {
@@ -161,7 +138,11 @@ class Resolver extends Component {
     // Transition the element out. React will re-render after setState,
     // reseting this and transitioning again.
 
-    const wrapper = document.querySelector('.application__wrapper')
+    // This is a *dirty* hack.
+    // Direct DOM manipulation & fixed animation delay
+    // Should listen to transitionend event and so on.
+
+    /* const wrapper = document.querySelector('.application__wrapper')
     if (wrapper) {
       if (!componentProps.disableTransition) {
         wrapper.classList.add('fadeOut')
@@ -173,7 +154,9 @@ class Resolver extends Component {
         wrapper.classList.remove('animated')
         wrapper.classList.remove('fadeIn')
       }
-    }
+    } */
+
+    // End dirty hack
 
     this.setState({
       ViewComponent: component.default || component, // Support dynamic imports
