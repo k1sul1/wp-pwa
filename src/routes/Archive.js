@@ -6,7 +6,7 @@ import { taxonomyName } from '../lib/helpers'
 
 const Archive = (props) => {
   const { archive } = props
-  const prefix = taxonomyName(archive.taxonomy) || false
+  const prefix = taxonomyName(archive.taxonomy)
 
   const titlePrefix = prefix && `${prefix}: `
   const title = archive.label || archive.name
