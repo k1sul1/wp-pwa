@@ -45,7 +45,7 @@ class Resolver extends Component {
           this.setState(prevState => ({
             navigation: {
               ...prevState.navigation,
-              open: !prevState.navigation.open, // Invert the current value
+              open: !prevState.navigation.open,
             }
           }))
         },
