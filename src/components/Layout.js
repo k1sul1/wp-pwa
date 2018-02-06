@@ -67,12 +67,11 @@ class Layout extends Component {
 
   async componentWillUnmount() {
     if (!this.props.disableTransition) {
-      // console.log('changing transition')
-
       this.setState({
         transitioning: true,
       })
     }
+
     WP.removeNetworkStatusListeners(this)
     window.removeEventListener('resize', this.onresize)
   }
