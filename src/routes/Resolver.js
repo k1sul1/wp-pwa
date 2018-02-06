@@ -295,7 +295,7 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
           return false
         }
 
-        const result = arr.filter(item => item[key] && item[key] === compare ? true : false)
+        const result = arr.filter(item => item[key] && item[key] === compare)
         return result.length ? result.pop() : false
       }
 
@@ -310,7 +310,7 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
         findObjectByProp('archive_link', url, archives.taxonomies.post_tag)
       ]
       const archive = availableArchives.find(Boolean)
-      const isArchive = archive ? true : false
+      const isArchive = archive ? true : false // intentionally explicit
 
       if (post instanceof LookupError) {
         // If the permalink endpoint says that nothing was found
