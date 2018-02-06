@@ -4,9 +4,6 @@ import Layout from '../components/Layout'
 import LoginForm from '../components/LoginForm'
 import { dumpObject } from '../lib/helpers'
 
-// import { ResolverError } from './Resolver'
-
-
 const Error = (props) => {
   const { name, message } = props.error
   const afterLogin = props.afterLogin || (() => window.location.reload())

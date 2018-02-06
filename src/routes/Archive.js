@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Component } from 'react'
 import Layout from '../components/Layout'
 import PostList from '../components/PostList'
 import { taxonomyName } from '../lib/helpers'
@@ -29,7 +29,7 @@ const Archive = (props) => {
   )
 }
 
-export default class ArchiveComponent extends React.Component {
+export default class ArchiveComponent extends Component {
   componentDidMount() {
     document.querySelector('main#content').classList.add('bg--grey')
   }
@@ -42,4 +42,3 @@ export default class ArchiveComponent extends React.Component {
     return <Archive {...this.props} />
   }
 }
-// export default Archive
