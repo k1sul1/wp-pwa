@@ -229,13 +229,8 @@ class Resolver extends Component {
         this.setState({
           ViewComponentProps: {
             ...this.state.ViewComponentProps,
-            // sidebar: searchSidebar
           },
-          // sidebar: {
-            // ...this.state.sidebar,
-            // ...searchSidebar()
-          // },
-          sidebar: searchSidebar(this.state.sidebar)
+          sidebar: searchSidebar(this.state.sidebar),
         })
         break // Stop the switch but fall down!
       }
