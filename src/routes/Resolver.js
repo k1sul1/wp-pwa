@@ -187,77 +187,77 @@ class Resolver extends Component {
     })
   }
 
-    async wpErrorHandler(error) {
-      console.log('Resolver::wpErrorHandler', error)
-      // this.props.history contains additional helpful data
+  async wpErrorHandler(error) {
+    console.log('Resolver::wpErrorHandler', error)
+    // this.props.history contains additional helpful data
 
-      switch (error.constructor) {
-        case MenuLoadError: {
-          this.setState({
-            navigation: {
-              ...this.state.navigation,
-              error: error.message,
-            }
-          })
+    switch (error.constructor) {
+      case MenuLoadError: {
+        this.setState({
+          navigation: {
+            ...this.state.navigation,
+            error: error.message,
+          }
+        })
 
-          return false
-        }
+        return false
+      }
 
-        case Forbidden: {
-          this.setState({
-            authenticationRequired: true,
-          })
+      case Forbidden: {
+        this.setState({
+          authenticationRequired: true,
+        })
 
-          return false
-        }
+        return false
+      }
 
-        case Unauthorized: {
-          this.setState({
-            authenticationRequired: true,
-          })
+      case Unauthorized: {
+        this.setState({
+          authenticationRequired: true,
+        })
 
-          return false
-        }
+        return false
+      }
 
-        case LookupError: {
-          // Nothing matched the requested URL.
-          // Exchange the error for a generic one.
-          return new Error404(`Query didn't find any results.`)
-        }
+      case LookupError: {
+        // Nothing matched the requested URL.
+        // Exchange the error for a generic one.
+        return new Error404(`Query didn't find any results.`)
+      }
 
-        case Error404: {
-          this.setState({
-            ViewComponentProps: {
-              ...this.state.ViewComponentProps,
-              // sidebar: searchSidebar
-            },
-            // sidebar: {
-              // ...this.state.sidebar,
-              // ...searchSidebar()
-            // },
-            sidebar: searchSidebar(this.state.sidebar)
-          })
-          break // Stop the switch but fall down!
-        }
+      case Error404: {
+        this.setState({
+          ViewComponentProps: {
+            ...this.state.ViewComponentProps,
+            // sidebar: searchSidebar
+          },
+          // sidebar: {
+            // ...this.state.sidebar,
+            // ...searchSidebar()
+          // },
+          sidebar: searchSidebar(this.state.sidebar)
+        })
+        break // Stop the switch but fall down!
+      }
 
-        case FatalError404: {
-          this.setState({
-            crashed: { error }
-          })
-          break
-        }
+      case FatalError404: {
+        this.setState({
+          crashed: { error }
+        })
+        break
+      }
 
-        case OfflineError: {
-        console.log(`
+      case OfflineError: {
+      console.log(`
 You can just swallow OfflineError by returning before the error page is displayed.
 
 That gets rid of the OfflineError flash when offline. Other error handling will kick in if content isn't found.`)
 
-          // return // uncomment to swallow error
-        }
-
-        // no default
+        // return // uncomment to swallow error
       }
+
+      // no default
+    }
 
     // For errors that are not custom.
     switch (error.name) {
