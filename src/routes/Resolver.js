@@ -182,7 +182,6 @@ class Resolver extends Component {
         // But that's an insane default behaviour, so nah.
         ...(merge ? this.state.ViewComponentProps : {}),
         ...componentProps,
-        // navigation: this.state.navigation,
       },
       ready: true,
     })
