@@ -4,9 +4,10 @@ import Layout from '../components/Layout'
 import LoginForm from '../components/LoginForm'
 import { dumpObject } from '../lib/helpers'
 
+const defaultAfterLogin = (() => window.location.reload())
 const Error = (props) => {
   const { name, message } = props.error
-  const afterLogin = props.afterLogin || (() => window.location.reload())
+  const afterLogin = props.afterLogin || defaultAfterLogin
 
   return (
     <Layout {...props}>
