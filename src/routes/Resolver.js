@@ -4,6 +4,8 @@ import debounce from 'debounce'
 
 import { searchSidebar, defaultSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
+import { isDevelopment } from '../lib/helpers'
+
 import {
   ResolverError,
   Error404,
@@ -63,11 +65,9 @@ class Resolver extends Component {
 
   async componentDidMount() {
     WP.connectErrorHandler(this.wpErrorHandler.bind(this))
-    // this.doRouting(this.props)
     this.route(this.props)
 
     const menu = await WP.getMenu(3)
-
     if (menu) {
       const { items } = menu
 
@@ -150,6 +150,10 @@ class Resolver extends Component {
     })
   }
 
+  /*
+   * Errors come here to die. Got an error that crashed your application?
+   * Handle it here.
+   */
   async wpErrorHandler(error) {
     console.log('Resolver::wpErrorHandler', error)
     // this.props.history contains additional helpful data
@@ -240,7 +244,7 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
     // Keep the props from previous view in case of error
     // It'll help track down the cause of the bug if there's one.
     // In production you might want to disable this and/or use something like Sentry.
-    return this.showComponent(Error, { error }, true) // process.env.NODE_ENV === 'production' instead of true to disable in prod
+    return this.showComponent(Error, { error }, isDevelopment)
   }
 
   async route({ location }) {
@@ -249,6 +253,8 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
       const cacheSettings = {
         cacheStaleTime: 60 * 1000 * 10,
       }
+
+      // Query the endpoints simultaneously
       let [post, archives] = await Promise.all([
         WP.getByURL(url, cacheSettings),
         WP.getArchives({}, cacheSettings),
@@ -266,7 +272,7 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
         return this.wpErrorHandler(new ResolverError('Unable to get WordPress archives. Is WordPress up?'))
       }
 
-      // Just add taxonomies here as they appear.
+      // Check if the current URL belongs to any archive
       const availableArchives = [
         findObjectByProp('archive_link', url, archives.post_types),
         findObjectByProp('archive_link', url, archives.taxonomies.category),
@@ -277,7 +283,7 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
 
       if (post instanceof LookupError) {
         // If the permalink endpoint says that nothing was found
-        // swallow the error, and unset post
+        // swallow the error, and unset post, because no post exists
         post = null
       } else if (post instanceof ExtendableError || post instanceof Error) {
         // If it's an error, but of a different kind, handle the error
@@ -291,6 +297,9 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
         const componentProps = { post }
 
         if (archive) {
+          // Using humanmade/page-for-post-type?
+          // Add the archive data even when a singular post was found.
+          // Might even want to render an archive template instead.
           componentProps.archive = archive
         }
 
@@ -330,6 +339,7 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
         }
       }
 
+      // Okay, it wasn't a singular post. It could be an archive.
       if (isArchive) {
         switch (archive.name) {
           case 'slides': {
@@ -337,15 +347,12 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
           }
 
           default: {
-            // console.log('this is a ridiculous fix for postlist and causes flashing')
-            // console.log(this.props)
-            // console.log(archive)
-            // this.showComponent(Loading, {})
             return this.showComponent(await import('./Archive'), { archive })
           }
         }
       }
 
+      // Still nothing? Resource may require auth.
       if (this.state.authenticationRequired) {
         const afterLogin = () => {
           this.setState({
@@ -359,6 +366,7 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
         })
       }
 
+      // Give up, nothing is found.
       return this.wpErrorHandler(new Error404('No archive or single post matched your query.'))
     } catch (e) {
       throw e
