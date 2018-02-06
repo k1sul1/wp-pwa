@@ -28,25 +28,8 @@ const isDownloadComponent = (node) => {
   return nodeText === '[download]';
 }
 
-const isCodeblock = (node) => {
-  const cond = node.name === 'code'
-
-  if (cond) {
-    // console.log(node)
-  }
-
-  return cond
-}
-
-const isCodechild = (node) => {
-  const cond = (node.parent && node.parent.name === 'code')
-
-  if (cond) {
-    // console.log(node)
-  }
-
-  return cond
-}
+const isCodeblock = (node) => node.name === 'code'
+const isCodechild = (node) => (node.parent && node.parent.name === 'code')
 
 // Used to avoid caching in development and so on
 export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false
