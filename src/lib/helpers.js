@@ -48,7 +48,7 @@ export const taxonomies = {
   }
 }
 
-export const taxonomyExists = slug => slug in taxonomies
+export const taxonomyExists = slug => slug.toLowerCase() in taxonomies
 export const taxonomyName = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].name
 export const taxonomyRESTBase = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].RESTBase
 
