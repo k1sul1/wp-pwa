@@ -106,6 +106,7 @@ class Resolver extends Component {
       return
     }
 
+    // On resolutions over this breakpoint, the sidebar is visible at all times
     if (window.innerWidth <= 768) {
       const newState = {
         sidebar: {
@@ -151,8 +152,9 @@ class Resolver extends Component {
   onresize = debounce((e) => this.resize(e), 100)
 
   handleEvent(e) {
-    console.log(e)
-    this[`on${e.type}`](e)
+    if (this[`on${e.type}`]) {
+      this[`on${e.type}`](e)
+    }
   }
 
   async showComponent(component, componentProps = {}, merge = false) {
