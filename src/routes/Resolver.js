@@ -185,8 +185,6 @@ class Resolver extends Component {
       },
       ready: true,
     })
-
-    return
   }
 
     async wpErrorHandler(error) {
