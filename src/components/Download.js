@@ -1,6 +1,9 @@
 import React from 'react'
 import p from '../../package.json'
 
+/*
+ * Download will simple link to the repository of this project.
+ */
 const Download = () => (
   <section className="download-project">
     <div className="wrapper">

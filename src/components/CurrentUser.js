@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import LoginForm from '../components/LoginForm'
 import WP from '../lib/WP'
 
+/*
+ * CurrentUser displays current user data, or a login form if unauthenticated.
+ */
 const User = (props) => {
   return (
     <div className="user">

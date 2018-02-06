@@ -1,7 +1,12 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
-// import isEqual from 'lodash.isequal'
 
+/*
+ * PaginatingList contains paginationg logic, so components like
+ * PostList and CommentList can only provide a loader.
+ *
+ * DRY.
+ */
 export default class PaginatingList extends Component {
   constructor(props) {
     super(props)

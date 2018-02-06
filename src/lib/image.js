@@ -1,7 +1,14 @@
 import React from 'react'
 import WP from './WP'
 
+/*
+ * Takes a sizes object and returns a srcet string
+ */
 export const createSrcset = (sizes) => Object.keys(sizes).map((key) => `${sizes[key].source_url} ${sizes[key].width}w`)
+
+/*
+ * Takes an image object (WP or ACF), and returns a cleaned up version of it.
+ */
 export const getImageData = (image, size) => {
   if (!image) return false
 
@@ -60,6 +67,10 @@ export const getImageData = (image, size) => {
   }
 }
 
+
+/*
+ * Component for easy display of image.
+ */
 export const Image = ({ imageObj, size = 'medium', ...remaining }) => {
   if (!imageObj) {
     return false

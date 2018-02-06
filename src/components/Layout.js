@@ -12,7 +12,7 @@ const AnimationBoundary = ({ onEnd, children }) => (
 )
 
 /*
- * Layout is used to wrap our views so we can keep the code DRY.
+ * Layout is used to wrap our components so we can keep the code DRY.
  */
 class Layout extends Component {
   constructor(props) {

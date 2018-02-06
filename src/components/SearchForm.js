@@ -4,6 +4,10 @@ import { SearchError } from '../errors'
 import PostList from '../components/PostList'
 // import PropTypes from 'prop-types'
 
+/*
+ * Renders a search form.
+ * TODO: Migrate to PaginatingList
+ */
 export default class SearchForm extends Component {
   constructor(props) {
     super(props)

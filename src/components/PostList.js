@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom'
 import PaginatingList from './PaginatingList'
 import WP from '../lib/WP'
 
+/*
+ * PaginatingList expects a template and a loader, this will handle posts.
+ */
+
 export const SinglePost = (post, context) => {
   return (
     <article className="post-list__single" key={post.id}>

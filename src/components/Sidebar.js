@@ -6,6 +6,12 @@ import CurrentUser from './CurrentUser'
 import SearchForm from '../components/SearchForm'
 import Download from '../components/Download'
 
+
+/*
+ * Sidebar contains secondary content and whatever you put in it.
+ * There are several configurations available.
+ */
+
 export const defaultSidebar = (props) => merge(props, {
   children: (
     <Fragment>

@@ -12,6 +12,9 @@ import Download from '../components/Download'
 registerLanguage('jsx', jsx)
 registerLanguage('javascript', javascript)
 
+/*
+ * Pretty-print a JavaScript object.
+ */
 export const dumpObject = (obj) => {
   const string = JSON.stringify({ ...obj }, null, 2)
 
@@ -22,7 +25,9 @@ export const dumpObject = (obj) => {
   )
 }
 
-
+/*
+ * react-html-parser checks
+ */
 const isDownloadComponent = (node) => {
   const nodeText = node.data || (node.children[0] && node.children[0].data);
   return nodeText === '[download]';
@@ -30,27 +35,6 @@ const isDownloadComponent = (node) => {
 
 const isCodeblock = (node) => node.name === 'code'
 const isCodechild = (node) => (node.parent && node.parent.name === 'code')
-
-// Used to avoid caching in development and so on
-export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false
-console.log(isDevelopment ? 'Running development build' : 'Running production build')
-
-// TODO: Maybe add this data to the REST API via expose-more-pagedata?
-export const taxonomies = {
-  post_tag: {
-    name: 'Tag',
-    RESTBase: 'tags',
-  },
-
-  category: {
-    name: 'Category',
-    RESTBase: 'categories',
-  }
-}
-
-export const taxonomyExists = slug => typeof slug === 'string' && slug.toLowerCase() in taxonomies
-export const taxonomyName = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].name
-export const taxonomyRESTBase = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].RESTBase
 
 export const transformWPContent = (...args) => {
   const [node, index] = args
@@ -73,5 +57,29 @@ export const transformWPContent = (...args) => {
 export const renderHTML = (str) => ReactHtmlParser(str, {
   transform: transformWPContent,
 })
+
+export const isDevelopment = process.env.NODE_ENV === 'development' ? true : false
+console.log(isDevelopment ? 'Running development build' : 'Running production build')
+
+/*
+ * Taxonomy helpers
+ */
+// TODO: Maybe add this data to the REST API via expose-more-pagedata?
+export const taxonomies = {
+  post_tag: {
+    name: 'Tag',
+    RESTBase: 'tags',
+  },
+
+  category: {
+    name: 'Category',
+    RESTBase: 'categories',
+  }
+}
+
+export const taxonomyExists = slug => typeof slug === 'string' && slug.toLowerCase() in taxonomies
+export const taxonomyName = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].name
+export const taxonomyRESTBase = slug => taxonomyExists(slug) && taxonomies[slug.toLowerCase()].RESTBase
+
 
 

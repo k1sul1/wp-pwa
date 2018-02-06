@@ -37,6 +37,10 @@ export const getWPURL = () => {
   }
 }
 
+/*
+ * WP_Client is the abstraction between WordPress and the application.
+ * It gives you data.
+ */
 class WP_Client {
   constructor(url = undefined) {
     this.offline = !navigator.onLine

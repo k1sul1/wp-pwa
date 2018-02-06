@@ -2,6 +2,10 @@ import React from 'react'
 import PaginatingList from './PaginatingList'
 import WP from '../lib/WP'
 
+/*
+ * PaginatingList expects a template and a loader for comments.
+ */
+
 const messages = {
   loading: <p>Please wait while we load the comments...</p>,
   noPosts: <p>It appears that there are no comments.</p>,

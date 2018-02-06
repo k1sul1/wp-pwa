@@ -2,12 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import WP from '../lib/WP'
 
+/*
+ * LoginForm will render a login form and check the credentials provided.
+ */
 async function onSubmit(e, afterLogin) {
   e.preventDefault()
   e.stopPropagation()
 
-  // console.log(this.props)
-  // const { afterLogin } = this.props
   const form = e.target
   const response = await WP.authenticate(form.elements[0].value, form.elements[1].value)
 
