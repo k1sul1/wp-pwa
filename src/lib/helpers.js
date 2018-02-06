@@ -64,7 +64,7 @@ export const transformWPContent = (...args) => {
       </SyntaxHighlighter>
     )
   } else if (isCodechild(...args)) {
-    return false
+    return null
   }
 
   return undefined
