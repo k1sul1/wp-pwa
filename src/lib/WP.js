@@ -60,11 +60,6 @@ class WP_Client {
       }
     })
 
-    // Remove
-    this.url = url || '' // Use relative urls, assume current domain
-    this.cacheKeyPrefix = ''
-    // End remove
-
     this.setUser() // Async, will not be ready with the first request
     this.addNetworkStatusListeners(this)
     this.addAuthenticationListeners(this)
@@ -516,7 +511,7 @@ class WP_Client {
   async cacheKey(params = {}) {
     const user = await this.getCurrentUser()
     const key = [
-      this.cacheKeyPrefix,
+      // TODO: get commit or build hash and invalidate cache based on it
       params,
       omit(user, 'token'),
     ].map(i => JSON.stringify(i)).join('_')
@@ -638,6 +633,6 @@ class WP_Client {
 }
 
 const WP = new WP_Client(getWPURL())
-window.WP = WP
 
+window.WP = WP
 export default WP
