@@ -3,7 +3,7 @@ import Layout from '../components/Layout'
 
 const Loading = (props) => (
   <Layout disableTransition={true} className="loading" {...props}>
-    <p>Loading...</p>
+    <p style={{ margin: '20px' }}>Loading...</p>
   </Layout>
 )
 
