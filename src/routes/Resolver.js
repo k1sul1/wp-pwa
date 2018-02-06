@@ -42,14 +42,12 @@ class Resolver extends Component {
         error: false,
         items: [],
         toggleMenu: () => {
-          this.setState(prevState => {
-            return ({
-              navigation: {
-                ...prevState.navigation,
-                open: !prevState.navigation.open, // Invert the current value
-              }
-            })
-          })
+          this.setState(prevState => ({
+            navigation: {
+              ...prevState.navigation,
+              open: !prevState.navigation.open, // Invert the current value
+            }
+          }))
         },
       },
 
