@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
+import { Manager, Swipe } from 'hammerjs'
 
 import CurrentUser from './CurrentUser'
 import SearchForm from '../components/SearchForm'
@@ -44,15 +45,34 @@ const merge = (sidebarProps, overridingProps) => ({
 // Add more configurations if you'd like!
 
 export default class Sidebar extends Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {}
-  }
-
   static propTypes = {
     children: PropTypes.node,
     onClick: PropTypes.func,
+  }
+
+  componentDidMount() {
+    const { actions } = this.props
+    const { activate, deactivate } = actions
+
+    this.hammer = new Manager(this.element, {
+      touchAction: 'pan-y',
+    })
+    this.hammer.add(new Swipe())
+    this.hammer.on('swipe', (e) => {
+      if (this.props.open) { // If extracted from props, open won't work (bug)
+        if (e.direction === 4) {
+          deactivate()
+        }
+      } else {
+        if (e.direction === 2) {
+          activate()
+        }
+      }
+    })
+  }
+
+  componentWillUnmount() {
+    this.hammer.destroy()
   }
 
   render() {
@@ -63,7 +83,7 @@ export default class Sidebar extends Component {
     const { children, onClick } = this.props
 
     return (
-      <aside onClick={(e) => onClick(e)}>
+      <aside ref={n => this.element = n}>
         { children }
       </aside>
     )

@@ -30,6 +30,10 @@ class Resolver extends Component {
       sidebar: defaultSidebar({
         open: window.innerWidth > 768,
         onClick: (e) => this.maybeToggleSidebar(e),
+        actions: {
+          deactivate: () => this.closeSidebar(),
+          activate: () => this.openSidebar(),
+        }
       }),
 
       navigation: {
@@ -57,6 +61,48 @@ class Resolver extends Component {
     }
   }
 
+  async componentDidMount() {
+    WP.connectErrorHandler(this.wpErrorHandler.bind(this))
+    // this.doRouting(this.props)
+    this.route(this.props)
+
+    const menu = await WP.getMenu(3)
+
+    if (menu) {
+      const { items } = menu
+
+      this.setState({
+        navigation: {
+          ...this.state.navigation,
+          items,
+          ready: true,
+        }
+      })
+    }
+  }
+
+  async componentWillReceiveProps(nextProps) {
+    // console.log(nextProps, this.props)
+    // this.doRouting(props)
+
+    // Normally you'd check that the props have changed before running
+    // this kind of op again. Not necessary here.
+    this.route(nextProps)
+  }
+
+  componentWillUnmount() {
+    WP.disconnectErrorHandler()
+  }
+
+  componentDidCatch(error, info) {
+    this.setState({
+      crashed: { error },
+    })
+
+    console.log(error, info)
+  }
+
+
   maybeToggleSidebar(e) {
     // e.preventDefault() // Enabling prevents onSubmit from working in LoginForm
     if (e.target.tagName !== 'ASIDE') {
@@ -73,6 +119,24 @@ class Resolver extends Component {
 
       this.setState(newState)
     }
+  }
+
+  closeSidebar() {
+    this.setState({
+      sidebar: {
+        ...this.state.sidebar,
+        open: false,
+      }
+    })
+  }
+
+  openSidebar() {
+    this.setState({
+      sidebar: {
+        ...this.state.sidebar,
+        open: true,
+      }
+    })
   }
 
   resize(e) {
@@ -346,48 +410,6 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
       throw e
     }
   }
-
-  async componentDidMount() {
-    WP.connectErrorHandler(this.wpErrorHandler.bind(this))
-    // this.doRouting(this.props)
-    this.route(this.props)
-
-    const menu = await WP.getMenu(3)
-
-    if (menu) {
-      const { items } = menu
-
-      this.setState({
-        navigation: {
-          ...this.state.navigation,
-          items,
-          ready: true,
-        }
-      })
-    }
-  }
-
-  async componentWillReceiveProps(nextProps) {
-    // console.log(nextProps, this.props)
-    // this.doRouting(props)
-
-    // Normally you'd check that the props have changed before running
-    // this kind of op again. Not necessary here.
-    this.route(nextProps)
-  }
-
-  componentWillUnmount() {
-    WP.disconnectErrorHandler()
-  }
-
-  componentDidCatch(error, info) {
-    this.setState({
-      crashed: { error },
-    })
-
-    console.log(error, info)
-  }
-
 
   render() {
     const { ready, crashed, ViewComponent, ViewComponentProps } = this.state
