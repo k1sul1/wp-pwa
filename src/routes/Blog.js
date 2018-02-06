@@ -2,6 +2,9 @@ import React from 'react'
 import Archive from './Archive'
 import { blogSidebar } from '../components/Sidebar'
 
+/*
+ * Blog uses the archive template, modifying some props of it.
+ */
 const Blog = (props) => (
   <Archive
     {...props}

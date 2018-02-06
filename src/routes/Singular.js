@@ -4,6 +4,10 @@ import { Image } from '../lib/image'
 import { blogSidebar } from '../components/Sidebar'
 import CommentList from '../components/CommentList'
 
+/*
+ * Singular component is based on Page, but it changes the template almost entirely.
+ */
+
 const AuthorLine = ({ author }) => (
   <address>
     {author.name}

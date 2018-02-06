@@ -18,6 +18,9 @@ import {
 import Error from './Error'
 import Loading from './Loading'
 
+/*
+ * Resolver routes the application.
+ */
 class Resolver extends Component {
   constructor() {
     super()

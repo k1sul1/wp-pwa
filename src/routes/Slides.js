@@ -7,6 +7,12 @@ import p from '../../package.json'
 import WP from '../lib/WP'
 import { getImageData } from '../lib/image'
 
+/*
+ * Only an idiot would spend a hundred hours creating their own slides.
+ * Instead of using a premade library.
+ *
+ * Everything here is a terrible hack, barely works, and there are bugs.
+ */
 export default class Slides extends Component {
   constructor(props) {
     super(props)

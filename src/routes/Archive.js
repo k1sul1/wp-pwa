@@ -4,6 +4,10 @@ import PostList from '../components/PostList'
 import { taxonomyName } from '../lib/helpers'
 
 
+/*
+ * Archive passes PostList a context object which is then used to
+ * fetch data.
+ */
 const Archive = (props) => {
   const { archive } = props
 

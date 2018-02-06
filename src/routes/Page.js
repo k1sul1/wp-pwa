@@ -6,6 +6,12 @@ import { defaultSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
 
 const noop = n => n
+
+
+/*
+ * Page component is used to render most singular post formats.
+ * Render props are used to get WP hook like functionality.
+ */
 class Page extends Component {
   constructor() {
     super()

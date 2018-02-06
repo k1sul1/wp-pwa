@@ -4,6 +4,10 @@ import Layout from '../components/Layout'
 import LoginForm from '../components/LoginForm'
 import { dumpObject } from '../lib/helpers'
 
+/*
+ * Resolver will show this error page as a last resort.
+ */
+
 const defaultAfterLogin = (() => window.location.reload())
 const Error = (props) => {
   const { name, message } = props.error

@@ -18,8 +18,6 @@ class Layout extends Component {
   constructor(props) {
     super(props)
 
-    // When these change, a re-render will trigger and everything can be updated accordingly
-    // except the child components.
     this.state = {
       online: navigator.onLine,
       transitioning: !props.disableTransition,
