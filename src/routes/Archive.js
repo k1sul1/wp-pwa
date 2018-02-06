@@ -6,14 +6,16 @@ import { taxonomyName } from '../lib/helpers'
 
 const Archive = (props) => {
   const { archive } = props
+
+  if (!archive) {
+    throw new Error(`Archive wasn't provided with archive data, unable to render archive.`);
+  }
+
   const prefix = taxonomyName(archive.taxonomy)
 
   const titlePrefix = prefix && `${prefix}: `
   const title = archive.label || archive.name
 
-  if (!archive) {
-    throw new Error(`Archive wasn't provided with archive data, unable to render archive.`);
-  }
 
   return (
     <Layout className="archive" {...props}>
