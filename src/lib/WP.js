@@ -15,14 +15,24 @@ import {
   OfflineError
 } from '../errors'
 
+/*
+ * Store for data that can be gotten rid of at any time.
+ */
 const requestCache = localforage.createInstance({
   name: 'requestCache',
 })
 
+/*
+ * Store for data that shouldn't be invalidated between builds.
+ * User info & preferences for example.
+ */
 const dataStore = localforage.createInstance({
   name: 'dataStore',
 })
 
+/*
+ * Helper for getting the correct instance URL.
+ */
 export const getWPURL = () => {
   return p.prodWP
 
@@ -65,6 +75,29 @@ class WP_Client {
     this.addAuthenticationListeners(this)
   }
 
+  addNetworkStatusListeners(component) {
+    window.addEventListener('online', component)
+    window.addEventListener('offline', component)
+  }
+
+  removeNetworkStatusListeners(component) {
+    window.removeEventListener('online', component)
+    window.removeEventListener('offline', component)
+  }
+
+  addAuthenticationListeners(component) {
+    window.addEventListener('authenticated', component)
+    window.addEventListener('logout', component)
+  }
+
+  removeAuthenticationListeners(component) {
+    window.removeEventListener('authenticated', component)
+    window.removeEventListener('logout', component)
+  }
+
+  /*
+   * Bind the user to the class instance. For authentication.
+   */
   async setUser() {
     const user = await this.getCurrentUser()
 
@@ -79,6 +112,20 @@ class WP_Client {
     }
   }
 
+  async getCurrentUser() {
+    const user = await dataStore.getItem('user')
+
+    if (user) {
+      return user
+    }
+
+    return false
+  }
+
+  /*
+   * Error handler, will pass any unhandled errors into registered error handler.
+   * (Resolver.js)
+   */
   async onError(error) {
     if (error.name === 'QuotaExceededError') {
       console.log(error) // Private browsing or disk full? Fail silently.
@@ -126,7 +173,9 @@ class WP_Client {
   }
 
   handleEvent(e) {
-    this[`on${e.type}`](e)
+    if (this[`on${e.type}`]) {
+      this[`on${e.type}`](e)
+    }
   }
 
   connectErrorHandler(handler) {
@@ -139,217 +188,6 @@ class WP_Client {
 
   getWPURL() {
     return getWPURL()
-  }
-
-  turnURLRelative(key, obj) {
-    obj[key] = obj[key].replace(this.getWPURL(), '')
-
-    return obj
-  }
-
-  renderContent(post) {
-    post = { ...post }
-    if (post && post.content) {
-      post.content.rendered = renderHTML(post.content.rendered)
-    }
-
-    if (post && post.title) {
-      post.title.rendered = renderHTML(post.title.rendered)
-    }
-
-    return post
-  }
-
-  async getPostsFrom(type = 'posts', payload = {}, options) {
-    const endpoint = `/wp-json/wp/v2/${type}`
-
-    const cacheParams = {
-      method: 'getPostsFrom',
-      type,
-      payload,
-    }
-
-    const cached = await this.getCached(endpoint, cacheParams)
-    const request = cached ? cached : await this.get(endpoint, {
-      ...payload,
-      _embed: 1,
-    }, options)
-
-    const { data, headers } = request
-
-
-    if (data) {
-      await this.cache(request, cacheParams)
-
-      const posts = Object.values(data)
-        .map(post => this.turnURLRelative('link', post))
-        .map(this.renderContent)
-
-      return  {
-        posts,
-        headers,
-      }
-    } else {
-      console.log('Throw something here? Like plates?')
-    }
-
-  }
-
-  async getPages(payload = {}, options = {}) {
-    return await this.getPostsFrom('pages', payload, options)
-  }
-
-  async getPosts(payload = {}, options = {}) {
-    return await this.getPostsFrom('posts', {
-      // add custom arguments
-      ...payload,
-    }, options)
-  }
-
-  async getForContext(type, params = {}, options = {}) {
-    const formatResponse = ({ headers, posts }) => ({ posts, headers })
-
-    switch (type) {
-      case 'blog': {
-        const response = await this.getPostsFrom('posts', params, options)
-
-        if (response) {
-          return formatResponse(response)
-        }
-
-        break
-      }
-
-      case 'taxonomy': {
-        const { term_id, taxonomy } = params
-        const response = await this.getPostsFrom('posts', {
-          [taxonomyRESTBase(taxonomy)]: term_id,
-          ...params,
-        }, options)
-
-        if (response) {
-          return formatResponse(response)
-        }
-
-        break
-      }
-
-      case 'post_type': {
-        // tl;dr use this.getPostsFrom and pick the type from params
-        // might have to create a helper, because rest base..
-        const { restBase } = params
-        const response = await this.getPostsFrom(restBase, {
-          ...params,
-        }, options)
-
-        if (response) {
-          return formatResponse(response)
-        }
-
-        break
-      }
-
-      case 'comments': {
-        const response = await this.getPostsFrom('comments', params)
-
-        if (response) {
-          return formatResponse(response)
-        }
-
-        break
-      }
-      // no default
-    }
-
-    return false
-  }
-
-  async getMenus(params = {}, options = {}) {
-    const cacheParams = {
-      method: 'getMenus',
-      ...params,
-    }
-    const endpoint = `/wp-json/wp-api-menus/v2/menus`
-    const cached = await this.getCached(endpoint, cacheParams)
-    const response = cached ? cached : await this.get(endpoint, params)
-
-    if (response) {
-      !cached && await this.cache(response, cacheParams, { always: true })
-
-      return response.data
-    } else {
-      return this.onError(new MenuLoadError('Unable to load menus'))
-    }
-  }
-
-  async getMenu(menu_id, params = {}, options = {}) {
-    const cacheParams = {
-      method: 'getMenu',
-      ...params,
-    }
-    const endpoint = `/wp-json/wp-api-menus/v2/menus/${menu_id}`
-    const cached = await this.getCached(endpoint, cacheParams)
-    const response = cached ? cached : await this.get(endpoint, params)
-
-    if (response) {
-      const { data } = response
-      !cached && await this.cache(response, cacheParams, { always: false })
-
-      if (data.items) {
-        return {
-          ...data,
-          items: data.items.map(item => this.turnURLRelative('url', item)),
-        }
-      }
-    }
-
-    return this.onError(new MenuLoadError('Unable to load menu'))
-  }
-
-  async getArchives(params = {}, options = {}) {
-    const cacheParams = {
-      method: 'getArchives',
-      ...options,
-    }
-    const endpoint = '/wp-json/emp/v1/archives'
-    const cached = await this.getCached(endpoint, cacheParams)
-    const response = cached ? cached : await this.get(endpoint, params)
-
-    if (response) {
-      await this.cache(response, cacheParams)
-      return response.data
-    }
-
-    return this.onError(new ArchiveLoadError('Unable to load archives'))
-  }
-
-  async query(params = {}, options = {}) {
-    // not used anywhere, might be broken
-
-    const cacheParams = {
-      method: 'query',
-      ...params,
-    }
-    const endpoint = '/wp-json/wp_query/args/'
-    const cached = await this.getCached(endpoint, cacheParams)
-    const response = cached ? cached : await this.get(endpoint, params)
-
-    if (response) {
-      await this.cache(response, cacheParams)
-      return response
-    }
-
-    return this.onError(new Error('????? query error'))
-  }
-
-  async getCurrentUser() {
-    const user = await dataStore.getItem('user')
-
-    if (user) {
-      return user
-    }
-
-    return false
   }
 
   async logout() {
@@ -404,94 +242,10 @@ class WP_Client {
     return false
   }
 
-  addNetworkStatusListeners(component) {
-    window.addEventListener('online', component)
-    window.addEventListener('offline', component)
-  }
 
-  removeNetworkStatusListeners(component) {
-    window.removeEventListener('online', component)
-    window.removeEventListener('offline', component)
-  }
-
-  addAuthenticationListeners(component) {
-    window.addEventListener('authenticated', component)
-    window.addEventListener('logout', component)
-  }
-
-  removeAuthenticationListeners(component) {
-    window.removeEventListener('authenticated', component)
-    window.removeEventListener('logout', component)
-  }
-
-  async getMedia(id) {
-    const response = await this.get(`/wp-json/wp/v2/media/${id}`)
-
-    if (response) {
-      return response.data
-    }
-
-    return false
-  }
-
-  async getUser(id) {
-    const response = await this.get(`/wp-json/wp/v2/users/${id}`)
-
-    if (response) {
-      return response.data
-    }
-
-    return false
-  }
-
-  async getByURL(url, options) {
-    const cacheParams = {
-      method: 'getByURL',
-      url,
-      options,
-    }
-    const cacheOpts = {}
-
-    if (url.indexOf('preview=true') > -1) {
-      cacheOpts.cacheTime = 0
-    }
-
-    const endpoint = '/wp-json/rpl/v1/lookup'
-    const cached = await this.getCached(endpoint, cacheParams)
-    const request = cached ? cached : await this.get(endpoint, {
-      url,
-    })
-
-    if (request) {
-      const { data } = request
-      const { error } = data
-
-      if (error) {
-        if (error === 'No post found.') {
-          return new LookupError(error)
-        }
-
-        return error
-      }
-
-      const featuredImage = !data.featured_media ? false : [await this.getMedia(data.featured_media)]
-      const author = !data.author ? false : [await this.getUser(data.author)]
-      const post = {
-        ...data,
-        _embedded: {
-          'wp:featuredmedia': featuredImage || [],
-          'author': author || [],
-        }
-      }
-
-      !cached &&  await this.cache(request, cacheParams, cacheOpts)
-
-      return this.renderContent(post)
-    }
-
-    return false
-  }
-
+  /*
+   * Wrap data with meta before caching for invalidation and settings.
+   */
   addCacheMeta(data, meta = {}) {
     const cacheTime =  Date.now()
     return {
@@ -569,6 +323,302 @@ class WP_Client {
     }
   }
 
+  /*
+   * Transform selected key in provided object, stripping WP URL from it.
+   */
+  turnURLRelative(key, obj) {
+    obj[key] = obj[key].replace(this.getWPURL(), '')
+
+    return obj
+  }
+
+  /*
+   * Render everything inside post object to React elements.
+   * Never cache the output of this function!
+   */
+  renderContent(post) {
+    post = { ...post }
+    if (post && post.content) {
+      post.content.rendered = renderHTML(post.content.rendered)
+    }
+
+    if (post && post.title) {
+      post.title.rendered = renderHTML(post.title.rendered)
+    }
+
+    return post
+  }
+
+  /*
+   * Generic function to get posts from given post type with given params.
+   */
+  async getPostsFrom(type = 'posts', payload = {}, options) {
+    const endpoint = `/wp-json/wp/v2/${type}`
+
+    const cacheParams = {
+      method: 'getPostsFrom',
+      type,
+      payload,
+    }
+
+    const cached = await this.getCached(endpoint, cacheParams)
+    const request = cached ? cached : await this.get(endpoint, {
+      ...payload,
+      _embed: 1,
+    }, options)
+
+    const { data, headers } = request
+
+
+    if (data) {
+      await this.cache(request, cacheParams)
+
+      const posts = Object.values(data)
+        .map(post => this.turnURLRelative('link', post))
+        .map(this.renderContent)
+
+      return  {
+        posts,
+        headers,
+      }
+    } else {
+      console.log('Throw something here? Like plates?')
+    }
+
+  }
+
+  async getPages(payload = {}, options = {}) {
+    return await this.getPostsFrom('pages', payload, options)
+  }
+
+  async getPosts(payload = {}, options = {}) {
+    return await this.getPostsFrom('posts', {
+      // add custom arguments
+      ...payload,
+    }, options)
+  }
+
+  /*
+   * Fetch data based on context.
+   */
+  async getForContext(type, params = {}, options = {}) {
+    const formatResponse = ({ headers, posts }) => ({ posts, headers })
+
+    switch (type) {
+      case 'blog': {
+        const response = await this.getPostsFrom('posts', params, options)
+
+        if (response) {
+          return formatResponse(response)
+        }
+
+        break
+      }
+
+      case 'taxonomy': {
+        const { term_id, taxonomy } = params
+        const response = await this.getPostsFrom('posts', {
+          [taxonomyRESTBase(taxonomy)]: term_id,
+          ...params,
+        }, options)
+
+        if (response) {
+          return formatResponse(response)
+        }
+
+        break
+      }
+
+      case 'post_type': {
+        // tl;dr use this.getPostsFrom and pick the type from params
+        // might have to create a helper, because rest base..
+        console.log('getForContext may be incomplete when used with post_type')
+        const { restBase } = params
+        const response = await this.getPostsFrom(restBase, {
+          ...params,
+        }, options)
+
+        if (response) {
+          return formatResponse(response)
+        }
+
+        break
+      }
+
+      case 'comments': {
+        const response = await this.getPostsFrom('comments', params)
+
+        if (response) {
+          return formatResponse(response)
+        }
+
+        break
+      }
+      // no default
+    }
+
+    return false
+  }
+
+  async getMenus(params = {}, options = {}) {
+    const cacheParams = {
+      method: 'getMenus',
+      ...params,
+    }
+    const endpoint = `/wp-json/wp-api-menus/v2/menus`
+    const cached = await this.getCached(endpoint, cacheParams)
+    const response = cached ? cached : await this.get(endpoint, params)
+
+    if (response) {
+      !cached && await this.cache(response, cacheParams, { always: true })
+
+      return response.data
+    } else {
+      return this.onError(new MenuLoadError('Unable to load menus'))
+    }
+  }
+
+  async getMenu(menu_id, params = {}, options = {}) {
+    const cacheParams = {
+      method: 'getMenu',
+      ...params,
+    }
+    const endpoint = `/wp-json/wp-api-menus/v2/menus/${menu_id}`
+    const cached = await this.getCached(endpoint, cacheParams)
+    const response = cached ? cached : await this.get(endpoint, params)
+
+    if (response) {
+      const { data } = response
+      !cached && await this.cache(response, cacheParams, { always: false })
+
+      if (data.items) {
+        return {
+          ...data,
+          items: data.items.map(item => this.turnURLRelative('url', item)),
+        }
+      }
+    }
+
+    return this.onError(new MenuLoadError('Unable to load menu'))
+  }
+
+  /*
+   * Load all archives using a custom endpoint.
+   */
+  async getArchives(params = {}, options = {}) {
+    const cacheParams = {
+      method: 'getArchives',
+      ...options,
+    }
+    const endpoint = '/wp-json/emp/v1/archives'
+    const cached = await this.getCached(endpoint, cacheParams)
+    const response = cached ? cached : await this.get(endpoint, params)
+
+    if (response) {
+      await this.cache(response, cacheParams)
+      return response.data
+    }
+
+    return this.onError(new ArchiveLoadError('Unable to load archives'))
+  }
+
+  /*
+   * WP_Query on the client side.
+   */
+  async query(params = {}, options = {}) {
+    // not used anywhere, might be broken
+
+    const cacheParams = {
+      method: 'query',
+      ...params,
+    }
+    const endpoint = '/wp-json/wp_query/args/'
+    const cached = await this.getCached(endpoint, cacheParams)
+    const response = cached ? cached : await this.get(endpoint, params)
+
+    if (response) {
+      await this.cache(response, cacheParams)
+      return response
+    }
+
+    return this.onError(new Error('????? query error'))
+  }
+
+  async getMedia(id) {
+    const response = await this.get(`/wp-json/wp/v2/media/${id}`)
+
+    if (response) {
+      return response.data
+    }
+
+    return false
+  }
+
+  async getUser(id) {
+    const response = await this.get(`/wp-json/wp/v2/users/${id}`)
+
+    if (response) {
+      return response.data
+    }
+
+    return false
+  }
+
+  /*
+   * Query the custom permalink endpoint with an URL.
+   * Fill in missing data because WP is buggy.
+   */
+  async getByURL(url, options) {
+    const cacheParams = {
+      method: 'getByURL',
+      url,
+      options,
+    }
+    const cacheOpts = {}
+
+    if (url.indexOf('preview=true') > -1) {
+      cacheOpts.cacheTime = 0
+    }
+
+    const endpoint = '/wp-json/rpl/v1/lookup'
+    const cached = await this.getCached(endpoint, cacheParams)
+    const request = cached ? cached : await this.get(endpoint, {
+      url,
+    })
+
+    if (request) {
+      const { data } = request
+      const { error } = data
+
+      if (error) {
+        if (error === 'No post found.') {
+          return new LookupError(error)
+        }
+
+        return error
+      }
+
+      const featuredImage = !data.featured_media ? false : [await this.getMedia(data.featured_media)]
+      const author = !data.author ? false : [await this.getUser(data.author)]
+      const post = {
+        ...data,
+        _embedded: {
+          'wp:featuredmedia': featuredImage || [],
+          'author': author || [],
+        }
+      }
+
+      !cached &&  await this.cache(request, cacheParams, cacheOpts)
+
+      return this.renderContent(post)
+    }
+
+    return false
+  }
+
+  /*
+   * Append authentication header to headers if user is authenticated.
+   */
   async addAuthHeader(headers) {
     const user = this.user || await this.getCurrentUser() // this.user is null on initial req
     const expiry = user ? user.token_expires : 0
@@ -581,6 +631,9 @@ class WP_Client {
     return headers
   }
 
+  /*
+   * Perform a GET request using axios
+   */
   async get(url, payload = {}, config = {}) {
     const headers = await this.addAuthHeader(config.headers || {})
 
@@ -610,6 +663,9 @@ class WP_Client {
     }
   }
 
+  /*
+   * Perform a POST request using axios
+   */
   async post(url, payload = {}, config = {}) {
     const headers = await this.addAuthHeader(config.headers || {})
 
