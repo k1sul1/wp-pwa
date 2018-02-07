@@ -554,7 +554,15 @@ class WP_Client {
 
     if (response) {
       await this.cache(response, cacheParams)
-      return response
+
+      const data = Object.values(response.data)
+        .map(post => this.turnURLRelative('link', post))
+        .map(this.renderContent)
+
+      return {
+        ...response,
+        data,
+      }
     }
 
     return this.onError(new Error('????? query error'))
