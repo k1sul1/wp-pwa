@@ -452,7 +452,7 @@ class WP_Client {
         console.log('getForContext may be incomplete when used with post_type')
         const { restBase } = params
         const response = await this.getPostsFrom(restBase, {
-          ...params,
+          ...omit(params, 'restBase'),
         }, options)
 
         if (response) {
