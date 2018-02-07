@@ -99,7 +99,12 @@ class Resolver extends Component {
     console.log(error, info)
   }
 
+  // Limit sidebar toggeability to windows under 768 wide
   closeSidebar() {
+    if (window.innerWidth > 768) {
+      return false
+    }
+
     this.setState({
       sidebar: {
         ...this.state.sidebar,
@@ -109,6 +114,10 @@ class Resolver extends Component {
   }
 
   openSidebar() {
+    if (window.innerWidth > 768) {
+      return false
+    }
+
     this.setState({
       sidebar: {
         ...this.state.sidebar,
@@ -120,11 +129,17 @@ class Resolver extends Component {
   resize(e) {
     if (window.innerWidth > 768) {
       this.setState({
-        sidebarOpen: true
+        sidebar: {
+          ...this.state.sidebar,
+          open: true,
+        }
       })
     } else {
       this.setState({
-        sidebarOpen: false
+        sidebar: {
+          ...this.state.sidebar,
+          open: false,
+        }
       })
     }
   }
