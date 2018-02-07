@@ -44,11 +44,8 @@ export default class PaginatingList extends Component {
     const { context, loadItems } = this.props
     const { page } = this.state
 
-    // this.setState({ items: [] })
-
     try {
       const loaded = await loadItems(page, context)
-      console.log(loaded)
 
       if (loaded) {
         const { items, maxPages, maxPosts } = loaded
@@ -71,15 +68,6 @@ export default class PaginatingList extends Component {
   async componentDidMount() {
     await this.getContents()
   }
-
-  /* async componentWillReceiveProps(nextProps) {
-    // Don't run this expensive op at every render.
-    if (!isEqual(this.props.page, nextProps.page) ||
-        !isEqual(this.props.items, nextProps.items) ||
-        !isEqual(this.props.context, nextProps.context)) {
-      await this.getContents()
-    }
-  } */
 
   pagination() {
     const { page, maxPages } = this.state
