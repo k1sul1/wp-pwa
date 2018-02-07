@@ -449,7 +449,6 @@ class WP_Client {
       case 'post_type': {
         // tl;dr use this.getPostsFrom and pick the type from params
         // might have to create a helper, because rest base..
-        console.log('getForContext may be incomplete when used with post_type')
         const { restBase } = params
         const response = await this.getPostsFrom(restBase, {
           ...omit(params, 'restBase'),

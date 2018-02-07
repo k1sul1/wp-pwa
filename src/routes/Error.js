@@ -14,7 +14,7 @@ const Error = (props) => {
   const afterLogin = props.afterLogin || defaultAfterLogin
 
   return (
-    <Layout {...props}>
+    <Layout {...props} className="error">
       <h1>Error.js: {name}</h1>
       <p>{message}</p>
 

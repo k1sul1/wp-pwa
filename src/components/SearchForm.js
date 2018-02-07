@@ -1,12 +1,40 @@
 import React, { Component } from 'react'
+import { DebounceInput } from 'react-debounce-input'
 import WP from '../lib/WP'
 import { SearchError } from '../errors'
-import PostList from '../components/PostList'
-// import PropTypes from 'prop-types'
+import { SinglePost } from '../components/PostList'
+import PaginatingList, { getMax, defaultMessages } from '../components/PaginatingList'
+
+const messages = {
+  ...defaultMessages,
+  noPosts: <p>No results. Sorry.</p>,
+  pageInfo: () => null,
+}
+
+const loadResults = async (page, context) => {
+  if (!context) {
+    throw new SearchError('Unable to search without search context')
+  }
+
+  const result = await WP.query({
+    ...context,
+    page,
+  })
+
+  const posts = result ? result.data : [];
+  const headers = result ? result.headers : {};
+  const maxPages = getMax(headers, 'x-wp-totalpages')
+  const maxPosts = getMax(headers, 'x-wp-total')
+
+  return {
+    items: posts,
+    maxPages,
+    maxPosts,
+  }
+}
 
 /*
  * Renders a search form.
- * TODO: Migrate to PaginatingList
  */
 export default class SearchForm extends Component {
   constructor(props) {
@@ -14,38 +42,6 @@ export default class SearchForm extends Component {
 
     this.state = {
       searchQuery: '',
-      loading: false,
-      results: [],
-    }
-  }
-
-  static propTypes = {}
-
-  static defaultProps = {}
-
-  onChange(e) {
-    this.setState({
-      searchQuery: e.target.value,
-    })
-  }
-
-  async onSubmit(e) {
-    const { searchQuery } = this.state
-
-    e.preventDefault()
-    this.setState({
-      loading: true,
-    })
-
-    const results = await WP.query({
-      s: searchQuery
-    })
-
-    if (results) {
-      console.log(results)
-      this.setState({ results })
-    } else {
-      throw new SearchError(`Search query didn't return an acceptable response`)
     }
   }
 
@@ -53,16 +49,30 @@ export default class SearchForm extends Component {
     const { searchQuery, results } = this.state
 
     return (
-      <form onSubmit={(e) => this.onSubmit(e)}>
-        <input
-          type="search"
-          placeholder="kittens"
-          value={searchQuery}
-          onChange={(e) => this.onChange(e)}
-        />
-        <input type="submit" value="&#x1F50E;" title="Do the search" />
+      <form className="search-form">
+        <label htmlFor="username_input">
+          <span>Search</span>
+          <span className="screen-reader-text">
+            The search is performed automatically when at least 3 characters are entered into the input below.
+          </span>
 
-        {results.length ? <PostList posts={results} /> : false}
+          <DebounceInput
+            type="search"
+            placeholder="kittens"
+            minLength={3}
+            debounceTimeout={300}
+            onChange={e => this.setState({ searchQuery: e.target.value })} />
+        </label>
+
+        {searchQuery.length !== 0 ? (
+          <PaginatingList
+            context={{ s: searchQuery }}
+            messages={messages}
+            loadItems={loadResults}
+            renderItem={SinglePost}
+            className="search-results" />
+        ) : false}
+
       </form>
     )
   }

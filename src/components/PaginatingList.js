@@ -121,6 +121,7 @@ export default class PaginatingList extends Component {
   render() {
     const { items, loading } = this.state
     const { renderItem, context, className, messages } = this.props
+
     return (
       <div className={`${className || ''} paginating-list`}>
         {loading ? (

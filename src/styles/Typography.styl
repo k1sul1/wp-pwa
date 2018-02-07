@@ -70,6 +70,7 @@ textInput() {
 input {
   &[type="text"],
   &[type="email"],
+  &[type="search"],
   &[type="password"] {
     textInput()
   }
@@ -119,4 +120,14 @@ pre {
   border-radius: 0 !important
   margin-top: r(20px) !important
   // margin-bottom: r(-20px) !important
+}
+
+form {
+  label {
+    display: block
+
+    > span {
+      display: block
+    }
+  }
 }

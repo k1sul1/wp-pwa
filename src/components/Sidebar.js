@@ -15,8 +15,7 @@ import Download from '../components/Download'
 export const defaultSidebar = (props) => merge(props, {
   children: (
     <Fragment>
-      <h2>Sidebar</h2>
-
+      <SearchForm />
       <CurrentUser />
     </Fragment>
   ),
@@ -36,9 +35,9 @@ export const searchSidebar = (props) => merge (props, {
 export const blogSidebar = (props) => merge(props, {
   children: (
     <Fragment>
-      <h2>Blog sidebar</h2>
-      <CurrentUser />
+      <SearchForm />
       <Download />
+      <CurrentUser />
     </Fragment>
   )
 })

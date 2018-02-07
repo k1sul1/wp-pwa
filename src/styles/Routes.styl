@@ -11,10 +11,13 @@
   }
 
   &.blog,
-  &.archive {
-    h1 {
-      margin-left: r(20px)
-      margin-right: @margin-left
+  &.archive,
+  &.error {
+    #content {
+      h1, p, form {
+        margin-left: r(20px)
+        margin-right: @margin-left
+      }
     }
   }
 

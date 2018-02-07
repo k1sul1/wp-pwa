@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import ExtendableError from 'es6-error'
-import debounce from 'debounce'
+import debounce from 'lodash.debounce'
 
 import { searchSidebar, defaultSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
