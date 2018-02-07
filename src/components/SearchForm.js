@@ -18,7 +18,7 @@ const loadResults = async (page, context) => {
 
   const result = await WP.query({
     ...context,
-    page,
+    paged: page, // This endpoint is different than the others
   })
 
   const posts = result ? result.data : [];
