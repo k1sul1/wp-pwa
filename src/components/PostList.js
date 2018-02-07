@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import PaginatingList from './PaginatingList'
+import PaginatingList, { getMax } from './PaginatingList'
 import WP from '../lib/WP'
 
 /*
@@ -37,13 +37,13 @@ const loadItems = async (page, context) => {
 
   const posts = result ? result.posts : [];
   const headers = result ? result.headers : {};
-  const maxPages = headers && headers['x-wp-totalpages']
-    ? parseInt(headers['x-wp-totalpages'], 10)
-    : 0
+  const maxPages = getMax(headers, 'x-wp-totalpages')
+  const maxPosts = getMax(headers, 'x-wp-total')
 
   return {
     items: posts,
     maxPages,
+    maxPosts,
   }
 }
 

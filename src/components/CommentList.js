@@ -1,5 +1,5 @@
 import React from 'react'
-import PaginatingList from './PaginatingList'
+import PaginatingList, { getMax, defaultMessages } from './PaginatingList'
 import WP from '../lib/WP'
 
 /*
@@ -7,11 +7,15 @@ import WP from '../lib/WP'
  */
 
 const messages = {
+  ...defaultMessages,
   loading: <p>Please wait while we load the comments...</p>,
   noPosts: <p>It appears that there are no comments.</p>,
 }
 
-const loadChildren = async (page, context) => {
+// The standard Comment endpoint forces the usage of potentially hundreds of requests
+// on a popular post, and rate limiting is bound to kick in, crashing the application.
+// Hence no support for child comments.
+/* const loadChildren = async (page, context) => {
   if (!context) {
     throw new Error('Unable to load comments without context')
   }
@@ -38,7 +42,7 @@ const loadChildren = async (page, context) => {
     items: posts.reverse(),
     maxPages,
   }
-}
+} */
 
 const loadTopLevelComments = async (page, context) => {
   if (!context) {
@@ -54,13 +58,13 @@ const loadTopLevelComments = async (page, context) => {
   const result = await WP.getForContext('comments', { ...params })
   const posts = result ? result.posts : [];
   const headers = result ? result.headers : {};
-  const maxPages = headers && headers['x-wp-totalpages']
-    ? parseInt(headers['x-wp-totalpages'], 10)
-    : 0
+  const maxPages = getMax(headers, 'x-wp-totalpages')
+  const maxPosts = getMax(headers, 'x-wp-total')
 
   return {
     items: posts.reverse(),
     maxPages,
+    maxPosts,
   }
 }
 
@@ -76,7 +80,7 @@ export const Comment = (post, context) => {
         {post.content.rendered}
       </div>
 
-      {/* Hierarchical comments are so hard to implement that this is an infinite loop */}
+      {/* Hierarchical comments are so hard to implement that this is an infinite loop}
       {post.parent === 0 ? false && (
         <Comments
           context={post}
@@ -84,7 +88,7 @@ export const Comment = (post, context) => {
           messages={{ ...messages, noPosts: '', loading: '' }}
           className="child-comment-list"
         />
-      ) : false}
+      ) : false*/}
     </article>
   )
 }

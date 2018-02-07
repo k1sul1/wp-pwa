@@ -1,12 +1,25 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 
+
+export const getMax = (headers, key) => headers && headers[key]
+  ? parseInt(headers[key], 10)
+  : 0
+
 /*
  * PaginatingList contains paginationg logic, so components like
  * PostList and CommentList can only provide a loader.
  *
  * DRY.
  */
+
+export const defaultMessages = {
+  loading: <p>Please wait while we load posts...</p>,
+  noPosts: <p>It appears that there are no posts.</p>,
+  pageInfo: (page, maxPages) => <p>Showing page {page} of {maxPages}.</p>,
+  entryInfo: (maxPosts) => <p>Total of {maxPosts} entries found.</p>
+}
+
 export default class PaginatingList extends Component {
   constructor(props) {
     super(props)
@@ -24,24 +37,22 @@ export default class PaginatingList extends Component {
   }
 
   static defaultProps = {
-    messages: {
-      loading: <p>Please wait while we load posts...</p>,
-      noPosts: <p>It appears that there are no posts.</p>,
-    }
+    messages: defaultMessages,
   }
 
   async getContents() {
     const { context, loadItems } = this.props
     const { page } = this.state
 
-    this.setState({ items: [] })
+    // this.setState({ items: [] })
 
     try {
       const loaded = await loadItems(page, context)
+      console.log(loaded)
 
       if (loaded) {
-        const { items, maxPages } = loaded
-        return this.setState({ page, items, maxPages, loading: false });
+        const { items, maxPages, maxPosts } = loaded
+        return this.setState({ page, items, maxPages, maxPosts, loading: false });
       }
     } catch(e) {
       console.log(e)
@@ -107,6 +118,18 @@ export default class PaginatingList extends Component {
     )
   }
 
+  queryInfo() {
+    const { messages } = this.props
+    const { page, maxPages, maxPosts } = this.state
+
+    return (
+      <div className="query-info">
+        {messages.pageInfo(page, maxPages)}
+        {messages.entryInfo(maxPosts)}
+      </div>
+    )
+  }
+
   render() {
     const { items, loading } = this.state
     const { renderItem, context, className, messages } = this.props
@@ -120,6 +143,7 @@ export default class PaginatingList extends Component {
           <Fragment>
             {items.map(post => renderItem(post, context))}
             {this.pagination()}
+            {this.queryInfo()}
           </Fragment>
         )}
       </div>
