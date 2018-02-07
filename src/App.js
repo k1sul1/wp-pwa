@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom'
 
 import 'normalize.css'
 import 'animate.css'
+import 'nprogress/nprogress.css'
 import './App.styl'
 
 import Resolver from './routes/Resolver'

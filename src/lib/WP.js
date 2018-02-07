@@ -2,6 +2,7 @@ import axios from 'axios'
 import localforage from 'localforage'
 import omit from 'lodash.omit'
 import queryString from 'query-string'
+import NProgress from 'nprogress'
 
 import { isDevelopment, renderHTML, taxonomyRESTBase } from '../lib/helpers'
 import p from  '../../package.json'
@@ -15,6 +16,10 @@ import {
   OfflineError
 } from '../errors'
 
+NProgress.configure({
+  easing: 'linear',
+  speed: 350
+})
 /*
  * Store for data that can be gotten rid of at any time.
  */
@@ -67,7 +72,19 @@ class WP_Client {
         const exceptions = status === 403 || status === 401
 
         return successRange || exceptions
-      }
+      },
+      transformRequest: [
+        function (data, headers) {
+          NProgress.start()
+          return data
+        },
+      ],
+      /* transformResponse: [
+        function (data) {
+          NProgress.done()
+          return data
+        },
+      ], */
     })
 
     this.setUser() // Async, will not be ready with the first request
@@ -660,6 +677,8 @@ class WP_Client {
       return response
     } catch (e) {
       return this.onError(e)
+    } finally {
+      NProgress.done()
     }
   }
 
@@ -684,6 +703,8 @@ class WP_Client {
       return response
     } catch (e) {
       return this.onError(e)
+    } finally {
+      NProgress.done()
     }
   }
 }

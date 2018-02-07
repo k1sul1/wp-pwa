@@ -21,6 +21,7 @@
     "lodash.omit": "^4.5.0",
     "node-watch": "^0.5.5",
     "normalize.css": "^7.0.0",
+    "nprogress": "^0.2.0",
     "prop-types": "^15.6.0",
     "query-string": "^5.0.1",
     "react": "^16.2.0",
