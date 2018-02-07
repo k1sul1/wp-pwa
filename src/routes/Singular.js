@@ -5,7 +5,7 @@ import Page from './Page'
 import { Image } from '../lib/image'
 import { blogSidebar } from '../components/Sidebar'
 import CommentList from '../components/CommentList'
-import { AuthorLine, getAuthor } from '../components/Author'
+import { AuthorName, getAuthor } from '../components/Author'
 
 /*
  * Singular component is based on Page, but it changes the template almost entirely.
@@ -23,7 +23,7 @@ const header = (node, { post }) => {
       <div className="overlay">
         {node}
         {author ? (
-          <AuthorLine author={author} />
+          <AuthorName name={author.name} />
         ) : false}
       </div>
     </header>

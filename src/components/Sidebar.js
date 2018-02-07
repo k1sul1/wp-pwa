@@ -2,9 +2,10 @@ import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { Manager, Swipe } from 'hammerjs'
 
+import Author from './Author'
 import CurrentUser from './CurrentUser'
-import SearchForm from '../components/SearchForm'
-import Download from '../components/Download'
+import SearchForm from './SearchForm'
+import Download from './Download'
 
 
 /*
@@ -35,6 +36,7 @@ export const searchSidebar = (props) => merge (props, {
 export const blogSidebar = (props) => merge(props, {
   children: (
     <Fragment>
+      <Author post={props.post} />
       <SearchForm />
       <Download />
       <CurrentUser />
