@@ -142,8 +142,8 @@ export default class PaginatingList extends Component {
         ) : (
           <Fragment>
             {items.map(post => renderItem(post, context))}
-            {this.pagination()}
             {this.queryInfo()}
+            {this.pagination()}
           </Fragment>
         )}
       </div>
