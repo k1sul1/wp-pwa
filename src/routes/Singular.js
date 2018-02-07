@@ -1,31 +1,29 @@
 import React, { Fragment } from 'react'
+import { get } from 'lodash'
+
 import Page from './Page'
 import { Image } from '../lib/image'
 import { blogSidebar } from '../components/Sidebar'
 import CommentList from '../components/CommentList'
+import { AuthorLine, getAuthor } from '../components/Author'
 
 /*
  * Singular component is based on Page, but it changes the template almost entirely.
  */
 
-const AuthorLine = ({ author }) => (
-  <address>
-    {author.name}
-  </address>
-)
 
 const header = (node, { post }) => {
-  const embedded = post._embedded
-  const featuredImages = embedded && embedded['wp:featuredmedia'].length ? embedded['wp:featuredmedia'] : null
+  const author = getAuthor(post)
+  const featuredImage = get(post, '_embedded[wp:featuredmedia][0]', null)
 
   return (
-    <header className={`post-header ${featuredImages ? 'has-image' : 'no-image'}`}>
-      {featuredImages ? <Image imageObj={featuredImages[0]} /> : false}
+    <header className={`post-header ${featuredImage ? 'has-image' : 'no-image'}`}>
+      {featuredImage ? <Image imageObj={featuredImage} /> : false}
 
       <div className="overlay">
         {node}
-        {post && post._embedded && post._embedded.author ? (
-          <AuthorLine author={post._embedded.author[0]} />
+        {author ? (
+          <AuthorLine author={author} />
         ) : false}
       </div>
     </header>
@@ -40,10 +38,13 @@ const content = (node, { post }) => (
   </Fragment>
 )
 
-const Singular = (props) => (
+const Singular = (props) => console.log(props) || (
   <Page
     {...props}
-    sidebar={blogSidebar(props.sidebar)}
+    sidebar={blogSidebar({
+      ...props.sidebar,
+      post: {...props.post},
+    })}
     filterTitle={header}
     filterContent={content}
     className="single-post"
