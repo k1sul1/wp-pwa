@@ -46,7 +46,7 @@ export default class SearchForm extends Component {
   }
 
   render() {
-    const { searchQuery, results } = this.state
+    const { searchQuery } = this.state
 
     return (
       <form className="search-form">
@@ -64,7 +64,7 @@ export default class SearchForm extends Component {
             onChange={e => this.setState({ searchQuery: e.target.value })} />
         </label>
 
-        {searchQuery.length !== 0 ? (
+        {searchQuery.length >= 3 ? (
           <PaginatingList
             context={{ s: searchQuery }}
             messages={messages}
