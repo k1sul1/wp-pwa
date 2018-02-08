@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import ExtendableError from 'es6-error'
 import debounce from 'lodash.debounce'
+import { Manager, Swipe } from 'hammerjs'
 
 import { searchSidebar, defaultSidebar } from '../components/Sidebar'
 import WP from '../lib/WP'
@@ -66,6 +67,7 @@ class Resolver extends Component {
   async componentDidMount() {
     WP.connectErrorHandler(this.wpErrorHandler.bind(this))
     this.route(this.props)
+    this.addTouchControls()
 
     const menu = await WP.getMenu(3)
     if (menu) {
@@ -89,6 +91,7 @@ class Resolver extends Component {
 
   componentWillUnmount() {
     WP.disconnectErrorHandler()
+    this.hammer.destroy()
   }
 
   componentDidCatch(error, info) {
@@ -97,6 +100,28 @@ class Resolver extends Component {
     })
 
     console.log(error, info)
+  }
+
+  addTouchControls() {
+    this.hammer = new Manager(document.body, {
+      touchAction: 'pan-y',
+    })
+    this.hammer.add(new Swipe())
+    this.hammer.on('swipe', (e) => {
+      const { sidebar } = this.state
+      const { actions, open: sidebarOpen } = sidebar
+      const { activate, deactivate } = actions
+
+      if (sidebarOpen) { //
+        if (e.direction === 4) {
+          deactivate()
+        }
+      } else {
+        if (e.direction === 2) {
+          activate()
+        }
+      }
+    })
   }
 
   // Limit sidebar toggeability to windows under 768 wide
@@ -389,15 +414,19 @@ That gets rid of the OfflineError flash when offline. Other error handling will 
   }
 
   render() {
-    const { ready, crashed, ViewComponent, ViewComponentProps } = this.state
+    const { ready, crashed, ViewComponent, ViewComponentProps, navigation, sidebar } = this.state
+    const props = {
+      navigation,
+      sidebar,
+    }
 
     if (crashed) {
-      return <Error {...crashed} navigation={this.state.navigation} sidebar={this.state.sidebar} />
+      return <Error {...crashed} {...props} />
     }
 
     return ready
-      ? <ViewComponent {...ViewComponentProps} navigation={this.state.navigation} sidebar={this.state.sidebar} />
-      : <Loading navigation={this.state.navigation} sidebar={this.state.sidebar} />
+      ? <ViewComponent {...ViewComponentProps} {...props} />
+      : <Loading {...props} />
   }
 }
 

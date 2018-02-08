@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
-import { Manager, Swipe } from 'hammerjs'
 
 import Author from './Author'
 import CurrentUser from './CurrentUser'
@@ -57,31 +56,6 @@ export default class Sidebar extends Component {
     onClick: PropTypes.func,
   }
 
-  componentDidMount() {
-    const { actions } = this.props
-    const { activate, deactivate } = actions
-
-    this.hammer = new Manager(this.element, {
-      touchAction: 'pan-y',
-    })
-    this.hammer.add(new Swipe())
-    this.hammer.on('swipe', (e) => {
-      if (this.props.open) { // If extracted from props, open won't work (bug)
-        if (e.direction === 4) {
-          deactivate()
-        }
-      } else {
-        if (e.direction === 2) {
-          activate()
-        }
-      }
-    })
-  }
-
-  componentWillUnmount() {
-    this.hammer.destroy()
-  }
-
   render() {
     if (!this.props) {
       return <aside></aside>
@@ -90,7 +64,7 @@ export default class Sidebar extends Component {
     const { children } = this.props
 
     return (
-      <aside ref={n => this.element = n}>
+      <aside>
         { children }
       </aside>
     )
