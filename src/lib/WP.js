@@ -73,18 +73,6 @@ class WP_Client {
 
         return successRange || exceptions
       },
-      transformRequest: [
-        function (data, headers) {
-          NProgress.start()
-          return data
-        },
-      ],
-      /* transformResponse: [
-        function (data) {
-          NProgress.done()
-          return data
-        },
-      ], */
     })
 
     this.setUser() // Async, will not be ready with the first request
@@ -242,7 +230,6 @@ class WP_Client {
 
   async validateAuthentication(token) {
     const response = await this.post('/wp-json/simple-jwt-authentication/v1/validate', {}, {
-      validateStatus: (status) => (status >= 200 && status < 300) || (status >= 401 && status <= 403),
       headers: {
         'Authorization': `Bearer ${token}`
       },
@@ -662,6 +649,7 @@ class WP_Client {
     const headers = await this.addAuthHeader(config.headers || {})
 
     try {
+      NProgress.start()
       // parse url, remove querystrings and append them to payload
       const [endpoint, qs] = url.split('?')
       const response = await this.axios.get(
@@ -696,6 +684,7 @@ class WP_Client {
     const headers = await this.addAuthHeader(config.headers || {})
 
     try {
+      NProgress.start()
       const endpoint = url
       const response = await this.axios.post(endpoint, payload, {
         ...config,
