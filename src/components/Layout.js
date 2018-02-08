@@ -6,7 +6,7 @@ import Header from './Header'
 import Sidebar from './Sidebar'
 
 const AnimationBoundary = (props) => (
-  <div {...props} onAnimationEnd={props.onEnd}>
+  <div {...props} onAnimationEnd={props.onAnimationEnd}>
     {props.children}
   </div>
 )
@@ -89,9 +89,8 @@ class Layout extends Component {
         {!online ? <span className="offline-notice">Offline</span> : false}
         <Header navigation={navigation} />
         <AnimationBoundary
-          onEnd={() => this.setState({ transitioning: false })}
-          className={wrapperClass}
-          ref={n => this.wrapper = n}>
+          onAnimationEnd={() => this.setState({ transitioning: false })}
+          className={wrapperClass}>
             <main id="content">
               {children /* <Layout><p>Child 1</p><p>Child 2</p></Layout> */}
             </main>
