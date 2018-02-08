@@ -35,6 +35,14 @@ const Archive = (props) => {
 
 export default class ArchiveComponent extends Component {
   componentDidMount() {
+    const { archive, post } = this.props
+
+    if (post) {
+      document.title = post.title.rendered
+    } else {
+      document.title = archive.label || archive.name
+    }
+
     document.querySelector('main#content').classList.add('bg--grey')
   }
 

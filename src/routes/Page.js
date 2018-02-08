@@ -50,7 +50,12 @@ class Page extends Component {
   }
 
   async componentDidMount() {
+    const { post } = this.props
     const user = await WP.getCurrentUser()
+
+    if (post) {
+      document.title = post.title.rendered
+    }
 
     WP.addAuthenticationListeners(this)
 

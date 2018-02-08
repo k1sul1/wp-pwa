@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import Layout from '../components/Layout'
 import LoginForm from '../components/LoginForm'
@@ -9,7 +9,7 @@ import { dumpObject } from '../lib/helpers'
  */
 
 const defaultAfterLogin = (() => window.location.reload())
-const Error = (props) => {
+export const Error = (props) => {
   const { name, message } = props.error
   const afterLogin = props.afterLogin || defaultAfterLogin
 
@@ -38,4 +38,18 @@ Error.defaultProps = {
   }
 }
 
-export default Error
+export default class ErrorComponent extends Component {
+  componentDidMount() {
+    const { error } = this.props
+    console.log(error, )
+
+    document.title = 'Error'
+    if (error) {
+      document.title = `Error: ${error.name}`
+    }
+  }
+
+  render() {
+    return <Error {...this.props} />
+  }
+}
