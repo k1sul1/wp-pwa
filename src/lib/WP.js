@@ -77,6 +77,7 @@ class WP_Client {
       },
     })
 
+    this.stores = { requestCache, dataStore }
     this.setUser() // Async, will not be ready with the first request
     this.addNetworkStatusListeners(this)
     this.addAuthenticationListeners(this)
