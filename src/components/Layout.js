@@ -5,9 +5,9 @@ import WP from '../lib/WP'
 import Header from './Header'
 import Sidebar from './Sidebar'
 
-const AnimationBoundary = ({ onEnd, children }) => (
-  <div onAnimationEnd={onEnd}>
-    {children}
+const AnimationBoundary = (props) => (
+  <div {...props} onAnimationEnd={props.onEnd}>
+    {props.children}
   </div>
 )
 
@@ -88,8 +88,10 @@ class Layout extends Component {
       <Fragment>
         {!online ? <span className="offline-notice">Offline</span> : false}
         <Header navigation={navigation} />
-        <AnimationBoundary onEnd={() => this.setState({ transitioning: false })}>
-          <div className={wrapperClass} ref={n => this.wrapper = n}>
+        <AnimationBoundary
+          onEnd={() => this.setState({ transitioning: false })}
+          className={wrapperClass}
+          ref={n => this.wrapper = n}>
             <main id="content">
               {children /* <Layout><p>Child 1</p><p>Child 2</p></Layout> */}
             </main>
@@ -99,7 +101,6 @@ class Layout extends Component {
             if there's no props, no sidebar contents will be rendered.
 
             For styling purposes the aside element is rendered.*/}
-          </div>
         </AnimationBoundary>
       </Fragment>
     )
