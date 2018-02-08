@@ -38,8 +38,10 @@ const dataStore = localforage.createInstance({
 /*
  * Helper for getting the correct instance URL.
  */
-export const getWPURL = () => {
-  return p.prodWP
+export const getWPURL = (alwaysUseProduction = true) => {
+  if (alwaysUseProduction) {
+    return p.prodWP
+  }
 
   const urls = [p.prodWP, p.devWP]
   const index = urls.indexOf(window.location.origin)
