@@ -7,7 +7,7 @@ import WP from '../lib/WP'
  * PaginatingList expects a template and a loader, this will handle posts.
  */
 
-export const SinglePost = (post, context) => {
+export const SinglePost = (post) => {
   return (
     <article className="post-list__single" key={post.id}>
       <Link to={post.link}>
