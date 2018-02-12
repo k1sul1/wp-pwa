@@ -6,7 +6,7 @@ Basically clone the repo, run npm install and npm run start.
 More documentation below, but in general, just read the library READMEs and docs.
 
 ## Warning
-The 'deploy' npm script assumes that this repository is cloned inside Seravo/wordpress project template.
+The 'deploy' npm script assumes that this repository is cloned inside Seravo/wordpress project template, or more spesifically, at the root of this repository: [k1sul1/wcjkl.local](https://github.com/k1sul1/wcjkl.local).
 
 It's potentially destructive if you have a `htdocs` folder in `..`.
 -------------------
