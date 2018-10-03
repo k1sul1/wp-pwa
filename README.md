@@ -1,7 +1,7 @@
 # Offline-first progressive web application
 Built using Create React App & custom-react-scripts.
 
-Basically clone the repo, run npm install and npm run start.
+Basically clone the repo, run npm install and npm run start. Also kinda requires you to run WordPress. This was hosted for WCJKL, but isn't anymore, since hosting costs money. https://github.com/k1sul1/wcjkl.local is usable locally.
 
 More documentation below, but in general, just read the library READMEs and docs.
 
